@@ -41,7 +41,7 @@ export class User {
   @Column({ default: true })
   can_login: boolean;
 
-  @Column({ default: false })
+  @Column({ default: true })
   must_change_password: boolean;
 
   @Column({ default: true })

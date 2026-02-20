@@ -20,4 +20,14 @@ export class SchoolClassController {
   findByGrade(@Query('grade') grade: number) {
     return this.schoolClassService.findByGrade(Number(grade));
   }
+
+  @Get('grades')
+  getGrades() {
+    return this.schoolClassService.getGrades();
+  }
+
+  @Get('sections')
+  getSections(@Query('gradeId') gradeId: number) {
+    return this.schoolClassService.getSections(Number(gradeId));
+  }
 }

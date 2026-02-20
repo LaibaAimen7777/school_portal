@@ -31,4 +31,32 @@ export class SchoolClassService {
       relations: ['students'],
     });
   }
+
+  async getGrades() {
+    const grades = await this.classRepository
+      .createQueryBuilder('schoolClass')
+      .select('DISTINCT schoolClass.grade', 'grade')
+      .getRawMany();
+
+    return grades.map((g) => ({
+      id: g.grade,
+      grade: g.grade,
+    }));
+  }
+
+  async getSections(gradeId: number) {
+    return this.classRepository
+      .find({
+        where: { grade: gradeId },
+        relations: ['students'],
+      })
+      .then((classes) => {
+        classes.map((cls) => ({
+          id: cls.id,
+          section: cls.section,
+          currentStrength: cls.students.length,
+          maxStrength: cls.maxStrength,
+        }));
+      });
+  }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
+import { Wrapper } from "@/wrappers/adminDashboard";
 
 type User = {
   id: number;
