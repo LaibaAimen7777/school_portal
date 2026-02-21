@@ -47,6 +47,7 @@ export class StudentService {
 
   async create(dto: CreateStudentDto) {
     return this.dataSource.transaction(async (manager) => {
+      console.log('here in ss in b');
       const schoolClass = await manager.findOne(SchoolClass, {
         where: { id: dto.classId },
         relations: ['students'],
@@ -61,24 +62,34 @@ export class StudentService {
       }
 
       // Generate Roll Number
-      const rollNumber = schoolClass.students.length + 1;
-
-      // Generate Username
-      const yearShort = dto.joiningYear.toString().slice(2);
-      const username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
-        .toString()
-        .padStart(2, '0')}`;
-
-      const plainPassword = generatePassword();
-      const hashedPassword = await bcrypt.hash(plainPassword, 10);
-
-      const user = manager.create(User, {
-        username,
-        password: hashedPassword,
-        role: UserRole.STUDENT,
+      const lastStudent = await manager.findOne(Student, {
+        where: { schoolClass: { id: schoolClass.id } },
+        order: { rollNumber: 'DESC' },
       });
 
-      const savedUser = await manager.save(user);
+      const rollNumber = lastStudent ? lastStudent.rollNumber + 1 : 1;
+
+      let savedUser: User | null = null;
+      let username: string | null = null;
+      let plainPassword: string | null = null;
+
+      if (schoolClass.grade >= 9) {
+        const yearShort = dto.joiningYear.toString().slice(2);
+        username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
+          .toString()
+          .padStart(2, '0')}`;
+
+        plainPassword = generatePassword();
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+        const user = manager.create(User, {
+          username,
+          password: hashedPassword,
+          role: UserRole.STUDENT,
+        });
+
+        savedUser = await manager.save(user);
+      }
 
       // Check if parent exists
       let parent = await manager.findOne(Parent, {
@@ -111,9 +122,16 @@ export class StudentService {
 
       await manager.save(student);
 
+      schoolClass.currentStrength += 1;
+      await manager.save(schoolClass);
+
       return {
-        username,
-        temporaryPassword: plainPassword,
+        studentId: student.id,
+        grade: schoolClass.grade,
+        section: schoolClass.section,
+        rollNumber,
+        username: username ?? null,
+        temporaryPassword: plainPassword ?? null,
       };
     });
   }
@@ -132,8 +150,10 @@ export class StudentService {
       const newPassword = crypto.randomBytes(8).toString('hex');
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-      student.user.password = hashedPassword;
-      student.user.must_change_password = true;
+      if (student.user) {
+        student.user.password = hashedPassword;
+        student.user.must_change_password = true;
+      }
 
       await manager.save(student.user);
 
@@ -153,27 +173,67 @@ export class StudentService {
 
       if (!student) throw new NotFoundException('Student not found');
 
+      const oldClass = student.schoolClass;
+
       const newClass = await manager.findOne(SchoolClass, {
         where: { id: newClassId },
-        relations: ['students'],
       });
 
       if (!newClass) throw new NotFoundException('Class not found');
 
-      if (newClass.students.length >= newClass.maxStrength)
+      if (newClass.currentStrength >= newClass.maxStrength)
         throw new BadRequestException('Class is full');
 
-      // Update roll number in new class
-      student.rollNumber = newClass.students.length + 1;
+      // 🔁 Decrease old class strength
+      oldClass.currentStrength -= 1;
+      await manager.save(oldClass);
+
+      // 🔢 Generate new roll number safely
+      const lastStudent = await manager.findOne(Student, {
+        where: { schoolClass: { id: newClass.id } },
+        order: { rollNumber: 'DESC' },
+      });
+
+      const newRollNumber = lastStudent ? lastStudent.rollNumber + 1 : 1;
+
+      // Update student
+      student.rollNumber = newRollNumber;
       student.schoolClass = newClass;
 
-      // Update username as well
+      // 🧠 Handle portal logic
       const yearShort = student.joiningYear.toString().slice(2);
-      student.user.username = `${yearShort}${newClass.grade}${newClass.section}${student.rollNumber
-        .toString()
-        .padStart(2, '0')}`;
 
-      await manager.save(student.user);
+      // Case 1: Student moves into Grade 9 or 10 and has NO account
+      if (newClass.grade >= 9 && !student.user) {
+        const plainPassword = generatePassword();
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+        const username = `${yearShort}${newClass.grade}${newClass.section}${newRollNumber
+          .toString()
+          .padStart(2, '0')}`;
+
+        const user = manager.create(User, {
+          username,
+          password: hashedPassword,
+          role: UserRole.STUDENT,
+        });
+
+        student.user = await manager.save(user);
+      }
+
+      // Case 2: Student already has portal → just update username
+      if (student.user) {
+        student.user.username = `${yearShort}${newClass.grade}${newClass.section}${newRollNumber
+          .toString()
+          .padStart(2, '0')}`;
+
+        await manager.save(student.user);
+      }
+
+      // 🔁 Increase new class strength
+      newClass.currentStrength += 1;
+      await manager.save(newClass);
+
       return manager.save(student);
     });
   }

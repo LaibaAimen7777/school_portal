@@ -12,6 +12,6 @@ export class CreateStudentDto {
   fatherName: string;
   motherName: string;
   phone: string;
-  email: string;
+  email?: string;
   address: string;
 }

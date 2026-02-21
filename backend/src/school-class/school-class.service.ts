@@ -33,11 +33,13 @@ export class SchoolClassService {
   }
 
   async getGrades() {
+    console.log('here in getGrades');
     const grades = await this.classRepository
       .createQueryBuilder('schoolClass')
       .select('DISTINCT schoolClass.grade', 'grade')
       .getRawMany();
 
+    console.log('grades in scs in b:', grades);
     return grades.map((g) => ({
       id: g.grade,
       grade: g.grade,
@@ -45,18 +47,16 @@ export class SchoolClassService {
   }
 
   async getSections(gradeId: number) {
-    return this.classRepository
-      .find({
-        where: { grade: gradeId },
-        relations: ['students'],
-      })
-      .then((classes) => {
-        classes.map((cls) => ({
-          id: cls.id,
-          section: cls.section,
-          currentStrength: cls.students.length,
-          maxStrength: cls.maxStrength,
-        }));
-      });
+    const classes = await this.classRepository.find({
+      where: { grade: gradeId },
+      relations: ['students'],
+    });
+
+    return classes.map((cls) => ({
+      id: cls.id, // ✅ THIS is classId
+      section: cls.section,
+      currentStrength: cls.students.length,
+      maxStrength: cls.maxStrength,
+    }));
   }
 }

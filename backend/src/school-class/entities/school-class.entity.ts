@@ -8,7 +8,7 @@ import {
 import { Student } from 'src/student/entities/student.entity';
 
 @Entity()
-@Unique(['grade', 'section']) // Prevent duplicate 10A
+@Unique(['grade', 'section'])
 export class SchoolClass {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,6 +21,9 @@ export class SchoolClass {
 
   @Column()
   maxStrength: number;
+
+  @Column({ default: 0 })
+  currentStrength: number; // NEW
 
   @OneToMany(() => Student, (student) => student.schoolClass)
   students: Student[];

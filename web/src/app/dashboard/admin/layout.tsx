@@ -2,6 +2,7 @@
 
 import styled from "styled-components";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const LayoutWrapper = styled.div`
   display: flex;
@@ -10,7 +11,7 @@ const LayoutWrapper = styled.div`
 
   .sidebar {
     width: 250px;
-    background: #fffefb;
+    background: #0874f0b6;
     box-shadow: 5px 0 20px rgba(0, 0, 0, 0.05);
     padding: 30px 20px;
 
@@ -24,7 +25,7 @@ const LayoutWrapper = styled.div`
       margin-bottom: 15px;
       padding: 10px;
       border: none;
-      background: #f4f4f4;
+      background: #e33232;
       border-radius: 10px;
       cursor: pointer;
       text-align: left;
@@ -39,7 +40,7 @@ const LayoutWrapper = styled.div`
 
   .content {
     flex: 1;
-    background: linear-gradient(160deg, #fdf6e3, #f7f3ec);
+    background: linear-gradient(160deg, #1ba2d375, #e49205);
     padding: 40px;
   }
 `;
@@ -50,6 +51,28 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    if (role !== "admin") {
+      router.replace("/dashboard");
+      return;
+    }
+
+    // ✅ Auth passed
+    setChecked(true);
+  }, [router]);
+
+  // 🚫 Prevent UI flicker + premature redirect
+  if (!checked) return null;
 
   return (
     <LayoutWrapper>

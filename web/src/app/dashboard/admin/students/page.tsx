@@ -22,6 +22,7 @@ export default function AdminStudents() {
   useEffect(() => {
     const fetchStudents = async () => {
       const res = await api.get("/student");
+      console.log("res in student page in admin:", res.data);
       setStudents(res.data);
     };
     fetchStudents();
