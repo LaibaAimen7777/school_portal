@@ -15,19 +15,21 @@ export const HeroWrapper = styled.section<HeroWrapperProps>`
   text-align: center;
   padding: 4rem 2rem;
   position: relative;
-  background-image: url(${props => props.bgImage || '/default-hero.jpg'});
+  background-image: url(${(props) => props.bgImage || "/default-hero.jpg"});
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  
+
+  // In your HeroWrapper, update the overlay to use theme-aware colors:
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: ${(props) =>
+      props.theme === "piship" ? "rgba(0, 0, 0, 0.3)" : "rgba(0, 0, 0, 0.5)"};
     z-index: 1;
   }
 
@@ -45,7 +47,7 @@ export const HeroWrapper = styled.section<HeroWrapperProps>`
     letter-spacing: -2px;
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    
+
     span {
       color: var(--accent);
       display: block;
@@ -69,7 +71,8 @@ export const HeroWrapper = styled.section<HeroWrapperProps>`
   }
 
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0);
     }
     50% {

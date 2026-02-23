@@ -5,7 +5,7 @@ export const NavigationWrapper = styled.nav`
   justify-content: space-between;
   align-items: center;
   padding: 2rem 4rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border);
 
   @media (max-width: 768px) {
     padding: 1.5rem;

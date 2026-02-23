@@ -4,14 +4,40 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import { DashboardWrapper } from "@/wrappers/landingDashboard/DashboardWrapper";
-import { NavigationWrapper } from "@/wrappers/landingDashboard/NavigationWrapper";
-import { HeroWrapper } from "@/wrappers/landingDashboard/HeroWrapper";
-import { QuoteWrapper } from "@/wrappers/landingDashboard/QuoteWrapper";
-import { ExploreWrapper } from "@/wrappers/landingDashboard/ExploreWrapper";
-import { CardWrapper } from "@/wrappers/landingDashboard/CardWrapper";
-import { ButtonWrapper } from "@/wrappers/landingDashboard/ButtonWrapper";
-import { ThemeToggleWrapper } from "@/wrappers/landingDashboard/ThemeToggleWrapper";
+// import { DashboardWrapper } from "@/wrappers/landingDashboard/DashboardWrapper";
+// import { NavigationWrapper } from "@/wrappers/landingDashboard/NavigationWrapper";
+// import { HeroWrapper } from "@/wrappers/landingDashboard/HeroWrapper";
+// import { QuoteWrapper } from "@/wrappers/landingDashboard/QuoteWrapper";
+// import { ExploreWrapper } from "@/wrappers/landingDashboard/ExploreWrapper";
+// import { CardWrapper } from "@/wrappers/landingDashboard/CardWrapper";
+// import { ButtonWrapper } from "@/wrappers/landingDashboard/ButtonWrapper";
+// import { ThemeToggleWrapper } from "@/wrappers/landingDashboard/ThemeToggleWrapper";
+
+import {
+  Container,
+  Nav,
+  Logo,
+  NavMenu,
+  NavLink,
+  Hero,
+  FloatingImage,
+  HeroTitle,
+  QuoteSection,
+  QuoteText,
+  QuoteAuthor,
+  ExploreSection,
+  SectionTitle,
+  Grid,
+  Card,
+  CardTitle,
+  CardDescription,
+  ButtonGroup,
+  Button,
+  QuestionBox,
+  Question,
+  Answer,
+  ThemeButton,
+} from "@/wrappers/landingStyles";
 
 export default function DashboardPage() {
   const [currentTheme, setCurrentTheme] = useState<"isomania" | "piship">(
@@ -35,124 +61,90 @@ export default function DashboardPage() {
   }, [router, currentTheme]);
 
   return (
-    <DashboardWrapper>
-      <NavigationWrapper>
-        <div className="logo">YOUR SCHOOL</div>
-        <div className="nav-menu">
-          <a href="#" className="nav-link">
-            HOME
-          </a>
-          <a href="#" className="nav-link">
-            ABOUT
-          </a>
-          <a href="#" className="nav-link">
-            ACADEMICS
-          </a>
-          <a href="#" className="nav-link">
-            ADMISSIONS
-          </a>
-          <a href="#" className="nav-link">
-            CONTACT
-          </a>
-        </div>
-      </NavigationWrapper>
+    <Container>
+      <Nav>
+        <Logo>{currentTheme === "isomania" ? "ISOMANIA" : "PISHIP"}</Logo>
+        <NavMenu>
+          <NavLink href="#">HOME</NavLink>
+          <NavLink href="#">ABOUT</NavLink>
+          <NavLink href="#">ACADEMICS</NavLink>
+          <NavLink href="#">ADMISSIONS</NavLink>
+          <NavLink href="#">CONTACT</NavLink>
+        </NavMenu>
+      </Nav>
 
-      <HeroWrapper bgImage="/images/school-hero.jpg">
-        <Image
-          src="/images/student-avatar.jpg"
-          alt="Student"
-          width={200}
-          height={200}
-          className="hero-image"
-        />
-        <div className="hero-content">
-          <h1 className="hero-title">
-            <span>BE A HERO IN</span>
-            YOUR SCHOOL
-          </h1>
-          <p className="hero-subtitle">
-            Empowering students to discover their potential and make a
-            difference
-          </p>
-          <ButtonWrapper>
-            <button className="btn btn-primary">EXPLORE NOW</button>
-            <button className="btn">LEARN MORE</button>
-          </ButtonWrapper>
-        </div>
-      </HeroWrapper>
+      <Hero>
+        {/* Floating Image - Add this above the title */}
+        <FloatingImage>
+          <Image
+            src="/images/DashImage.jpg" // Update this path to your image
+            alt="Student"
+            width={180}
+            height={180}
+          />
+        </FloatingImage>
+        <HeroTitle>
+          <span>BE A HERO IN</span>
+          YOUR SCHOOL
+        </HeroTitle>
+        <ButtonGroup>
+          <Button $primary>EXPLORE NOW</Button>
+          <Button onClick={() => router.push("/login")}>LOGIN</Button>
+        </ButtonGroup>
+      </Hero>
 
-      <QuoteWrapper>
-        <p className="quote-text">
-          "As soon as I entered this school, I realized that I've found my
-          second home."
-        </p>
-        <p className="quote-author">— Student Testimonial</p>
-      </QuoteWrapper>
+      <QuoteSection>
+        <QuoteText>
+          "As soon as I left my home, I realized that I'm home."
+        </QuoteText>
+        <QuoteAuthor>— WANDERER</QuoteAuthor>
+      </QuoteSection>
 
-      <ExploreWrapper>
-        <h2 className="section-title">DISCOVER</h2>
-        <div className="grid">
-          <CardWrapper>
-            <div className="card-icon">📚</div>
-            <h3 className="card-title">ACADEMICS</h3>
-            <p className="card-description">
-              Excellence in education through innovative teaching methods and
-              dedicated faculty.
-            </p>
-          </CardWrapper>
-          <CardWrapper>
-            <div className="card-icon">🎨</div>
-            <h3 className="card-title">ARTS</h3>
-            <p className="card-description">
-              Nurturing creativity through music, visual arts, and performing
-              arts programs.
-            </p>
-          </CardWrapper>
-          <CardWrapper>
-            <div className="card-icon">⚽</div>
-            <h3 className="card-title">ATHLETICS</h3>
-            <p className="card-description">
-              Building character and teamwork through competitive sports and
-              activities.
-            </p>
-          </CardWrapper>
-          <CardWrapper>
-            <div className="card-icon">🤝</div>
-            <h3 className="card-title">COMMUNITY</h3>
-            <p className="card-description">
-              A supportive environment where every student belongs and thrives.
-            </p>
-          </CardWrapper>
-        </div>
-      </ExploreWrapper>
+      <ExploreSection>
+        <SectionTitle>DISCOVER</SectionTitle>
+        <Grid>
+          <Card>
+            <CardTitle>ACADEMICS</CardTitle>
+            <CardDescription>
+              Excellence in education through innovative teaching methods.
+            </CardDescription>
+          </Card>
+          <Card>
+            <CardTitle>ARTS</CardTitle>
+            <CardDescription>
+              Nurturing creativity through various artistic programs.
+            </CardDescription>
+          </Card>
+          <Card>
+            <CardTitle>ATHLETICS</CardTitle>
+            <CardDescription>
+              Building character through sports and teamwork.
+            </CardDescription>
+          </Card>
+          <Card>
+            <CardTitle>COMMUNITY</CardTitle>
+            <CardDescription>
+              A supportive environment where every student belongs.
+            </CardDescription>
+          </Card>
+        </Grid>
+      </ExploreSection>
 
-      <div
-        className="question-section"
-        style={{ margin: "4rem auto", padding: "0 2rem", maxWidth: "600px" }}
-      >
-        <h3
-          className="question"
-          style={{ fontSize: "1.5rem", marginBottom: "1rem" }}
-        >
-          Am I ready to discover my potential?
-        </h3>
-        <p
-          className="answer"
-          style={{
-            fontSize: "1.1rem",
-            lineHeight: "1.8",
-            marginBottom: "2rem",
-          }}
-        >
-          Ready to find answers, I joined this community of learners, stepping
-          out of my comfort zone to spread my wings and grow.
-        </p>
-        <button className="btn">See More →</button>
-      </div>
+      <QuestionBox>
+        <Question>Am I in touch with my deeper desires?</Question>
+        <Answer>
+          What is the purpose? Question that I asked myself. Ready to find
+          answers, I picked up my belongings and left to spread my wings and fly
+          on my own.
+        </Answer>
+        <Button>See More →</Button>
+      </QuestionBox>
 
-      <ThemeToggleWrapper onClick={toggleTheme}>
-        Switch to {currentTheme === "isomania" ? "PISHIP" : "ISOMANIA"} Style
-      </ThemeToggleWrapper>
-    </DashboardWrapper>
+      <ThemeButton onClick={toggleTheme}>
+        {currentTheme === "isomania"
+          ? "SWITCH TO PISHIP →"
+          : "← SWITCH TO ISOMANIA"}
+      </ThemeButton>
+    </Container>
   );
 }

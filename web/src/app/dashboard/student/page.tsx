@@ -1,5 +1,5 @@
 "use client";
 
 export default function StudentDashboard() {
-  return <h1>Student Dashboard</h1>;
+  return <h1>Teacher Dashboard</h1>;
 }

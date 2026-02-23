@@ -5,8 +5,8 @@ export const QuoteWrapper = styled.section`
   margin: 4rem auto;
   padding: 4rem 2rem;
   text-align: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border); /* Use CSS variable */
+  border-bottom: 1px solid var(--border);
 
   .quote-text {
     font-family: "Playfair Display", serif;
