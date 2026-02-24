@@ -23,6 +23,7 @@ export class StudentController {
   @Roles(UserRole.ADMIN)
   @Post()
   create(@Body() dto: CreateStudentDto) {
+    console.log('Controller received:', dto);
     return this.studentService.create(dto);
   }
 

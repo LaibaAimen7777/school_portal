@@ -15,8 +15,8 @@ export class Parent {
   @Column({ unique: true })
   phone: string; // unique identifier to avoid duplicates
 
-  @Column({ nullable: true })
-  email: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  email: string | null;
 
   @Column({ nullable: true })
   address: string;

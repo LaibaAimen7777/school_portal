@@ -6,6 +6,7 @@ import {
   OneToOne,
   JoinColumn,
   Unique,
+  RelationId,
 } from 'typeorm';
 import { SchoolClass } from 'src/school-class/entities/school-class.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -16,12 +17,6 @@ import { Parent } from 'src/parent/entities/parent.entity';
 export class Student {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
 
   @Column({ type: 'date' })
   dateOfBirth: Date;
@@ -35,22 +30,27 @@ export class Student {
   @Column()
   joiningYear: number;
 
-  @Column()
-  schoolClassId: number;
-
   @ManyToOne(() => SchoolClass, (schoolClass) => schoolClass.students, {
+    nullable: false,
     onDelete: 'CASCADE',
+    eager: true, // optional: load class automatically
   })
   @JoinColumn({ name: 'schoolClassId' })
   schoolClass: SchoolClass;
 
-  @OneToOne(() => User, { nullable: true })
-  @JoinColumn()
-  user: User | null; // IMPORTANT
+  //   @RelationId((student: Student) => student.schoolClass)
+  //   schoolClassId: number;
+
+  @OneToOne(() => User, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @ManyToOne(() => Parent, (parent) => parent.students, {
     eager: true,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'parentId' })
   parent: Parent;
 }

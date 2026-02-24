@@ -22,17 +22,17 @@ export default function CreateStudentPage() {
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
 
   // Student State
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [gender, setGender] = useState("");
+  const [firstName, setFirstName] = useState("Alice");
+  const [lastName, setLastName] = useState("Wood");
+  const [dateOfBirth, setDateOfBirth] = useState("2010-01-01");
+  const [gender, setGender] = useState("FEMALE");
 
   // Parent State
-  const [phone, setPhone] = useState("");
-  const [fatherName, setFatherName] = useState("");
-  const [motherName, setMotherName] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("03001234567");
+  const [fatherName, setFatherName] = useState("John Doe");
+  const [motherName, setMotherName] = useState("Jane Doe");
+  const [email, setEmail] = useState("jane@gmail.com");
+  const [address, setAddress] = useState("123 Test Street");
   const [parentExists, setParentExists] = useState(false);
 
   const [joiningYear, setJoiningYear] = useState(new Date().getFullYear());

@@ -5,9 +5,8 @@ export class CreateStudentDto {
   // student
   firstName: string;
   lastName: string;
-  dateOfBirth: string;
+  dateOfBirth: Date;
   gender: string;
-
   // parent
   fatherName: string;
   motherName: string;

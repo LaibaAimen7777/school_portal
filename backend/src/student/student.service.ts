@@ -47,55 +47,55 @@ export class StudentService {
 
   async create(dto: CreateStudentDto) {
     return this.dataSource.transaction(async (manager) => {
-      console.log('here in ss in b');
+      // 1️⃣ Find the class
       const schoolClass = await manager.findOne(SchoolClass, {
         where: { id: dto.classId },
-        relations: ['students'],
       });
 
       if (!schoolClass) {
         throw new NotFoundException('Class not found');
       }
 
-      if (schoolClass.students.length >= schoolClass.maxStrength) {
+      if (schoolClass.currentStrength >= schoolClass.maxStrength) {
         throw new BadRequestException('Class is full');
       }
 
-      // Generate Roll Number
+      console.log('school class:', schoolClass);
+
+      // 2️⃣ Generate roll number
       const lastStudent = await manager.findOne(Student, {
         where: { schoolClass: { id: schoolClass.id } },
         order: { rollNumber: 'DESC' },
       });
-
       const rollNumber = lastStudent ? lastStudent.rollNumber + 1 : 1;
 
-      let savedUser: User | null = null;
-      let username: string | null = null;
-      let plainPassword: string | null = null;
+      // 3️⃣ Prepare username/password
+      const yearShort = dto.joiningYear.toString().slice(2);
+      const username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
+        .toString()
+        .padStart(2, '0')}`;
 
-      if (schoolClass.grade >= 9) {
-        const yearShort = dto.joiningYear.toString().slice(2);
-        username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
-          .toString()
-          .padStart(2, '0')}`;
+      const plainPassword = generatePassword();
+      const hashedPassword = await bcrypt.hash(plainPassword, 10);
+      const canLogin = schoolClass.grade >= 9 ? 1 : 0;
 
-        plainPassword = generatePassword();
-        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+      // 4️⃣ Create user
+      const user = manager.create(User, {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        username,
+        password: hashedPassword,
+        role: UserRole.STUDENT,
+        canLogin,
+        mustChangePassword: canLogin ? 1 : 0,
+        isActive: 1,
+      });
+      const savedUser = await manager.save(user);
 
-        const user = manager.create(User, {
-          username,
-          password: hashedPassword,
-          role: UserRole.STUDENT,
-        });
-
-        savedUser = await manager.save(user);
-      }
-
-      // Check if parent exists
+      // 5️⃣ Find or create parent
       let parent = await manager.findOne(Parent, {
         where: { phone: dto.phone },
       });
-
       if (!parent) {
         parent = manager.create(Parent, {
           fatherName: dto.fatherName,
@@ -104,38 +104,38 @@ export class StudentService {
           email: dto.email,
           address: dto.address,
         });
-
         parent = await manager.save(parent);
       }
 
+      // 6️⃣ Create student using classId directly
       const student = manager.create(Student, {
-        firstName: dto.firstName,
-        lastName: dto.lastName,
         dateOfBirth: dto.dateOfBirth,
         gender: dto.gender,
         rollNumber,
         joiningYear: dto.joiningYear,
-        schoolClass,
-        user: savedUser || null,
+        schoolClass: schoolClass, // ✅ Pass only the ID to avoid null issue
+        user: savedUser,
         parent: parent,
       });
 
-      await manager.save(student);
+      const savedStudent = await manager.save(student);
 
+      // 7️⃣ Update class current strength
       schoolClass.currentStrength += 1;
       await manager.save(schoolClass);
 
+      // 8️⃣ Return created info
       return {
-        studentId: student.id,
+        studentId: savedStudent.id,
         grade: schoolClass.grade,
         section: schoolClass.section,
         rollNumber,
-        username: username ?? null,
-        temporaryPassword: plainPassword ?? null,
+        username,
+        temporaryPassword: canLogin ? plainPassword : null,
+        canLogin,
       };
     });
   }
-
   async resetPassword(studentId: number) {
     return this.dataSource.transaction(async (manager) => {
       const student = await manager.findOne(Student, {
