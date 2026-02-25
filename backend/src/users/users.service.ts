@@ -14,13 +14,13 @@ export class UsersService {
 
   async findByUsernameOrEmail(identifier: string) {
     return this.userRepository.findOne({
-      where: [{ username: identifier }, { email: identifier }],
+      where: [{ username: identifier }],
     });
   }
 
   async findAll() {
     return this.userRepository.find({
-      select: ['id', 'email', 'username', 'role'],
+      select: ['id', 'username', 'role'],
     });
   }
 

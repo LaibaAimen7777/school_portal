@@ -37,6 +37,7 @@ export default function CreateStudentPage() {
 
   const [joiningYear, setJoiningYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Fetch grades
   useEffect(() => {
@@ -46,6 +47,69 @@ export default function CreateStudentPage() {
     };
     fetchGrades();
   }, []);
+
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
+
+    // First Name
+    if (!firstName.trim()) {
+      newErrors.firstName = "First name is required";
+    } else if (!/^[A-Za-z]+$/.test(firstName)) {
+      newErrors.firstName = "First name must contain only letters";
+    }
+
+    // Last Name
+    if (!lastName.trim()) {
+      newErrors.lastName = "Last name is required";
+    } else if (!/^[A-Za-z]+$/.test(lastName)) {
+      newErrors.lastName = "Last name must contain only letters";
+    }
+
+    // Date of Birth
+    if (!dateOfBirth) {
+      newErrors.dateOfBirth = "Date of birth is required";
+    } else if (new Date(dateOfBirth) > new Date()) {
+      newErrors.dateOfBirth = "Date of birth cannot be in the future";
+    }
+
+    // Gender
+    if (!gender) {
+      newErrors.gender = "Please select gender";
+    }
+
+    // Phone
+    if (!phone) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^03\d{9}$/.test(phone)) {
+      newErrors.phone = "Phone must be 11 digits and start with 03";
+    }
+
+    // Email
+    if (!email) {
+      newErrors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      newErrors.email = "Invalid email format";
+    }
+
+    // Father Name
+    if (!fatherName.trim()) {
+      newErrors.fatherName = "Father name is required";
+    }
+
+    // Mother Name
+    if (!motherName.trim()) {
+      newErrors.motherName = "Mother name is required";
+    }
+
+    // Address
+    if (!address.trim()) {
+      newErrors.address = "Address is required";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   // When grade selected → fetch sections
   const handleGradeChange = async (grade: number) => {
@@ -88,7 +152,7 @@ export default function CreateStudentPage() {
   const handleSubmit = async () => {
     if (!selectedClass) return alert("Please select class first");
     if (isFull) return alert("Selected section is full");
-
+    if (!validateForm()) return;
     try {
       setLoading(true);
 
@@ -170,19 +234,37 @@ export default function CreateStudentPage() {
               placeholder="First Name"
               onChange={(e) => setFirstName(e.target.value)}
             />
+            {errors.firstName && (
+              <p style={{ color: "red", fontSize: "12px" }}>
+                {errors.firstName}
+              </p>
+            )}
             <input
               placeholder="Last Name"
               onChange={(e) => setLastName(e.target.value)}
             />
+            {errors.lastName && (
+              <p style={{ color: "red", fontSize: "12px" }}>
+                {errors.lastName}
+              </p>
+            )}
             <input
               type="date"
               onChange={(e) => setDateOfBirth(e.target.value)}
             />
+            {errors.dateOfBirth && (
+              <p style={{ color: "red", fontSize: "12px" }}>
+                {errors.dateOfBirth}
+              </p>
+            )}
             <select onChange={(e) => setGender(e.target.value)}>
               <option value="">Select Gender</option>
               <option value="MALE">Male</option>
               <option value="FEMALE">Female</option>
             </select>
+            {errors.gender && (
+              <p style={{ color: "red", fontSize: "12px" }}>{errors.gender}</p>
+            )}
 
             <h3>Step 3: Parent Information</h3>
             <input
@@ -191,6 +273,9 @@ export default function CreateStudentPage() {
               onChange={(e) => setPhone(e.target.value)}
               onBlur={handlePhoneBlur}
             />
+            {errors.phone && (
+              <p style={{ color: "red", fontSize: "12px" }}>{errors.phone}</p>
+            )}
 
             {parentExists && (
               <p style={{ color: "green" }}>
@@ -203,21 +288,37 @@ export default function CreateStudentPage() {
               value={fatherName}
               onChange={(e) => setFatherName(e.target.value)}
             />
+            {errors.fatherName && (
+              <p style={{ color: "red", fontSize: "12px" }}>
+                {errors.fatherName}
+              </p>
+            )}
             <input
               placeholder="Mother Name"
               value={motherName}
               onChange={(e) => setMotherName(e.target.value)}
             />
+            {errors.motherName && (
+              <p style={{ color: "red", fontSize: "12px" }}>
+                {errors.motherName}
+              </p>
+            )}
             <input
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            {errors.email && (
+              <p style={{ color: "red", fontSize: "12px" }}>{errors.email}</p>
+            )}
             <input
               placeholder="Address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
+            {errors.address && (
+              <p style={{ color: "red", fontSize: "12px" }}>{errors.address}</p>
+            )}
 
             <button onClick={handleSubmit} disabled={loading}>
               {loading ? "Admitting..." : "Admit Student"}

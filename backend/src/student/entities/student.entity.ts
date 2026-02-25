@@ -18,6 +18,12 @@ export class Student {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  firstName: string;
+
+  @Column()
+  lastName: string;
+
   @Column({ type: 'date' })
   dateOfBirth: Date;
 
@@ -41,11 +47,9 @@ export class Student {
   //   @RelationId((student: Student) => student.schoolClass)
   //   schoolClassId: number;
 
-  @OneToOne(() => User, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @OneToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn()
+  user: User | null;
 
   @ManyToOne(() => Parent, (parent) => parent.students, {
     eager: true,

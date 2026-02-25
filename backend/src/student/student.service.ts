@@ -69,53 +69,107 @@ export class StudentService {
       });
       const rollNumber = lastStudent ? lastStudent.rollNumber + 1 : 1;
 
-      // 3️⃣ Prepare username/password
-      const yearShort = dto.joiningYear.toString().slice(2);
-      const username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
-        .toString()
-        .padStart(2, '0')}`;
+      let savedUser: User | null = null;
+      let username: string | null = null;
+      let plainPassword: string | null = null;
+      let canLogin = false;
 
-      const plainPassword = generatePassword();
-      const hashedPassword = await bcrypt.hash(plainPassword, 10);
-      const canLogin = schoolClass.grade >= 9 ? 1 : 0;
+      if (schoolClass.grade >= 9) {
+        // 3️⃣ Prepare username/password
+        const yearShort = dto.joiningYear.toString().slice(2);
+        username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
+          .toString()
+          .padStart(2, '0')}`;
 
-      // 4️⃣ Create user
-      const user = manager.create(User, {
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        username,
-        password: hashedPassword,
-        role: UserRole.STUDENT,
-        canLogin,
-        mustChangePassword: canLogin ? 1 : 0,
-        isActive: 1,
-      });
-      const savedUser = await manager.save(user);
+        plainPassword = generatePassword();
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+        canLogin = true;
 
+        const user = manager.create(User, {
+          username,
+          password: hashedPassword,
+          role: UserRole.STUDENT,
+          canLogin: 1,
+          mustChangePassword: 1,
+          isActive: 1,
+        });
+
+        savedUser = await manager.save(user);
+      }
+
+      // 5️⃣ Find or create parent
       // 5️⃣ Find or create parent
       let parent = await manager.findOne(Parent, {
         where: { phone: dto.phone },
+        relations: ['user'],
       });
+
+      let parentPlainPassword: string | null = null;
+
       if (!parent) {
+        // Create parent user
+        const parentUsername = dto.phone;
+        parentPlainPassword = generatePassword();
+        const parentHashedPassword = await bcrypt.hash(parentPlainPassword, 10);
+
+        const parentUser = manager.create(User, {
+          username: parentUsername,
+          password: parentHashedPassword,
+          role: UserRole.PARENT,
+          canLogin: 1,
+          mustChangePassword: 1,
+          isActive: 1,
+        });
+
+        const savedParentUser = await manager.save(parentUser);
+
+        // Create parent
         parent = manager.create(Parent, {
           fatherName: dto.fatherName,
           motherName: dto.motherName,
           phone: dto.phone,
           email: dto.email,
           address: dto.address,
+          user: savedParentUser,
         });
-        parent = await manager.save(parent);
-      }
 
+        parent = await manager.save(parent);
+      } else {
+        // Parent exists but may not have user
+        if (!parent.user) {
+          const parentUsername = parent.phone;
+          parentPlainPassword = generatePassword();
+          const parentHashedPassword = await bcrypt.hash(
+            parentPlainPassword,
+            10,
+          );
+
+          const parentUser = manager.create(User, {
+            username: parentUsername,
+            password: parentHashedPassword,
+            role: UserRole.PARENT,
+            canLogin: 1,
+            mustChangePassword: 1,
+            isActive: 1,
+          });
+
+          const savedParentUser = await manager.save(parentUser);
+
+          parent.user = savedParentUser;
+          await manager.save(parent);
+        }
+      }
       // 6️⃣ Create student using classId directly
       const student = manager.create(Student, {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         dateOfBirth: dto.dateOfBirth,
         gender: dto.gender,
         rollNumber,
         joiningYear: dto.joiningYear,
-        schoolClass: schoolClass, // ✅ Pass only the ID to avoid null issue
-        user: savedUser,
-        parent: parent,
+        schoolClass, // ✅ Pass only the ID to avoid null issue
+        user: savedUser ?? null,
+        parent,
       });
 
       const savedStudent = await manager.save(student);

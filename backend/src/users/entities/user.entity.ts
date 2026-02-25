@@ -3,7 +3,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToOne,
 } from 'typeorm';
+import { Parent } from 'src/parent/entities/parent.entity';
+import { Student } from 'src/student/entities/student.entity';
 
 export enum UserRole {
   STUDENT = 'student',
@@ -17,20 +20,14 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
-
   @Column({ unique: true, nullable: true })
   username: string;
 
-  @Column({ unique: true, nullable: true })
-  email: string;
+  // @Column({ unique: true, nullable: true })
+  // email: string;
 
-  @Column({ length: 20, nullable: true })
-  phone: string;
+  // @Column({ length: 20, nullable: true })
+  // phone: string;
 
   @Column({ nullable: true })
   password: string;
@@ -52,4 +49,13 @@ export class User {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @OneToOne(() => Parent, (parent) => parent.user)
+  parent: Parent;
+
+  @OneToOne(() => Student, (student) => student.user)
+  student: Student;
+
+  // @OneToOne(() => Teacher, (teacher) => teacher.user)
+  // teacher: Teacher;
 }
