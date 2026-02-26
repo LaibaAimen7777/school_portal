@@ -5,6 +5,7 @@ import StyledComponentsRegistry from "@/lib/registry";
 import { ThemeProvider } from "styled-components";
 import { theme } from "@/styles/theme";
 import { GlobalStyles } from "@/styles/globalStyles";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
           <ThemeProvider theme={theme}>
             <GlobalStyles />
             {children}
+            <ThemeToggle />
           </ThemeProvider>
         </StyledComponentsRegistry>
       </body>

@@ -1,8 +1,31 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AdminContainer, MainContent } from "@/wrappers/adminStyles";
+import {
+  LayoutWrapper,
+  Sidebar,
+  SidebarHeader,
+  NavSection,
+  NavLabel,
+  NavButton,
+  SidebarFooter,
+  UserInfo,
+  UserAvatar,
+  UserDetails,
+  LogoutButton,
+  ContentArea,
+} from "@/wrappers/adminLayoutStyles";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import {
+  FaUsers,
+  FaChalkboardTeacher,
+  FaUserPlus,
+  FaSignOutAlt,
+  FaTachometerAlt,
+  FaBook,
+  FaCog,
+} from "react-icons/fa";
 
 export default function AdminLayout({
   children,
@@ -10,7 +33,13 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [checked, setChecked] = useState(false);
+  const [userData, setUserData] = useState({
+    initial: "A",
+    name: "Admin User",
+    email: "admin@school.com",
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -26,16 +55,113 @@ export default function AdminLayout({
       return;
     }
 
+    // Get user data from somewhere
+    const userEmail = localStorage.getItem("userEmail") || "admin@school.com";
+    setUserData({
+      initial: userEmail.charAt(0).toUpperCase(),
+      name: "Admin User",
+      email: userEmail,
+    });
+
     setChecked(true);
   }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userEmail");
+    router.push("/login");
+  };
+
+  const isActive = (path: string) => pathname === path;
 
   if (!checked) return null;
 
   return (
-    <AdminContainer>
-      <MainContent style={{ marginLeft: 0, padding: 0 }}>
-        {children}
-      </MainContent>
-    </AdminContainer>
+    <LayoutWrapper>
+      <Sidebar>
+        <SidebarHeader>
+          <h2>ADMIN</h2>
+          <p>Management Panel</p>
+        </SidebarHeader>
+
+        <NavSection>
+          <NavLabel>Main</NavLabel>
+
+          <NavButton
+            onClick={() => router.push("/dashboard/admin")}
+            $active={isActive("/dashboard/admin")}
+          >
+            <FaTachometerAlt />
+            <span>Dashboard</span>
+          </NavButton>
+
+          <NavLabel>Management</NavLabel>
+
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/students")}
+            $active={isActive("/dashboard/admin/students")}
+          >
+            <FaUsers />
+            <span>Students</span>
+          </NavButton>
+
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/create-student")}
+            $active={isActive("/dashboard/admin/create-student")}
+          >
+            <FaUserPlus />
+            <span>Add Student</span>
+          </NavButton>
+
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/teachers")}
+            $active={isActive("/dashboard/admin/teachers")}
+          >
+            <FaChalkboardTeacher />
+            <span>Teachers</span>
+          </NavButton>
+
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/create-teachers")}
+            $active={isActive("/dashboard/admin/create-teachers")}
+          >
+            <FaUserPlus />
+            <span>Add Teacher</span>
+          </NavButton>
+
+          <NavLabel>Academic</NavLabel>
+
+          <NavButton>
+            <FaBook />
+            <span>Classes</span>
+          </NavButton>
+
+          <NavButton>
+            <FaCog />
+            <span>Settings</span>
+          </NavButton>
+        </NavSection>
+
+        <SidebarFooter>
+          <UserInfo>
+            <UserAvatar>{userData.initial}</UserAvatar>
+            <UserDetails>
+              <h4>{userData.name}</h4>
+              <p>{userData.email}</p>
+            </UserDetails>
+          </UserInfo>
+
+          <LogoutButton onClick={handleLogout}>
+            <FaSignOutAlt />
+            <span>Logout</span>
+          </LogoutButton>
+        </SidebarFooter>
+      </Sidebar>
+
+      <ContentArea>{children}</ContentArea>
+
+      <ThemeToggle />
+    </LayoutWrapper>
   );
 }

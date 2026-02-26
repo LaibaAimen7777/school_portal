@@ -3,16 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-
-// import { DashboardWrapper } from "@/wrappers/landingDashboard/DashboardWrapper";
-// import { NavigationWrapper } from "@/wrappers/landingDashboard/NavigationWrapper";
-// import { HeroWrapper } from "@/wrappers/landingDashboard/HeroWrapper";
-// import { QuoteWrapper } from "@/wrappers/landingDashboard/QuoteWrapper";
-// import { ExploreWrapper } from "@/wrappers/landingDashboard/ExploreWrapper";
-// import { CardWrapper } from "@/wrappers/landingDashboard/CardWrapper";
-// import { ButtonWrapper } from "@/wrappers/landingDashboard/ButtonWrapper";
-// import { ThemeToggleWrapper } from "@/wrappers/landingDashboard/ThemeToggleWrapper";
-
+import { FaSun, FaMoon } from "react-icons/fa";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import {
   Container,
   Nav,
@@ -36,20 +28,16 @@ import {
   QuestionBox,
   Question,
   Answer,
-  ThemeButton,
+  ThemeToggleButton,
+  SunIcon,
+  MoonIcon,
 } from "@/wrappers/landingStyles";
 
 export default function DashboardPage() {
-  const [currentTheme, setCurrentTheme] = useState<"isomania" | "piship">(
-    "isomania",
-  );
+  // const [currentTheme, setCurrentTheme] = useState<"isomania" | "piship">(
+  //   "isomania",
+  // );
   const router = useRouter();
-
-  const toggleTheme = () => {
-    const newTheme = currentTheme === "isomania" ? "piship" : "isomania";
-    setCurrentTheme(newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
-  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -57,13 +45,13 @@ export default function DashboardPage() {
     if (!token) {
       router.push("/login");
     }
-    document.documentElement.setAttribute("data-theme", currentTheme);
-  }, [router, currentTheme]);
+    // document.documentElement.setAttribute("data-theme", currentTheme);
+  }, [router]);
 
   return (
     <Container>
       <Nav>
-        <Logo>{currentTheme === "isomania" ? "ISOMANIA" : "PISHIP"}</Logo>
+        <Logo>School</Logo>
         <NavMenu>
           <NavLink href="#">HOME</NavLink>
           <NavLink href="#">ABOUT</NavLink>
@@ -74,10 +62,9 @@ export default function DashboardPage() {
       </Nav>
 
       <Hero>
-        {/* Floating Image - Add this above the title */}
         <FloatingImage>
           <Image
-            src="/images/DashImage.jpg" // Update this path to your image
+            src="/images/DashImage.jpg"
             alt="Student"
             width={180}
             height={180}
@@ -139,12 +126,7 @@ export default function DashboardPage() {
         </Answer>
         <Button>See More →</Button>
       </QuestionBox>
-
-      <ThemeButton onClick={toggleTheme}>
-        {currentTheme === "isomania"
-          ? "SWITCH TO PISHIP →"
-          : "← SWITCH TO ISOMANIA"}
-      </ThemeButton>
+      <ThemeToggle />
     </Container>
   );
 }

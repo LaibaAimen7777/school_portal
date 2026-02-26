@@ -1,43 +1,61 @@
 "use client";
 
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/services/authService";
 import { LoginPayload } from "@/types/auth";
-import { userAgent } from "next/server";
-
-const Container = styled.div`
-  display: flex;
-  height: 100vh;
-  justify-content: center;
-  align-items: center;
-`;
-
-const Card = styled.div`
-  padding: 40px;
-  border-radius: 12px;
-  background: #d87070;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  width: 350px;
-`;
+import {
+  Container,
+  Card,
+  Title,
+  InputGroup,
+  IconWrapper,
+  Input,
+  LoginButton,
+  ForgotPassword,
+  ErrorMessage,
+  BackToHome,
+} from "@/wrappers/loginStyles";
+import { FaUser, FaLock } from "react-icons/fa";
+// import { ThemeToggle } from "@/components/ThemeToggle";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function LoginPage() {
   const [form, setForm] = useState<LoginPayload>({
     identifier: "",
     password: "",
   });
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const router = useRouter();
+
+  useEffect(() => {
+    // Check if theme is applied
+    const theme = document.documentElement.getAttribute("data-theme");
+    if (!theme) {
+      document.documentElement.setAttribute("data-theme", "isomania");
+    }
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
       [e.target.name]: e.target.value,
     });
+    setError(""); // Clear error when user types
   };
 
   const handleLogin = async () => {
+    // Basic validation
+    if (!form.identifier || !form.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
     try {
       const data = await login(form);
 
@@ -53,29 +71,65 @@ export default function LoginPage() {
         router.push("/dashboard/student");
       }
     } catch (error) {
-      alert("Invalid credentials===>login page");
+      setError("Invalid email/username or password");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleLogin();
     }
   };
 
   return (
     <Container>
       <Card>
-        <h2>Login</h2>
+        <Title>Welcome Back</Title>
 
-        <input
-          name="identifier"
-          placeholder="Email or username"
-          onChange={handleChange}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="password"
-          onChange={handleChange}
-        />
+        <InputGroup>
+          <IconWrapper>
+            <FaUser />
+          </IconWrapper>
+          <Input
+            name="identifier"
+            placeholder="Email or Username"
+            onChange={handleChange}
+            onKeyPress={handleKeyPress}
+            value={form.identifier}
+            autoComplete="username"
+          />
+        </InputGroup>
 
-        <button onClick={handleLogin}>Login</button>
+        <InputGroup>
+          <IconWrapper>
+            <FaLock />
+          </IconWrapper>
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            onChange={handleChange}
+            onKeyPress={handleKeyPress}
+            value={form.password}
+            autoComplete="current-password"
+          />
+        </InputGroup>
+
+        <ForgotPassword>Forgot Password?</ForgotPassword>
+
+        {error && <ErrorMessage>{error}</ErrorMessage>}
+
+        <LoginButton onClick={handleLogin} disabled={isLoading}>
+          {isLoading ? "LOGGING IN..." : "LOGIN"}
+        </LoginButton>
+
+        <BackToHome onClick={() => router.push("/dashboard")}>
+          ← Back to Home
+        </BackToHome>
       </Card>
+      <ThemeToggle />
     </Container>
   );
 }

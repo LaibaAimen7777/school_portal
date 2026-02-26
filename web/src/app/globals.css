@@ -7,19 +7,29 @@
 }
 
 :root {
-  /* ISOMANIA - Dark theme */
-  --bg-color: #0a0a0a;
-  --text-color: #ffffff;
+  /*  Light theme */
+  --bg-color: #f5f2e8;
+  --text-color: #2c3e50;
   --accent-color: #ff4d4d;
-  --secondary-color: #2a2a2a;
+  --secondary-color: #2c3e50;
+  --nav-bg: #f5f2e8;
+  --heading-color: #f5f2e8;
+  --card-bg: #f8f9fa;
+  --button-text: #ffffff;
+  --button-text-hover: #ffffff;
 }
 
 [data-theme="piship"] {
-  /* PISHIP - Light theme */
-  --bg-color: #f5f2e8;
-  --text-color: #1b2a3a;
-  --accent-color: #c97c5b;
-  --secondary-color: #345a88;
+  /*  Dark theme */
+  --bg-color: #1a1a1a;
+  --text-color: #ffffff;
+  --accent-color: #e74c3c;
+  --secondary-color: #2c2c2c;
+  --nav-bg: #1a1a1a;
+  --heading-color: #ffffff;
+  --card-bg: #1a1a1a;
+  --button-text: #1a1a1a;
+  --button-text-hover: #1a1a1a;
 }
 
 body {

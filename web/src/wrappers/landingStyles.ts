@@ -1,13 +1,14 @@
 import styled from "styled-components";
+import { FaSun, FaMoon } from "react-icons/fa";
 
 // Main container
 export const Container = styled.div`
   min-height: 100vh;
   background-color: var(--bg-color);
   color: var(--text-color);
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow-x: hidden;
 `;
 
 // Navigation
@@ -17,6 +18,7 @@ export const Nav = styled.nav`
   align-items: center;
   padding: 2rem 4rem;
   border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  background-color: var(--nav-bg, var(--bg-color));
 
   @media (max-width: 768px) {
     padding: 1.5rem;
@@ -65,6 +67,7 @@ export const Hero = styled.section`
   align-items: center;
   text-align: center;
   padding: 4rem 2rem;
+  position: relative;
 `;
 
 export const HeroTitle = styled.h1`
@@ -73,6 +76,7 @@ export const HeroTitle = styled.h1`
   line-height: 1.1;
   margin-bottom: 1.5rem;
   text-transform: uppercase;
+  color: var(--text-color);
 
   span {
     color: var(--accent-color);
@@ -99,6 +103,7 @@ export const QuoteText = styled.p`
   font-style: italic;
   line-height: 1.6;
   margin-bottom: 2rem;
+  color: var(--text-color);
   opacity: 0.9;
 `;
 
@@ -125,7 +130,7 @@ export const SectionTitle = styled.h2`
   text-transform: uppercase;
   text-align: center;
   margin-bottom: 3rem;
-  color: var(--text-color);
+  color: var(--heading-color, var(--text-color));
 `;
 
 export const Grid = styled.div`
@@ -139,7 +144,7 @@ export const Grid = styled.div`
 // Card
 export const Card = styled.div`
   padding: 2rem;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--card-bg, rgba(255, 255, 255, 0.05));
   border-radius: 8px;
   transition: transform 0.3s ease;
   border: 1px solid rgba(128, 128, 128, 0.1);
@@ -190,15 +195,16 @@ export const Button = styled.button<ButtonProps>`
   transition: all 0.3s ease;
   border: 2px solid var(--accent-color);
   border-radius: 4px;
-
   background-color: ${(props) =>
     props.$primary ? "var(--accent-color)" : "transparent"};
   color: ${(props) =>
-    props.$primary ? "var(--bg-color)" : "var(--text-color)"};
+    props.$primary
+      ? "var(--button-text, var(--bg-color))"
+      : "var(--text-color)"};
 
   &:hover {
     background-color: var(--accent-color);
-    color: var(--bg-color);
+    color: var(--button-text-hover, var(--bg-color));
   }
 `;
 
@@ -206,7 +212,7 @@ export const Button = styled.button<ButtonProps>`
 export const QuestionBox = styled.div`
   max-width: 600px;
   margin: 6rem auto;
-  padding: 0 2rem;
+  padding: 0 2rem 4rem;
   text-align: left;
 `;
 
@@ -225,7 +231,7 @@ export const Answer = styled.p`
   color: var(--text-color);
 `;
 
-// New styled component for the floating image
+// Floating Image
 export const FloatingImage = styled.div`
   margin-bottom: 2rem;
   animation: float 3s ease-in-out infinite;
@@ -251,23 +257,51 @@ export const FloatingImage = styled.div`
 `;
 
 // Theme Toggle
-export const ThemeButton = styled.button`
+export const ThemeToggle = styled.div`
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  padding: 0.8rem 1.5rem;
-  background-color: var(--accent-color);
-  color: var(--bg-color);
-  border: none;
-  border-radius: 30px;
-  font-weight: 600;
-  cursor: pointer;
   z-index: 1000;
-  transition: transform 0.3s ease;
-  font-size: 0.9rem;
-  text-transform: uppercase;
+`;
+
+interface ThemeToggleButtonProps {
+  $isIsomania: boolean;
+}
+
+export const ThemeToggleButton = styled.button<ThemeToggleButtonProps>`
+  width: 70px;
+  height: 34px;
+  background-color: ${(props) => (props.$isIsomania ? "#f1c40f" : "#2c3e50")};
+  border-radius: 34px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 5px;
+  position: relative;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 
   &:hover {
     transform: scale(1.05);
   }
+`;
+
+interface IconProps {
+  $isActive: boolean;
+}
+
+export const SunIcon = styled(FaSun)<IconProps>`
+  color: ${(props) => (props.$isActive ? "#fff" : "#f39c12")};
+  font-size: 20px;
+  transition: all 0.3s ease;
+  opacity: ${(props) => (props.$isActive ? 1 : 0.5)};
+`;
+
+export const MoonIcon = styled(FaMoon)<IconProps>`
+  color: ${(props) => (props.$isActive ? "#fff" : "#bdc3c7")};
+  font-size: 18px;
+  transition: all 0.3s ease;
+  opacity: ${(props) => (props.$isActive ? 1 : 0.5)};
 `;
