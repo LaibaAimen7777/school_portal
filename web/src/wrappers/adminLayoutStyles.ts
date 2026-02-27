@@ -131,6 +131,7 @@ export const NavButton = styled.button<NavButtonProps>`
   &:hover {
     background: ${(props) =>
       props.$active ? "var(--accent-color)" : "var(--secondary-color)"};
+    color: var(--button-text-hover);
     transform: translateX(5px);
 
     @media (max-width: 768px) {
@@ -193,14 +194,14 @@ export const UserDetails = styled.div`
   flex: 1;
 
   h4 {
-    color: var(--text-color);
+    color: white;
     font-size: 0.95rem;
     font-weight: 600;
     margin: 0 0 4px 0;
   }
 
   p {
-    color: var(--text-color);
+    color: white;
     opacity: 0.6;
     font-size: 0.8rem;
     margin: 0;
@@ -238,7 +239,7 @@ export const LogoutButton = styled.button`
 
   &:hover {
     background: #ff4444;
-    color: white;
+    color: var(--button-text-hover);
     opacity: 1;
     transform: translateX(5px);
     border-color: #ff4444;
@@ -302,6 +303,7 @@ export const StatCard = styled.div`
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    color: var(--button-text-hover);
   }
 
   .icon {
