@@ -4,10 +4,12 @@ import {
   Column,
   OneToOne,
   JoinColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { Subject } from 'src/subject/entities/subject.entity';
 
-@Entity('teachers')
 @Entity('teachers')
 export class Teacher {
   @PrimaryGeneratedColumn()
@@ -31,4 +33,8 @@ export class Teacher {
   @OneToOne(() => User)
   @JoinColumn()
   user: User;
+
+  @ManyToMany(() => Subject)
+  @JoinTable()
+  subjects: Subject[];
 }
