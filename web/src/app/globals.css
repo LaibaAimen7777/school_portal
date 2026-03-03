@@ -1,42 +1,629 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Import retro fonts - MUST be at the VERY TOP */
+@import url("https://fonts.googleapis.com/css2?family=Righteous&family=Space+Grotesk:wght@300;400;500;600;700&family=Press+Start+2P&family=Monoton&display=swap");
 
 :root {
-  /*  Light theme */
-  --bg-color: #f5f2e8;
-  --text-color: #2c3e50;
-  --accent-color: #ff4d4d;
-  --secondary-color: #2c3e50;
-  --nav-bg: #f5f2e8;
-  --heading-color: #f5f2e8;
-  --card-bg: #f8f9fa;
+  /* Pure black and white theme - light mode with modern retro twist */
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --accent-color: #000000;
+  --secondary-color: #000000;
+  --nav-bg: #ffffff;
+  --heading-color: #000000;
+  --card-bg: #ffffff;
   --button-text: #ffffff;
   --button-text-hover: #ffffff;
+  --border-color: #000000;
+  --border-width: 3px;
+  --border-radius: 20px;
+  --border-radius-sm: 12px;
+  --border-radius-lg: 30px;
+  --shadow: 8px 8px 0px 0px #000000;
+  --shadow-hover: 12px 12px 0px 0px #000000;
+  --font-main: "Space Grotesk", "Courier New", monospace;
+  --font-heading: "Righteous", "Arial Black", sans-serif;
+  --font-retro: "Press Start 2P", "Courier New", cursive;
+  --font-display: "Monoton", "Impact", sans-serif;
+  --transition: all 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
 }
 
 [data-theme="piship"] {
-  /*  Dark theme */
-  --bg-color: #1a1a1a;
+  /* Invert for dark mode - still black and white */
+  --bg-color: #000000;
   --text-color: #ffffff;
-  --accent-color: #e74c3c;
-  --secondary-color: #2c2c2c;
-  --nav-bg: #1a1a1a;
+  --accent-color: #ffffff;
+  --secondary-color: #ffffff;
+  --nav-bg: #000000;
   --heading-color: #ffffff;
-  --card-bg: #1a1a1a;
-  --button-text: #1a1a1a;
-  --button-text-hover: #1a1a1a;
+  --card-bg: #000000;
+  --button-text: #000000;
+  --button-text-hover: #000000;
+  --border-color: #ffffff;
+  --border-width: 3px;
+  --border-radius: 20px;
+  --border-radius-sm: 12px;
+  --border-radius-lg: 30px;
+  --shadow: 8px 8px 0px 0px #ffffff;
+  --shadow-hover: 12px 12px 0px 0px #ffffff;
+  --font-main: "Space Grotesk", "Courier New", monospace;
+  --font-heading: "Righteous", "Arial Black", sans-serif;
+  --font-retro: "Press Start 2P", "Courier New", cursive;
+  --font-display: "Monoton", "Impact", sans-serif;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-main);
+  line-height: 1.6;
+  /* REMOVED: border: var(--border-width) solid var(--border-color); */
+  /* REMOVED: border-radius: var(--border-radius-lg); */
+  min-height: 100vh;
+  margin: 0;
+  /* padding: 20px; */
+  transition: var(--transition);
+}
+
+/* Groovy text styles */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 20px 25px;
+  margin: 25px 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  text-shadow: 4px 4px 0 var(--border-color);
+  border-width: 4px;
+}
+
+h1::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+h1:hover::before {
+  left: 100%;
+}
+
+h2 {
+  font-family: var(--font-retro);
+  font-size: 1.8rem;
+  border-style: double;
+  border-width: 4px;
+}
+
+.retro-text {
+  font-family: var(--font-retro);
+  font-size: 0.9rem;
+  line-height: 1.8;
+  letter-spacing: 1px;
+}
+
+.groovy-text {
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  padding: 5px 10px;
+  border-radius: var(--border-radius-sm);
+  display: inline-block;
+  transform: skew(-5deg);
+}
+
+/* Navigation with rounded corners */
+nav {
+  background-color: var(--nav-bg);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 15px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow);
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  gap: 15px;
+}
+
+nav a {
+  color: var(--text-color);
+  text-decoration: none;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 12px 25px;
+  display: inline-block;
+  transition: var(--transition);
+  font-family: var(--font-retro);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+nav a:hover {
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Modern retro cards */
+.card {
+  background-color: var(--card-bg);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  margin: 25px 0;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  position: relative;
+}
+
+.card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: -5px;
+  bottom: -5px;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  opacity: 0;
+  transition: var(--transition);
+  pointer-events: none;
+}
+
+.card:hover::after {
+  opacity: 0.3;
+}
+
+/* Buttons with retro style */
+button,
+.button {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 15px 30px;
+  font-family: var(--font-retro);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+button::before,
+.button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background-color: var(--text-color);
+  transform: translate(-50%, -50%);
   transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+    width 0.3s,
+    height 0.3s;
+  z-index: -1;
+}
+
+button:hover,
+.button:hover {
+  color: var(--bg-color);
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-hover);
+}
+
+button:hover::before,
+.button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Fun illustrations with rounded corners */
+.sketch-icon {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  margin: 15px;
+  display: inline-block;
+  position: relative;
+  background-color: var(--bg-color);
+  box-shadow: var(--shadow);
+}
+
+/* Modern robot */
+.robot-icon {
+  width: 60px;
+  height: 60px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  position: relative;
+  background-color: var(--bg-color);
+  margin: 20px;
+}
+
+.robot-icon::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 50%;
+  top: -20px;
+  left: 10px;
+}
+
+.robot-icon::after {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 50%;
+  top: -20px;
+  right: 10px;
+}
+
+/* Retro cassette tape illustration */
+.cassette-icon {
+  width: 120px;
+  height: 80px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  position: relative;
+  background-color: var(--bg-color);
+  margin: 20px;
+}
+
+.cassette-icon::before {
+  content: "◉";
+  position: absolute;
+  font-size: 30px;
+  left: 15px;
+  top: 20px;
+}
+
+.cassette-icon::after {
+  content: "◉";
+  position: absolute;
+  font-size: 30px;
+  right: 15px;
+  top: 20px;
+}
+
+/* Retro grid with rounded corners */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 25px;
+  margin: 25px 0;
+  background-color: var(--bg-color);
+}
+
+.grid-item {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  font-family: var(--font-retro);
+  font-size: 0.8rem;
+}
+
+.grid-item:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Quote blocks */
+blockquote {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 30px;
+  margin: 30px 0;
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  position: relative;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+blockquote::before {
+  content: '"';
+  font-size: 6rem;
+  position: absolute;
+  top: -20px;
+  left: 20px;
+  opacity: 0.2;
+  font-family: var(--font-display);
+}
+
+blockquote::after {
+  content: '"';
+  font-size: 6rem;
+  position: absolute;
+  bottom: -40px;
+  right: 20px;
+  opacity: 0.2;
+  font-family: var(--font-display);
+}
+
+/* Forms with rounded corners */
+input,
+textarea,
+select {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  font-family: var(--font-main);
+  width: 100%;
+  margin: 10px 0;
+  transition: var(--transition);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  box-shadow: var(--shadow);
+  transform: translate(-2px, -2px);
+}
+
+/* Retro badges */
+.badge {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 8px 16px;
+  font-family: var(--font-retro);
+  font-size: 0.7rem;
+  display: inline-block;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  letter-spacing: 1px;
+  box-shadow: var(--shadow);
+}
+
+/* Progress bar with retro style */
+.progress-container {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  height: 30px;
+  background-color: var(--bg-color);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: var(--text-color);
+  width: 0%;
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Loading animation */
+.loading-retro {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.loading-retro span {
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  animation: bounce 0.5s alternate infinite;
+}
+
+.loading-retro span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.loading-retro span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes bounce {
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+/* Toggle switch retro style */
+.toggle-switch {
+  width: 60px;
+  height: 30px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  position: relative;
+  cursor: pointer;
+  background-color: var(--bg-color);
+}
+
+.toggle-switch::before {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: 50%;
+  top: 1px;
+  left: 1px;
+  background-color: var(--text-color);
+  transition: transform 0.3s ease;
+}
+
+.toggle-switch.active::before {
+  transform: translateX(30px);
+}
+
+/* Price tags retro */
+.price-tag {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg) 0 var(--border-radius-lg) 0;
+  padding: 10px 20px;
+  font-family: var(--font-retro);
+  font-size: 1.2rem;
+  display: inline-block;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  transform: rotate(-2deg);
+  box-shadow: var(--shadow);
+}
+
+/* Tooltips with rounded corners */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 3px dotted var(--border-color);
+  cursor: help;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 220px;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  position: absolute;
+  z-index: 1;
+  bottom: 130%;
+  left: 50%;
+  margin-left: -110px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-family: var(--font-main);
+  font-size: 0.9rem;
+  box-shadow: var(--shadow);
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Table with retro style */
+table {
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius);
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+th,
+td {
+  border: var(--border-width) solid var(--border-color);
+  padding: 15px;
+  text-align: left;
+}
+
+th {
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  font-family: var(--font-retro);
+  font-size: 0.8rem;
+}
+
+td {
+  font-family: var(--font-main);
+}
+
+/* Pulse animation for attention */
+.pulse-retro {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--border-color);
+  }
+  50% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
 }

@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserRole } from 'src/users/entities/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Repository, In } from 'typeorm';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { Teacher } from './entities/teacher.entity';
+import { Subject } from 'src/subject/entities/subject.entity';
 
 function generatePassword() {
   return crypto.randomBytes(8).toString('hex');
@@ -46,6 +47,11 @@ export class TeachersService {
         hireDate: dto.hireDate,
         user: savedUser,
       });
+      const subjects = await manager.find(Subject, {
+        where: { id: In(dto.subjectIds) },
+      });
+
+      teacher.subjects = subjects;
       const savedTeacher = await teacherRepo.save(teacher);
       return {
         teacherId: savedTeacher.id,

@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { api } from "@/services/api";
 
 interface TeacherResponse {
   teacherId: number;
   username: string;
   temporaryPassword: string;
+}
+
+interface Subject {
+  id: number;
+  name: string;
 }
 
 const CreateTeacherPage = () => {
@@ -22,6 +28,16 @@ const CreateTeacherPage = () => {
     null,
   );
   const [loading, setLoading] = useState(false);
+  const [subjectList, setSubjectList] = useState<Subject[]>([]);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchSubjectss = async () => {
+      const res = await api.get("/subject");
+      setSubjectList(res.data);
+    };
+    fetchSubjectss();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -35,11 +51,15 @@ const CreateTeacherPage = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/teachers", formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const res = await axios.post(
+        "http://localhost:3000/teachers",
+        { ...formData, subjectIds: selectedSubjects },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         },
-      });
+      );
 
       setResponseData(res.data);
       alert("Teacher created successfully!");
@@ -80,6 +100,22 @@ const CreateTeacherPage = () => {
           value={formData.specialization}
           onChange={handleChange}
         />
+
+        <select
+          multiple
+          value={selectedSubjects}
+          onChange={(e) =>
+            setSelectedSubjects(
+              Array.from(e.target.selectedOptions, (option) => option.value),
+            )
+          }
+        >
+          {subjectList.map((subject) => (
+            <option key={subject.id} value={subject.id.toString()}>
+              {subject.name}
+            </option>
+          ))}
+        </select>
 
         <input
           type="date"

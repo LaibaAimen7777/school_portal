@@ -21,4 +21,6 @@ export class CreateTeacherDto {
   @IsOptional()
   @IsDateString()
   hireDate?: Date;
+
+  subjectIds: number[];
 }
