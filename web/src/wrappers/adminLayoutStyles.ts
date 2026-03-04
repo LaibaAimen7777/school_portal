@@ -4,57 +4,62 @@ import styled from "styled-components";
 export const LayoutWrapper = styled.div`
   display: flex;
   min-height: 100vh;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--font-main);
   background-color: var(--bg-color);
   color: var(--text-color);
-  transition: all 0.3s ease;
+  transition: var(--transition);
 `;
 
 export const Sidebar = styled.aside`
   width: 280px;
-  background: var(--card-bg);
-  border-right: 1px solid rgba(128, 128, 128, 0.1);
+  background: var(--bg-color);
+  border-right: var(--border-width) solid var(--border-color);
   display: flex;
   flex-direction: column;
   position: fixed;
   height: 100vh;
   overflow-y: auto;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
 
   @media (max-width: 768px) {
     width: 80px;
   }
 
-  /* Hide scrollbar for cleaner look */
   &::-webkit-scrollbar {
     width: 5px;
   }
 
   &::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--bg-color);
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 10px;
-    opacity: 0.5;
+    background: var(--text-color);
+    border-radius: var(--border-radius-full);
+    border: 1px solid var(--border-color);
   }
 `;
 
 export const SidebarHeader = styled.div`
   padding: 2rem 1.5rem;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  border-bottom: var(--border-width) solid var(--border-color);
+  margin: 0 1rem;
 
   h2 {
     font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--accent-color);
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--text-color);
     letter-spacing: 2px;
     text-transform: uppercase;
     margin: 0;
+    border: none;
+    padding: 0;
+    box-shadow: none;
 
     @media (max-width: 768px) {
-      font-size: 1.2rem;
+      font-size: 1rem;
       text-align: center;
     }
   }
@@ -64,6 +69,8 @@ export const SidebarHeader = styled.div`
     opacity: 0.6;
     font-size: 0.9rem;
     margin-top: 0.5rem;
+    border: none;
+    padding: 0;
 
     @media (max-width: 768px) {
       display: none;
@@ -84,6 +91,7 @@ export const NavLabel = styled.div`
   letter-spacing: 1px;
   margin-bottom: 1rem;
   padding-left: 1rem;
+  font-weight: 600;
 
   @media (max-width: 768px) {
     display: none;
@@ -101,18 +109,19 @@ export const NavButton = styled.button<NavButtonProps>`
   width: 100%;
   padding: 1rem 1.5rem;
   margin-bottom: 0.5rem;
-  border: none;
+  border: var(--border-width) solid var(--border-color);
   background: ${(props) =>
-    props.$active ? "var(--accent-color)" : "transparent"};
+    props.$active ? "var(--text-color)" : "transparent"};
   color: ${(props) =>
-    props.$active ? "var(--button-text)" : "var(--text-color)"};
-  border-radius: 12px;
+    props.$active ? "var(--bg-color)" : "var(--text-color)"};
+  border-radius: var(--border-radius-lg);
   cursor: pointer;
   font-weight: ${(props) => (props.$active ? "600" : "500")};
+  font-family: var(--font-main);
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: var(--transition);
   position: relative;
-  overflow: hidden;
+  box-shadow: ${(props) => (props.$active ? "var(--shadow)" : "none")};
 
   @media (max-width: 768px) {
     padding: 1rem;
@@ -130,31 +139,21 @@ export const NavButton = styled.button<NavButtonProps>`
 
   &:hover {
     background: ${(props) =>
-      props.$active ? "var(--accent-color)" : "var(--secondary-color)"};
-    color: var(--button-text-hover);
+      props.$active ? "var(--text-color)" : "var(--text-color)"};
+    color: var(--bg-color);
     transform: translateX(5px);
+    border-color: var(--border-color);
+    box-shadow: var(--shadow);
 
     @media (max-width: 768px) {
       transform: translateX(0);
     }
   }
-
-  &::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: ${(props) => (props.$active ? "4px" : "0")};
-    background: var(--accent-color);
-    transition: width 0.3s ease;
-  }
 `;
 
 export const SidebarFooter = styled.div`
   padding: 2rem 1rem;
-  border-top: 1px solid rgba(128, 128, 128, 0.1);
-  margin-top: auto;
+  border-top: var(--border-width) solid var(--border-color);
 `;
 
 export const UserInfo = styled.div`
@@ -163,8 +162,10 @@ export const UserInfo = styled.div`
   gap: 12px;
   padding: 1rem;
   margin-bottom: 1rem;
-  background: var(--secondary-color);
-  border-radius: 12px;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  background: var(--bg-color);
+  box-shadow: var(--shadow);
 
   @media (max-width: 768px) {
     padding: 0.5rem;
@@ -179,31 +180,34 @@ export const UserInfo = styled.div`
 export const UserAvatar = styled.div`
   width: 45px;
   height: 45px;
-  border-radius: 12px;
-  background: var(--accent-color);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  background: var(--text-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--button-text);
+  color: var(--bg-color);
   font-weight: 700;
   font-size: 1.2rem;
   text-transform: uppercase;
+  box-shadow: var(--shadow);
 `;
 
 export const UserDetails = styled.div`
   flex: 1;
 
   h4 {
-    color: white;
+    color: var(--text-color);
     font-size: 0.95rem;
     font-weight: 600;
     margin: 0 0 4px 0;
+    font-family: var(--font-heading);
   }
 
   p {
-    color: white;
+    color: var(--text-color);
     opacity: 0.6;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
     margin: 0;
   }
 `;
@@ -214,15 +218,17 @@ export const LogoutButton = styled.button`
   gap: 12px;
   width: 100%;
   padding: 1rem 1.5rem;
-  border: 2px solid transparent;
+  border: var(--border-width) solid var(--border-color);
   background: transparent;
   color: var(--text-color);
-  border-radius: 12px;
+  border-radius: var(--border-radius-lg);
   cursor: pointer;
   font-weight: 600;
+  font-family: var(--font-main);
   font-size: 1rem;
-  transition: all 0.3s ease;
-  opacity: 0.7;
+  transition: var(--transition);
+  opacity: 0.8;
+  box-shadow: var(--shadow);
 
   @media (max-width: 768px) {
     padding: 1rem;
@@ -238,11 +244,12 @@ export const LogoutButton = styled.button`
   }
 
   &:hover {
-    background: #ff4444;
-    color: var(--button-text-hover);
+    background: var(--text-color);
+    color: var(--bg-color);
     opacity: 1;
     transform: translateX(5px);
-    border-color: #ff4444;
+    border-color: var(--border-color);
+    box-shadow: var(--shadow-hover);
 
     @media (max-width: 768px) {
       transform: translateX(0);
@@ -254,9 +261,10 @@ export const ContentArea = styled.main`
   flex: 1;
   margin-left: 280px;
   padding: 2rem;
-  background: var(--secondary-color);
+  background: var(--bg-color);
   min-height: 100vh;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  border-left: var(--border-width) solid var(--border-color);
 
   @media (max-width: 768px) {
     margin-left: 80px;
@@ -270,15 +278,19 @@ export const PageHeader = styled.div`
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.1);
+  border-bottom: var(--border-width) solid var(--border-color);
 
   h1 {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--accent-color);
+    font-family: var(--font-heading);
+    color: var(--text-color);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin: 0;
+    border: none;
+    padding: 0;
+    box-shadow: none;
   }
 `;
 
@@ -290,32 +302,48 @@ export const StatsGrid = styled.div`
 `;
 
 export const StatCard = styled.div`
-  background: var(--card-bg);
+  background: var(--bg-color);
   padding: 1.8rem;
-  border-radius: 20px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(128, 128, 128, 0.1);
-  transition: all 0.3s ease;
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
   display: flex;
   align-items: center;
   gap: 1.5rem;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    color: var(--button-text-hover);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    background: var(--text-color);
+
+    .icon {
+      background: var(--bg-color);
+      color: var(--text-color);
+      border-color: var(--bg-color);
+    }
+
+    .info {
+      h3,
+      p {
+        color: var(--bg-color);
+      }
+    }
   }
 
   .icon {
     width: 60px;
     height: 60px;
-    border-radius: 15px;
-    background: var(--accent-color);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    background: var(--text-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--button-text);
+    color: var(--bg-color);
     font-size: 1.8rem;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
   }
 
   .info {
@@ -328,35 +356,49 @@ export const StatCard = styled.div`
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 0.3rem;
+      font-family: var(--font-heading);
+      transition: var(--transition);
     }
 
     p {
-      color: var(--accent-color);
+      color: var(--text-color);
       font-size: 2rem;
       font-weight: 700;
       margin: 0;
+      font-family: var(--font-heading);
+      transition: var(--transition);
     }
   }
 `;
 
 export const Card = styled.div`
-  background: var(--card-bg);
+  background: var(--bg-color);
   padding: 2rem;
-  border-radius: 20px;
-  border: 1px solid rgba(128, 128, 128, 0.1);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--border-radius-xl);
   margin-bottom: 1.5rem;
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
 
   &:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
   }
 
   h2 {
-    color: var(--accent-color);
+    color: var(--text-color);
     font-size: 1.5rem;
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 10px;
+    font-family: var(--font-heading);
+    border: none;
+    padding: 0;
+    box-shadow: none;
+
+    svg {
+      font-size: 1.5rem;
+    }
   }
 `;

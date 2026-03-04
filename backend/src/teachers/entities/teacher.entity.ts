@@ -24,8 +24,8 @@ export class Teacher {
   @Column()
   qualification: string;
 
-  @Column({ nullable: true })
-  specialization: string;
+  // @Column({ nullable: true })
+  // specialization: string;
 
   @Column({ type: 'date', nullable: true })
   hireDate: Date;

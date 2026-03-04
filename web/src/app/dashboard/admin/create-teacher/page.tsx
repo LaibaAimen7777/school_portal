@@ -53,7 +53,7 @@ const CreateTeacherPage = () => {
     try {
       const res = await axios.post(
         "http://localhost:3000/teachers",
-        { ...formData, subjectIds: selectedSubjects },
+        { ...formData, subjectIds: selectedSubjects.map(Number) },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -93,29 +93,56 @@ const CreateTeacherPage = () => {
           required
         />
 
-        <input
+        {/* <input
           type="text"
           name="specialization"
           placeholder="Specialization (optional)"
           value={formData.specialization}
           onChange={handleChange}
-        />
+        /> */}
 
-        <select
-          multiple
-          value={selectedSubjects}
-          onChange={(e) =>
-            setSelectedSubjects(
-              Array.from(e.target.selectedOptions, (option) => option.value),
-            )
-          }
-        >
-          {subjectList.map((subject) => (
-            <option key={subject.id} value={subject.id.toString()}>
-              {subject.name}
-            </option>
-          ))}
-        </select>
+        <div style={{ marginTop: "15px" }}>
+          <p>
+            <strong>Select Subjects (Max 3)</strong>
+          </p>
+
+          {subjectList.map((subject) => {
+            const isChecked = selectedSubjects.includes(subject.id.toString());
+
+            return (
+              <div key={subject.id}>
+                <label>
+                  <input
+                    type="checkbox"
+                    value={subject.id}
+                    checked={isChecked}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      if (isChecked) {
+                        // remove
+                        setSelectedSubjects((prev) =>
+                          prev.filter((id) => id !== value),
+                        );
+                      } else {
+                        // limit to 3
+                        if (selectedSubjects.length >= 3) {
+                          alert("A teacher can select maximum 3 subjects");
+                          return;
+                        }
+
+                        setSelectedSubjects((prev) => [...prev, value]);
+                      }
+                    }}
+                  />
+                  {subject.name}
+                </label>
+              </div>
+            );
+          })}
+        </div>
+
+        <p style={{ color: "gray" }}>Selected: {selectedSubjects.length} / 3</p>
 
         <input
           type="date"

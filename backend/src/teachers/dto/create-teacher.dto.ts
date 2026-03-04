@@ -14,9 +14,9 @@ export class CreateTeacherDto {
   @IsNotEmpty()
   qualification: string;
 
-  @IsOptional()
-  @IsString()
-  specialization?: string;
+  // @IsOptional()
+  // @IsString()
+  // specialization?: string;
 
   @IsOptional()
   @IsDateString()

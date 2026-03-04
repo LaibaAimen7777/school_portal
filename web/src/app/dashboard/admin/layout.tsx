@@ -115,8 +115,8 @@ export default function AdminLayout({
           </NavButton>
 
           <NavButton
-            onClick={() => router.push("/dashboard/admin/teacher")}
-            $active={isActive("/dashboard/admin/teacher")}
+            onClick={() => router.push("/dashboard/admin/teachers")}
+            $active={isActive("/dashboard/admin/teachers")}
           >
             <FaChalkboardTeacher />
             <span>Teachers</span>

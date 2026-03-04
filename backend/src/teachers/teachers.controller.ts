@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Post, Body } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Get } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
@@ -14,5 +14,10 @@ export class TeachersController {
   @Post()
   create(@Body() dto: CreateTeacherDto) {
     return this.teachersService.create(dto);
+  }
+
+  @Get()
+  findAll() {
+    return this.teachersService.findAll();
   }
 }

@@ -17,6 +17,7 @@ export class TeachersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private teacherRepository: Repository<Teacher>,
     private dataSource: DataSource,
   ) {}
   async create(dto: CreateTeacherDto) {
@@ -39,11 +40,13 @@ export class TeachersService {
         isActive: 1,
       });
       const savedUser = await userRepo.save(user);
+      const teacherCode = `T-${(teacherCount + 1).toString().padStart(3, '0')}`;
       // 4️⃣ Create teacher profile
       const teacher = teacherRepo.create({
+        teacherCode,
         fullName: dto.fullName,
         qualification: dto.qualification,
-        specialization: dto.specialization,
+        // specialization: dto.specialization,
         hireDate: dto.hireDate,
         user: savedUser,
       });
@@ -58,6 +61,14 @@ export class TeachersService {
         username,
         temporaryPassword: plainPassword,
       };
+    });
+  }
+
+  async findAll() {
+    console.log('in b in ts');
+    return this.teacherRepository.find({
+      relations: ['subject', 'user'],
+      order: { id: 'DESC' },
     });
   }
 }
