@@ -3,6 +3,35 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { api } from "@/services/api";
+import {
+  Container,
+  Title,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  SubjectsSection,
+  SubjectsTitle,
+  SubjectsGrid,
+  SubjectItem,
+  CheckboxLabel,
+  Checkbox,
+  SelectedCount,
+  SelectedInfo,
+  SelectedSubjectsList,
+  SelectedSubjectTag,
+  RemoveTagButton,
+  Button,
+  ResponseTitle,
+  ResponseItem,
+  CredentialCard,
+  CredentialHeader,
+  PrintButton,
+  PDFButton,
+  ButtonGroup,
+  PasswordValue,
+  PrintStyles,
+} from "@/wrappers/adminCreateTeacher";
 
 interface TeacherResponse {
   teacherId: number;
@@ -32,11 +61,15 @@ const CreateTeacherPage = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchSubjectss = async () => {
-      const res = await api.get("/subject");
-      setSubjectList(res.data);
+    const fetchSubjects = async () => {
+      try {
+        const res = await api.get("/subject");
+        setSubjectList(res.data);
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+      }
     };
-    fetchSubjectss();
+    fetchSubjects();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,6 +96,15 @@ const CreateTeacherPage = () => {
 
       setResponseData(res.data);
       alert("Teacher created successfully!");
+
+      // Reset form
+      setFormData({
+        fullName: "",
+        qualification: "",
+        specialization: "",
+        hireDate: today,
+      });
+      setSelectedSubjects([]);
     } catch (err: any) {
       alert(err.response?.data?.message || "Error creating teacher");
     }
@@ -70,107 +112,183 @@ const CreateTeacherPage = () => {
     setLoading(false);
   };
 
+  const handleSubjectToggle = (subjectId: string) => {
+    const isChecked = selectedSubjects.includes(subjectId);
+
+    if (isChecked) {
+      setSelectedSubjects((prev) => prev.filter((id) => id !== subjectId));
+    } else {
+      if (selectedSubjects.length >= 3) {
+        alert("A teacher can select maximum 3 subjects");
+        return;
+      }
+      setSelectedSubjects((prev) => [...prev, subjectId]);
+    }
+  };
+
+  const handleRemoveSubject = (subjectId: string) => {
+    setSelectedSubjects((prev) => prev.filter((id) => id !== subjectId));
+  };
+
+  const getSubjectName = (id: string) => {
+    return subjectList.find((s) => s.id.toString() === id)?.name || id;
+  };
+
   return (
-    <div style={{ maxWidth: "500px", margin: "auto" }}>
-      <h2>Create Teacher</h2>
+    <>
+      <PrintStyles />
+      <Container>
+        <Title>Create Teacher</Title>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="fullName"
-          placeholder="Full Name"
-          value={formData.fullName}
-          onChange={handleChange}
-          required
-        />
+        <Form onSubmit={handleSubmit}>
+          <FormGroup>
+            <Label htmlFor="fullName">Full Name</Label>
+            <Input
+              type="text"
+              id="fullName"
+              name="fullName"
+              placeholder="Enter teacher's full name"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
 
-        <input
-          type="text"
-          name="qualification"
-          placeholder="Qualification"
-          value={formData.qualification}
-          onChange={handleChange}
-          required
-        />
+          <FormGroup>
+            <Label htmlFor="qualification">Qualification</Label>
+            <Input
+              type="text"
+              id="qualification"
+              name="qualification"
+              placeholder="e.g., M.Sc, B.Ed"
+              value={formData.qualification}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
 
-        {/* <input
-          type="text"
-          name="specialization"
-          placeholder="Specialization (optional)"
-          value={formData.specialization}
-          onChange={handleChange}
-        /> */}
+          <FormGroup>
+            <Label htmlFor="hireDate">Hire Date</Label>
+            <Input
+              type="date"
+              id="hireDate"
+              name="hireDate"
+              value={formData.hireDate}
+              onChange={handleChange}
+            />
+          </FormGroup>
 
-        <div style={{ marginTop: "15px" }}>
-          <p>
-            <strong>Select Subjects (Max 3)</strong>
-          </p>
+          <SubjectsSection>
+            <SubjectsTitle>
+              <span>Select Subjects</span>
+              <SelectedCount>{selectedSubjects.length}</SelectedCount>
+            </SubjectsTitle>
 
-          {subjectList.map((subject) => {
-            const isChecked = selectedSubjects.includes(subject.id.toString());
+            <SubjectsGrid>
+              {subjectList.map((subject) => {
+                const isChecked = selectedSubjects.includes(
+                  subject.id.toString(),
+                );
 
-            return (
-              <div key={subject.id}>
-                <label>
-                  <input
-                    type="checkbox"
-                    value={subject.id}
-                    checked={isChecked}
-                    onChange={(e) => {
-                      const value = e.target.value;
-
-                      if (isChecked) {
-                        // remove
-                        setSelectedSubjects((prev) =>
-                          prev.filter((id) => id !== value),
-                        );
-                      } else {
-                        // limit to 3
-                        if (selectedSubjects.length >= 3) {
-                          alert("A teacher can select maximum 3 subjects");
-                          return;
+                return (
+                  <SubjectItem key={subject.id}>
+                    <CheckboxLabel>
+                      <Checkbox
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() =>
+                          handleSubjectToggle(subject.id.toString())
                         }
+                      />
+                      {subject.name}
+                    </CheckboxLabel>
+                  </SubjectItem>
+                );
+              })}
+            </SubjectsGrid>
 
-                        setSelectedSubjects((prev) => [...prev, value]);
-                      }
-                    }}
-                  />
-                  {subject.name}
-                </label>
-              </div>
-            );
-          })}
-        </div>
+            <SelectedInfo>
+              <span>Selected: {selectedSubjects.length} / 3 subjects</span>
+              {selectedSubjects.length > 0 && (
+                <SelectedSubjectsList>
+                  {selectedSubjects.map((id) => (
+                    <SelectedSubjectTag key={id}>
+                      {getSubjectName(id)}
+                      <RemoveTagButton
+                        type="button"
+                        onClick={() => handleRemoveSubject(id)}
+                        aria-label="Remove subject"
+                      >
+                        ×
+                      </RemoveTagButton>
+                    </SelectedSubjectTag>
+                  ))}
+                </SelectedSubjectsList>
+              )}
+            </SelectedInfo>
+          </SubjectsSection>
 
-        <p style={{ color: "gray" }}>Selected: {selectedSubjects.length} / 3</p>
+          <Button type="submit" disabled={loading}>
+            {loading ? "Creating..." : "Create Teacher"}
+          </Button>
+        </Form>
 
-        <input
-          type="date"
-          name="hireDate"
-          value={formData.hireDate}
-          onChange={handleChange}
-        />
+        {responseData && (
+          <>
+            <CredentialCard id="credentialCard">
+              <CredentialHeader>
+                <ResponseTitle>Login Credentials</ResponseTitle>
+                <PrintButton onClick={() => window.print()}>
+                  🖨️ Print
+                </PrintButton>
+              </CredentialHeader>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Teacher"}
-        </button>
-      </form>
+              <ResponseItem>
+                <strong>Username:</strong> {responseData.username}
+              </ResponseItem>
 
-      {responseData && (
-        <div
-          style={{ marginTop: "20px", background: "#f4f4f4", padding: "15px" }}
-        >
-          <h4>Login Credentials</h4>
-          <p>
-            <strong>Username:</strong> {responseData.username}
-          </p>
-          <p>
-            <strong>Temporary Password:</strong>{" "}
-            {responseData.temporaryPassword}
-          </p>
-        </div>
-      )}
-    </div>
+              <ResponseItem>
+                <strong>Temporary Password:</strong>{" "}
+                <PasswordValue>{responseData.temporaryPassword}</PasswordValue>
+              </ResponseItem>
+            </CredentialCard>
+
+            <ButtonGroup>
+              <PDFButton
+                onClick={async () => {
+                  const element = document.getElementById("credentialCard");
+                  if (!element) return;
+
+                  // Dynamically import libraries to avoid SSR issues
+                  const html2canvas = (await import("html2canvas")).default;
+                  const jsPDF = (await import("jspdf")).default;
+
+                  const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: "#ffffff",
+                  });
+
+                  const imgData = canvas.toDataURL("image/png");
+                  const pdf = new jsPDF({
+                    orientation: "portrait",
+                    unit: "mm",
+                    format: "a4",
+                  });
+
+                  const imgWidth = 190;
+                  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                  pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+                  pdf.save(`Teacher-${responseData.username}-Credentials.pdf`);
+                }}
+              >
+                📥 Download PDF
+              </PDFButton>
+            </ButtonGroup>
+          </>
+        )}
+      </Container>
+    </>
   );
 };
 

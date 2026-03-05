@@ -132,7 +132,10 @@ export default function AdminLayout({
 
           <NavLabel>Academic</NavLabel>
 
-          <NavButton>
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/schedule/create")}
+            $active={isActive("/dashboard/admin/schedule/create")}
+          >
             <FaBook />
             <span>Classes</span>
           </NavButton>

@@ -10,6 +10,7 @@ import { StudentModule } from './student/student.module';
 import { ParentModule } from './parent/parent.module';
 import { TeachersModule } from './teachers/teachers.module';
 import { SubjectModule } from './subject/subject.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { SubjectModule } from './subject/subject.module';
     ParentModule,
     TeachersModule,
     SubjectModule,
+    ScheduleModule,
   ],
   // controllers: [AppController],
   // providers: [AppService],

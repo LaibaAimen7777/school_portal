@@ -6,6 +6,8 @@ import {
   Unique,
 } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
+import { Schedule } from 'src/schedule/entities/schedule.entity';
+// import { Schedule } from '././../schedule/entities/schedule.entity';
 
 @Entity()
 @Unique(['grade', 'section'])
@@ -27,4 +29,7 @@ export class SchoolClass {
 
   @OneToMany(() => Student, (student) => student.schoolClass)
   students: Student[];
+
+  @OneToMany(() => Schedule, (schedule: Schedule) => schedule.schoolClass)
+  schedules: Schedule[];
 }

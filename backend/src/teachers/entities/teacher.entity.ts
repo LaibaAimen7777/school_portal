@@ -6,9 +6,11 @@ import {
   JoinColumn,
   ManyToMany,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
+import { Schedule } from 'src/schedule/entities/schedule.entity';
 
 @Entity('teachers')
 export class Teacher {
@@ -37,4 +39,7 @@ export class Teacher {
   @ManyToMany(() => Subject)
   @JoinTable()
   subjects: Subject[];
+
+  @OneToMany(() => Schedule, (schedule: Schedule) => schedule.teacher)
+  schedules: Schedule[];
 }

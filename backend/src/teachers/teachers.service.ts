@@ -17,7 +17,13 @@ export class TeachersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+
+    @InjectRepository(Teacher)
     private teacherRepository: Repository<Teacher>,
+
+    @InjectRepository(Subject)
+    private subjectRepository: Repository<Subject>,
+
     private dataSource: DataSource,
   ) {}
   async create(dto: CreateTeacherDto) {
@@ -67,7 +73,7 @@ export class TeachersService {
   async findAll() {
     console.log('in b in ts');
     return this.teacherRepository.find({
-      relations: ['subject', 'user'],
+      relations: ['subjects', 'user'],
       order: { id: 'DESC' },
     });
   }
