@@ -17,8 +17,12 @@ export class SchoolClassController {
   }
 
   @Get()
-  findByGrade(@Query('grade') grade: number) {
-    return this.schoolClassService.findByGrade(Number(grade));
+  findByGrade(@Query('grade') grade?: number) {
+    if (grade) {
+      return this.schoolClassService.findByGrade(Number(grade));
+    }
+
+    return this.schoolClassService.findAll();
   }
 
   @Get('grades')

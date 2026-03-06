@@ -1,33 +1,30 @@
-/* Import modern fonts */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+/* Import mix of modern and classic fonts */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
-  /* Pure black and white theme - light mode with modern twist */
-  --bg-color: #ffffff;
-  --text-color: #000000;
-  --accent-color: #000000;
-  --secondary-color: #000000;
-  --nav-bg: #ffffff;
-  --heading-color: #000000;
-  --card-bg: #ffffff;
-  --button-text: #ffffff;
-  --button-text-hover: #ffffff;
-  --border-color: #000000;
+  /* Pure black and white with sketchy aesthetic */
+  --bg-color: #f8f8f8;
+  --text-color: #2b2b2b;
+  --accent-color: #2b2b2b;
+  --secondary-color: #2b2b2b;
+  --nav-bg: #f8f8f8;
+  --heading-color: #2b2b2b;
+  --card-bg: #f8f8f8;
+  --button-text: #f8f8f8;
+  --button-text-hover: #f8f8f8;
+  --border-color: #3a3a3a;
   --border-width: 2px;
-  --border-radius-sm: 12px;
-  --border-radius-md: 20px;
-  --border-radius-lg: 32px;
-  --border-radius-xl: 40px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
   --border-radius-full: 9999px;
-  --shadow:
-    0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 8px 16px -6px rgba(0, 0, 0, 0.1);
-  --shadow-hover:
-    0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  --shadow: 8px 8px 0px 0px rgba(0, 0, 0, 1);
+  --shadow-hover: 12px 12px 0px 0px rgba(0, 0, 0, 0.8);
   --font-main:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif, "Courier New", monospace;
-  --font-heading:
-    "Poppins", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-heading: "Playfair Display", "Times New Roman", serif;
   --font-mono: "JetBrains Mono", "Courier New", monospace;
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --spacing-xs: 4px;
@@ -39,34 +36,29 @@
 }
 
 [data-theme="piship"] {
-  /* Invert for dark mode - still black and white */
-  --bg-color: #000000;
-  --text-color: #ffffff;
-  --accent-color: #ffffff;
-  --secondary-color: #ffffff;
-  --nav-bg: #000000;
-  --heading-color: #ffffff;
-  --card-bg: #000000;
-  --button-text: #000000;
-  --button-text-hover: #000000;
-  --border-color: #ffffff;
+  /* Invert for dark mode */
+  --bg-color: #1a1a1a;
+  --text-color: #e0e0e0;
+  --accent-color: #e0e0e0;
+  --secondary-color: #e0e0e0;
+  --nav-bg: #1a1a1a;
+  --heading-color: #e0e0e0;
+  --card-bg: #1a1a1a;
+  --button-text: #1a1a1a;
+  --button-text-hover: #1a1a1a;
+  --border-color: #c0c0c0;
   --border-width: 2px;
-  --border-radius-sm: 12px;
-  --border-radius-md: 20px;
-  --border-radius-lg: 32px;
-  --border-radius-xl: 40px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
   --border-radius-full: 9999px;
-  --shadow:
-    0 10px 20px -5px rgba(255, 255, 255, 0.1),
-    0 8px 16px -6px rgba(255, 255, 255, 0.1);
-  --shadow-hover:
-    0 20px 25px -5px rgba(255, 255, 255, 0.15),
-    0 10px 10px -5px rgba(255, 255, 255, 0.1);
+  --shadow: 8px 8px 0px 0px rgba(255, 255, 255, 1);
+  --shadow-hover: 12px 12px 0px 0px rgba(255, 255, 255, 0.8);
   --font-main:
-    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif, "Courier New", monospace;
-  --font-heading:
-    "Poppins", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-heading: "Playfair Display", "Times New Roman", serif;
   --font-mono: "JetBrains Mono", "Courier New", monospace;
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --spacing-xs: 4px;
@@ -88,22 +80,49 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-main);
-  line-height: 1.6;
+  line-height: 1.5;
   min-height: 100vh;
-  /* padding: var(--spacing-lg); */
   transition: var(--transition);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
 }
 
-/* Modern container for content */
+/* Hand-drawn background effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(
+      circle at 25px 25px,
+      var(--text-color) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to right, var(--text-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--text-color) 1px, transparent 1px);
+  background-size:
+    50px 50px,
+    50px 50px,
+    50px 50px;
+  background-position: -1px -1px;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-lg);
+  position: relative;
+  z-index: 1;
 }
 
-/* Modern headings with rounded borders */
+/* Sketchy headings with hand-drawn feel */
 h1,
 h2,
 h3,
@@ -111,78 +130,81 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.1;
   margin: var(--spacing-lg) 0 var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-lg);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-lg);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   box-shadow: var(--shadow);
   transition: var(--transition);
   background-color: var(--bg-color);
+  position: relative;
+  transform: rotate(-0.2deg);
 }
 
 h1 {
-  font-size: 3rem;
+  font-size: 3.5rem;
   border-width: 3px;
-  border-radius: var(--border-radius-xl);
   padding: var(--spacing-xl) var(--spacing-2xl);
   text-transform: uppercase;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
 }
 
 h2 {
-  font-size: 2.25rem;
-  border-radius: var(--border-radius-lg);
+  font-size: 2.5rem;
+  border-radius: 225px 15px 255px 15px/15px 255px 15px 225px;
 }
 
 h3 {
-  font-size: 1.875rem;
-  border-radius: var(--border-radius-md);
+  font-size: 2rem;
+  border-radius: 15px 225px 15px 255px/255px 15px 225px 15px;
 }
 
-h4 {
-  font-size: 1.5rem;
-  border-radius: var(--border-radius-md);
-}
-
-h5 {
-  font-size: 1.25rem;
-  border-radius: var(--border-radius-sm);
-}
-
-h6 {
-  font-size: 1.125rem;
-  border-radius: var(--border-radius-sm);
-}
-
-/* Modern paragraph with rounded corners */
+/* Sketchy paragraphs */
 p {
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-md);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-lg);
   margin: var(--spacing-md) 0;
   background-color: var(--bg-color);
   position: relative;
   transition: var(--transition);
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   line-height: 1.7;
+  box-shadow: var(--shadow);
+  transform: rotate(0.1deg);
 }
 
-/* Modern navigation */
+p::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 1px solid var(--text-color);
+  border-radius: inherit;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+/* Navigation with sketchy style */
 nav {
   background-color: var(--nav-bg);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
+  border-radius: 40px 60px 60px 40px/60px 40px 40px 60px;
   padding: var(--spacing-sm);
-  margin-bottom: var(--spacing-xl);
+  margin: 1rem;
   box-shadow: var(--shadow);
   transition: var(--transition);
-  margin: 1rem;
+  transform: rotate(-0.1deg);
 }
 
 nav:hover {
+  transform: rotate(-0.3deg) translateY(-2px);
   box-shadow: var(--shadow-hover);
 }
 
@@ -198,46 +220,78 @@ nav a {
   color: var(--text-color);
   text-decoration: none;
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
   padding: var(--spacing-sm) var(--spacing-lg);
   display: inline-block;
   transition: var(--transition);
   font-weight: 500;
   font-size: 1rem;
+  position: relative;
+  background-color: var(--bg-color);
+}
+
+nav a::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 1px solid var(--text-color);
+  border-radius: inherit;
+  opacity: 0;
+  transition: var(--transition);
 }
 
 nav a:hover {
   background-color: var(--text-color);
   color: var(--bg-color);
-  transform: translateY(-2px);
+  transform: translateY(-2px) rotate(-0.5deg);
   box-shadow: var(--shadow);
 }
 
-/* Modern cards */
+nav a:hover::before {
+  opacity: 0.3;
+}
+
+/* Cards with sketchy borders */
 .card {
   background-color: var(--card-bg);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-xl);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-xl);
   margin: var(--spacing-lg) 0;
   box-shadow: var(--shadow);
   transition: var(--transition);
   position: relative;
-  overflow: hidden;
+  transform: rotate(-0.2deg);
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: rotate(-0.5deg) translateY(-4px) scale(1.01);
   box-shadow: var(--shadow-hover);
 }
 
-/* Modern buttons */
+.card::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border: 1px dashed var(--text-color);
+  border-radius: inherit;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* Buttons with hand-drawn style */
 button,
 .button {
   background-color: var(--bg-color);
   color: var(--text-color);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
   padding: var(--spacing-sm) var(--spacing-xl);
   font-family: var(--font-main);
   font-size: 1rem;
@@ -250,25 +304,27 @@ button,
   justify-content: center;
   gap: var(--spacing-xs);
   min-width: 120px;
+  position: relative;
+  transform: rotate(-0.1deg);
 }
 
 button:hover,
 .button:hover {
   background-color: var(--text-color);
   color: var(--bg-color);
-  transform: translateY(-2px);
+  transform: rotate(-0.3deg) translateY(-2px) scale(1.02);
   box-shadow: var(--shadow-hover);
 }
 
 button:active,
 .button:active {
-  transform: translateY(0);
+  transform: rotate(0.1deg) translateY(0);
 }
 
-/* Modern illustrations with rounder shapes */
+/* Sketch icons from the image */
 .sketch-icon {
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-lg);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-lg);
   margin: var(--spacing-sm);
   display: inline-flex;
@@ -278,6 +334,25 @@ button:active,
   background-color: var(--bg-color);
   box-shadow: var(--shadow);
   transition: var(--transition);
+  position: relative;
+}
+
+.sketch-icon::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 65%,
+    var(--text-color) 65%,
+    var(--text-color) 70%,
+    transparent 70%
+  );
+  opacity: 0.1;
+  border-radius: inherit;
 }
 
 .sketch-icon:hover {
@@ -285,37 +360,41 @@ button:active,
   box-shadow: var(--shadow-hover);
 }
 
-/* Modern robot with rounded features */
+/* Robot icon matching the image style */
 .robot-icon {
   width: 60px;
   height: 60px;
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-lg);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
   position: relative;
   background-color: var(--bg-color);
   transition: var(--transition);
+  box-shadow: var(--shadow);
 }
 
 .robot-icon::before,
 .robot-icon::after {
   content: "";
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
   top: -16px;
+  background-color: var(--bg-color);
 }
 
 .robot-icon::before {
-  left: 12px;
+  left: 10px;
+  transform: rotate(-5deg);
 }
 
 .robot-icon::after {
-  right: 12px;
+  right: 10px;
+  transform: rotate(5deg);
 }
 
-/* Modern star */
+/* Star icon with sketchy edges */
 .star-icon {
   width: 0;
   height: 0;
@@ -325,6 +404,7 @@ button:active,
   position: relative;
   margin: 30px;
   filter: drop-shadow(var(--shadow));
+  transform: rotate(-2deg);
 }
 
 .star-icon::after {
@@ -339,11 +419,11 @@ button:active,
   left: -30px;
 }
 
-/* Modern pattern with smoother dots */
+/* Dotted pattern from the image */
 .dotted-pattern {
   position: relative;
   overflow: hidden;
-  border-radius: var(--border-radius-xl);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
 }
 
 .dotted-pattern::before {
@@ -354,16 +434,16 @@ button:active,
   right: 0;
   bottom: 0;
   background-image: radial-gradient(var(--text-color) 2px, transparent 2px);
-  background-size: 24px 24px;
-  opacity: 0.08;
+  background-size: 16px 16px;
+  opacity: 0.1;
   pointer-events: none;
 }
 
-/* Modern striped pattern */
+/* Striped pattern */
 .striped-pattern {
   position: relative;
   overflow: hidden;
-  border-radius: var(--border-radius-xl);
+  border-radius: 225px 15px 255px 15px/15px 255px 15px 225px;
 }
 
 .striped-pattern::after {
@@ -378,27 +458,29 @@ button:active,
     var(--text-color),
     var(--text-color) 2px,
     transparent 2px,
-    transparent 16px
+    transparent 12px
   );
   opacity: 0.08;
   pointer-events: none;
 }
 
-/* Modern fun border */
+/* Fun border with hand-drawn look */
 .fun-border {
   border: var(--border-width) dashed var(--border-color);
-  border-radius: var(--border-radius-lg);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-lg);
   margin: var(--spacing-sm);
   transition: var(--transition);
+  position: relative;
 }
 
 .fun-border:hover {
   border-style: solid;
-  transform: scale(1.01);
+  transform: scale(1.01) rotate(-0.2deg);
+  box-shadow: var(--shadow);
 }
 
-/* Modern hand-drawn underline */
+/* Hand-drawn underline effect */
 .hand-drawn-underline {
   position: relative;
   display: inline-block;
@@ -407,56 +489,61 @@ button:active,
 .hand-drawn-underline::after {
   content: "";
   position: absolute;
-  bottom: -4px;
+  bottom: -6px;
   left: 0;
   width: 100%;
-  height: 2px;
+  height: 3px;
   background: linear-gradient(
     90deg,
     var(--text-color) 0%,
-    var(--text-color) 80%,
+    var(--text-color) 60%,
+    transparent 80%,
+    var(--text-color) 90%,
     transparent 100%
   );
-  border-radius: var(--border-radius-full);
-  transform: skew(-5deg) rotate(-0.5deg);
+  border-radius: 2px;
+  transform: skew(-5deg) rotate(-1deg);
 }
 
-/* Modern grid */
+/* Grid with sketchy borders */
 .grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--spacing-lg);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-xl);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-xl);
   margin: var(--spacing-lg) 0;
   background-color: var(--bg-color);
   transition: var(--transition);
+  box-shadow: var(--shadow);
 }
 
 .grid-container:hover {
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-hover);
+  transform: rotate(-0.1deg);
 }
 
 .grid-item {
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-lg);
+  border-radius: 225px 15px 255px 15px/15px 255px 15px 225px;
   padding: var(--spacing-lg);
   text-align: center;
   box-shadow: var(--shadow);
   transition: var(--transition);
   background-color: var(--bg-color);
+  transform: rotate(-0.1deg);
 }
 
 .grid-item:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: rotate(-0.3deg) translateY(-4px) scale(1.02);
   box-shadow: var(--shadow-hover);
 }
 
-/* Modern tables */
+/* Tables with sketchy corners */
 .table-container {
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-xl);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   overflow: hidden;
   box-shadow: var(--shadow);
   margin: var(--spacing-lg) 0;
@@ -476,11 +563,12 @@ th {
   letter-spacing: 0.05em;
   font-size: 0.875rem;
   padding: var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--border-color);
 }
 
 td {
   padding: var(--spacing-md);
-  border-top: var(--border-width) solid var(--border-color);
+  border-bottom: 1px dashed var(--border-color);
 }
 
 tr:last-child td {
@@ -495,7 +583,7 @@ tr:hover td {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Modern forms */
+/* Form elements with sketchy style */
 .form-group {
   margin-bottom: var(--spacing-lg);
 }
@@ -506,6 +594,7 @@ label {
   font-weight: 500;
   font-size: 0.9375rem;
   letter-spacing: 0.02em;
+  transform: rotate(-0.1deg);
 }
 
 input,
@@ -514,12 +603,13 @@ select {
   background-color: var(--bg-color);
   color: var(--text-color);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-lg);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-md);
   font-family: var(--font-main);
   font-size: 1rem;
   width: 100%;
   transition: var(--transition);
+  box-shadow: var(--shadow);
 }
 
 input:focus,
@@ -527,22 +617,24 @@ textarea:focus,
 select:focus {
   outline: none;
   border-width: 2px;
-  box-shadow: var(--shadow);
-  transform: scale(1.01);
+  box-shadow: var(--shadow-hover);
+  transform: rotate(-0.2deg) scale(1.01);
 }
 
 input::placeholder,
 textarea::placeholder {
   color: var(--text-color);
   opacity: 0.5;
+  font-style: italic;
 }
 
-/* Modern lists */
+/* Lists with sketchy style */
 .list-container {
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-xl);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-lg);
   margin: var(--spacing-lg) 0;
+  box-shadow: var(--shadow);
 }
 
 ul,
@@ -555,42 +647,44 @@ li {
   margin: var(--spacing-xs) 0;
   padding: var(--spacing-xs) 0;
   border-bottom: 1px dashed var(--border-color);
+  list-style-type: "✧ ";
 }
 
 li:last-child {
   border-bottom: none;
 }
 
-/* Modern images */
+/* Image wrapper with sketchy frame */
 .image-wrapper {
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-xl);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   overflow: hidden;
   box-shadow: var(--shadow);
   transition: var(--transition);
+  position: relative;
 }
 
 .image-wrapper:hover {
-  transform: scale(1.02);
+  transform: rotate(-0.3deg) scale(1.02);
   box-shadow: var(--shadow-hover);
 }
 
 img {
-  /* filter: grayscale(100%); */
   max-width: 100%;
   height: auto;
   display: block;
   transition: var(--transition);
+  filter: grayscale(100%) contrast(1.1);
 }
 
 img:hover {
-  filter: grayscale(50%);
+  filter: grayscale(80%) contrast(1.2);
 }
 
-/* Modern quotes */
+/* Quotes with hand-drawn style */
 blockquote {
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-xl);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-xl);
   margin: var(--spacing-xl) 0;
   font-style: italic;
@@ -603,6 +697,7 @@ blockquote {
   box-shadow: var(--shadow);
   font-size: 1.25rem;
   line-height: 1.8;
+  transform: rotate(-0.1deg);
 }
 
 blockquote::before {
@@ -612,7 +707,8 @@ blockquote::before {
   top: -20px;
   left: 10px;
   opacity: 0.15;
-  font-family: serif;
+  font-family: var(--font-heading);
+  transform: rotate(-5deg);
 }
 
 blockquote::after {
@@ -622,20 +718,11 @@ blockquote::after {
   bottom: -40px;
   right: 10px;
   opacity: 0.15;
-  font-family: serif;
-  transform: rotate(180deg);
+  font-family: var(--font-heading);
+  transform: rotate(185deg);
 }
 
-blockquote footer {
-  margin-top: var(--spacing-md);
-  font-style: normal;
-  font-size: 1rem;
-  opacity: 0.8;
-  border-top: 1px dashed var(--border-color);
-  padding-top: var(--spacing-md);
-}
-
-/* Modern loading animation */
+/* Loading dots with sketchy animation */
 .loading-dots {
   display: inline-flex;
   gap: var(--spacing-xs);
@@ -644,36 +731,40 @@ blockquote footer {
 }
 
 .loading-dots span {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   background-color: var(--text-color);
-  border-radius: var(--border-radius-full);
-  animation: pulse 1.4s ease-in-out infinite;
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
+  animation: sketchBounce 1.2s ease-in-out infinite;
+  transform: rotate(var(--rotate, 0deg));
 }
 
 .loading-dots span:nth-child(1) {
+  --rotate: -5deg;
   animation-delay: 0s;
 }
 .loading-dots span:nth-child(2) {
+  --rotate: 0deg;
   animation-delay: 0.2s;
 }
 .loading-dots span:nth-child(3) {
+  --rotate: 5deg;
   animation-delay: 0.4s;
 }
 
-@keyframes pulse {
+@keyframes sketchBounce {
   0%,
   100% {
-    transform: scale(0.8);
+    transform: rotate(var(--rotate)) scale(0.8) translateY(0);
     opacity: 0.5;
   }
   50% {
-    transform: scale(1.2);
+    transform: rotate(var(--rotate)) scale(1.2) translateY(-4px);
     opacity: 1;
   }
 }
 
-/* Modern tooltips */
+/* Tooltips with sketchy style */
 .tooltip {
   position: relative;
   display: inline-block;
@@ -692,13 +783,13 @@ blockquote footer {
   background-color: var(--text-color);
   color: var(--bg-color);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-lg);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-md);
   position: absolute;
   z-index: 10;
   bottom: 130%;
   left: 50%;
-  transform: translateX(-50%) translateY(10px);
+  transform: translateX(-50%) translateY(10px) rotate(-0.5deg);
   opacity: 0;
   transition: var(--transition);
   font-size: 0.9375rem;
@@ -713,68 +804,39 @@ blockquote footer {
   top: 100%;
   left: 50%;
   margin-left: -6px;
-  border-width: 6px;
+  border-width: 8px;
   border-style: solid;
   border-color: var(--text-color) transparent transparent transparent;
+  transform: rotate(2deg);
 }
 
 .tooltip:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(0) rotate(-0.3deg);
 }
 
-/* Modern badges */
+/* Badges with sketchy corners */
 .badge {
   display: inline-flex;
   align-items: center;
   padding: var(--spacing-xs) var(--spacing-md);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
   font-size: 0.875rem;
   font-weight: 500;
   background-color: var(--bg-color);
   box-shadow: var(--shadow);
   transition: var(--transition);
+  transform: rotate(-0.2deg);
 }
 
 .badge:hover {
-  transform: translateY(-2px);
+  transform: rotate(-0.5deg) translateY(-2px);
   box-shadow: var(--shadow-hover);
 }
 
-/* Modern chips */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
-  font-size: 0.875rem;
-  background-color: var(--bg-color);
-  cursor: default;
-}
-
-.chip-close {
-  margin-left: var(--spacing-xs);
-  padding: 2px 6px;
-  border-radius: var(--border-radius-full);
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-  line-height: 1;
-  transition: var(--transition);
-}
-
-.chip-close:hover {
-  background-color: var(--text-color);
-  color: var(--bg-color);
-  transform: scale(1.1);
-}
-
-/* Modern divider */
+/* Divider with hand-drawn style */
 .divider {
   display: flex;
   align-items: center;
@@ -787,6 +849,7 @@ blockquote footer {
   content: "";
   flex: 1;
   border-bottom: var(--border-width) dashed var(--border-color);
+  transform: rotate(0.1deg);
 }
 
 .divider span {
@@ -795,31 +858,61 @@ blockquote footer {
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  font-family: var(--font-heading);
+  transform: rotate(-0.2deg);
 }
 
-/* Modern progress bar */
+/* Progress bar with sketchy style */
 .progress {
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
-  height: 12px;
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
+  height: 16px;
   background-color: var(--bg-color);
   overflow: hidden;
   box-shadow: var(--shadow);
+  transform: rotate(-0.1deg);
 }
 
 .progress-bar {
   height: 100%;
   background-color: var(--text-color);
   transition: width 0.3s ease;
-  border-radius: var(--border-radius-full);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Modern toggle switch */
+.progress-bar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Toggle switch with sketchy style */
 .toggle {
   position: relative;
   display: inline-block;
-  width: 56px;
-  height: 30px;
+  width: 60px;
+  height: 32px;
 }
 
 .toggle input {
@@ -837,7 +930,7 @@ blockquote footer {
   bottom: 0;
   background-color: var(--bg-color);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
   transition: var(--transition);
   box-shadow: var(--shadow);
 }
@@ -845,94 +938,67 @@ blockquote footer {
 .toggle-slider:before {
   position: absolute;
   content: "";
-  height: 22px;
-  width: 22px;
+  height: 24px;
+  width: 24px;
   left: 3px;
   bottom: 2px;
   background-color: var(--text-color);
-  border-radius: var(--border-radius-full);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
   transition: var(--transition);
+  transform: rotate(-2deg);
 }
 
 .toggle input:checked + .toggle-slider:before {
-  transform: translateX(25px);
+  transform: translateX(27px) rotate(2deg);
 }
 
-/* Modern badge indicators */
-.indicator {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 var(--spacing-xs);
-  border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-full);
-  background-color: var(--text-color);
-  color: var(--bg-color);
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
-/* Modern cards with hover effects */
-.hover-card {
-  transition: var(--transition);
-  cursor: pointer;
-}
-
-.hover-card:hover {
-  transform: scale(1.02) translateY(-4px);
-  box-shadow: var(--shadow-hover);
-}
-
-/* Modern glass effect (works with black and white) */
+/* Glass effect with sketchy twist */
 .glass {
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
   border: var(--border-width) solid var(--border-color);
-  border-radius: var(--border-radius-xl);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   box-shadow: var(--shadow);
 }
 
 [data-theme="piship"] .glass {
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 }
 
-/* Modern animations */
-@keyframes fadeInUp {
+/* Animation with sketchy feel */
+@keyframes sketchFadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(20px) rotate(-1deg);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) rotate(0deg);
   }
 }
 
 .animate-in {
-  animation: fadeInUp 0.6s ease-out;
+  animation: sketchFadeIn 0.6s ease-out;
 }
 
-/* Modern responsive design */
+/* Responsive design */
 @media (max-width: 768px) {
   body {
     padding: var(--spacing-md);
   }
 
   h1 {
-    font-size: 2.25rem;
+    font-size: 2.5rem;
     padding: var(--spacing-lg);
   }
 
   h2 {
-    font-size: 1.875rem;
+    font-size: 2rem;
   }
 
   h3 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 
   nav ul {
@@ -962,7 +1028,7 @@ blockquote footer {
 
 @media (max-width: 480px) {
   h1 {
-    font-size: 1.875rem;
+    font-size: 2rem;
   }
 
   .button,
@@ -983,12 +1049,16 @@ blockquote footer {
   }
 }
 
-/* Modern print styles */
+/* Print styles */
 @media print {
   body {
     background-color: white;
     color: black;
     padding: 0;
+  }
+
+  body::before {
+    display: none;
   }
 
   nav,
@@ -1006,5 +1076,6 @@ blockquote footer {
   h6 {
     box-shadow: none;
     border: 1px solid black;
+    border-radius: 0;
   }
 }

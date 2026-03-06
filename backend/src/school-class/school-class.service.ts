@@ -59,4 +59,8 @@ export class SchoolClassService {
       maxStrength: cls.maxStrength,
     }));
   }
+
+  findAll() {
+    return this.classRepository.find();
+  }
 }

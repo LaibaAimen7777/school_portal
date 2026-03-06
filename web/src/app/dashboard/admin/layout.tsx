@@ -137,7 +137,7 @@ export default function AdminLayout({
             $active={isActive("/dashboard/admin/schedule/create")}
           >
             <FaBook />
-            <span>Classes</span>
+            <span>Create Schedule</span>
           </NavButton>
 
           <NavButton>

@@ -6,6 +6,7 @@ import { api } from "@/services/api";
 interface Teacher {
   id: number;
   fullName: string;
+  subjects: Subject[];
 }
 
 interface Subject {
@@ -15,13 +16,16 @@ interface Subject {
 
 interface SchoolClass {
   id: number;
-  name: string;
+  grade: number;
+  section: string;
+  currentStrength: number;
 }
 
 const CreateSchedulePage = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
+  const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
 
   const [formData, setFormData] = useState({
     teacherId: "",
@@ -42,6 +46,8 @@ const CreateSchedulePage = () => {
     const teachersRes = await api.get("/teachers");
     const subjectsRes = await api.get("/subject");
     const classesRes = await api.get("/school-class");
+
+    console.log(classesRes.data);
 
     setTeachers(teachersRes.data);
     setSubjects(subjectsRes.data);
@@ -88,6 +94,21 @@ const CreateSchedulePage = () => {
     setLoading(false);
   };
 
+  const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const subjectId = e.target.value;
+
+    setFormData({
+      ...formData,
+      subjectId,
+      teacherId: "",
+    });
+
+    const filtered = teachers.filter((teacher) =>
+      teacher.subjects?.some((s) => s.id === Number(subjectId)),
+    );
+
+    setFilteredTeachers(filtered);
+  };
   return (
     <div style={{ maxWidth: "500px", margin: "auto" }}>
       <h2>Create Schedule</h2>
@@ -104,7 +125,7 @@ const CreateSchedulePage = () => {
 
           {classes.map((c) => (
             <option key={c.id} value={c.id}>
-              {c.name}
+              {c.grade}-{c.section}-----{c.currentStrength}
             </option>
           ))}
         </select>
@@ -113,7 +134,7 @@ const CreateSchedulePage = () => {
         <select
           name="subjectId"
           value={formData.subjectId}
-          onChange={handleChange}
+          onChange={handleSubjectChange}
           required
         >
           <option value="">Select Subject</option>
@@ -131,10 +152,11 @@ const CreateSchedulePage = () => {
           value={formData.teacherId}
           onChange={handleChange}
           required
+          disabled={!formData.subjectId}
         >
           <option value="">Select Teacher</option>
 
-          {teachers.map((t) => (
+          {filteredTeachers.map((t) => (
             <option key={t.id} value={t.id}>
               {t.fullName}
             </option>
