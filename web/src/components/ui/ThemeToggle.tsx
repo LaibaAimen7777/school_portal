@@ -14,11 +14,10 @@ export const ThemeToggle = () => {
     const newTheme = currentTheme === "isomania" ? "piship" : "isomania";
     setCurrentTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme); // Save preference
+    localStorage.setItem("theme", newTheme);
   };
 
   useEffect(() => {
-    // Load saved theme preference
     const savedTheme = localStorage.getItem("theme") as
       | "isomania"
       | "piship"
@@ -30,64 +29,181 @@ export const ThemeToggle = () => {
   }, []);
 
   return (
-    <ThemeToggleContainer>
-      <ThemeToggleButton
-        onClick={toggleTheme}
-        $isIsomania={currentTheme === "isomania"}
-      >
-        <SunIcon $isActive={currentTheme === "isomania"} />
-        <MoonIcon $isActive={currentTheme === "piship"} />
-      </ThemeToggleButton>
+    <ThemeToggleContainer onClick={toggleTheme}>
+      <ToggleInner $isIsomania={currentTheme === "isomania"}>
+        {currentTheme === "isomania" ? (
+          <FaSun className="icon" />
+        ) : (
+          <FaMoon className="icon" />
+        )}
+      </ToggleInner>
     </ThemeToggleContainer>
   );
 };
 
-// Styled components for the toggle
-const ThemeToggleContainer = styled.div`
+const ThemeToggleContainer = styled.button`
+  /* border-radius: 30px 30px 30px 30px/30px 30px 30px 30px; */
+  /* min-width: 90px; */
+  padding: 0;
+  margin: 0;
   position: fixed;
   bottom: 2rem;
   right: 2rem;
   z-index: 1000;
-`;
-
-interface ThemeToggleButtonProps {
-  $isIsomania: boolean;
-}
-
-const ThemeToggleButton = styled.button<ThemeToggleButtonProps>`
-  width: 70px;
-  height: 34px;
-  background-color: ${(props) => (props.$isIsomania ? "#f1c40f" : "#2c3e50")};
-  border-radius: 34px;
+  background: transparent;
   border: none;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 5px;
-  position: relative;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  padding: 0;
+  width: 60px;
+  height: 60px;
+  transition: var(--transition);
+  transform: rotate(-2deg);
+  box-shadow: none;
+
+  &::before {
+    content: "✧";
+    position: absolute;
+    top: -8px;
+    left: -5px;
+    color: var(--pop-color);
+    font-size: 1rem;
+    opacity: 0.6;
+    transform: rotate(-15deg);
+    animation: twinkleSmall 2s infinite ease-in-out;
+  }
+
+  &::after {
+    content: "✦";
+    position: absolute;
+    bottom: -8px;
+    right: -5px;
+    color: var(--pop-color);
+    font-size: 1rem;
+    opacity: 0.6;
+    transform: rotate(15deg);
+    background: transparent;
+    animation: twinkleSmall 2s infinite ease-in-out 0.5s;
+  }
+
+  @keyframes twinkleSmall {
+    0%,
+    100% {
+      opacity: 0.4;
+      transform: rotate(-15deg) scale(1);
+    }
+    50% {
+      opacity: 0.9;
+      transform: rotate(-10deg) scale(1.2);
+    }
+  }
 
   &:hover {
-    transform: scale(1.05);
+    transform: rotate(-4deg) scale(1.08);
+    background-color: transparent;
+    box-shadow: none;
+
+    &::before,
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  &:active {
+    transform: rotate(0deg) scale(0.95);
   }
 `;
 
-interface IconProps {
-  $isActive: boolean;
+interface ToggleInnerProps {
+  $isIsomania: boolean;
 }
 
-const SunIcon = styled(FaSun)<IconProps>`
-  color: ${(props) => (props.$isActive ? "#fff" : "#f39c12")};
-  font-size: 20px;
-  transition: all 0.3s ease;
-  opacity: ${(props) => (props.$isActive ? 1 : 0.5)};
-`;
+const ToggleInner = styled.div<ToggleInnerProps>`
+  width: 50%;
+  height: 100%;
+  background-color: ${(props) =>
+    props.$isIsomania ? "var(--pop-color)" : "var(--text-color)"};
+  border: 3px solid var(--border-color);
+  border-radius: 50%;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  position: relative;
 
-const MoonIcon = styled(FaMoon)<IconProps>`
-  color: ${(props) => (props.$isActive ? "#fff" : "#bdc3c7")};
-  font-size: 18px;
-  transition: all 0.3s ease;
-  opacity: ${(props) => (props.$isActive ? 1 : 0.5)};
+  .icon {
+    color: var(--bg-color);
+    font-size: 1.6rem;
+    filter: drop-shadow(2px 2px 0px var(--border-color));
+    transition: var(--transition);
+    animation: ${(props) =>
+      props.$isIsomania ? "spinSun 10s linear infinite" : "none"};
+  }
+
+  @keyframes spinSun {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border: 1px dashed var(--pop-color);
+    border-radius: 50%;
+    opacity: 0.4;
+    pointer-events: none;
+    animation: rotate 10s linear infinite;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    right: 3px;
+    bottom: 3px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    opacity: 0.2;
+    pointer-events: none;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  &:hover {
+    transform: scale(1.05);
+
+    .icon {
+      animation: ${(props) =>
+        props.$isIsomania ? "spinSun 5s linear infinite" : "bounce 0.5s ease"};
+    }
+  }
+
+  @keyframes bounce {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    25% {
+      transform: rotate(-10deg);
+    }
+    75% {
+      transform: rotate(10deg);
+    }
+  }
 `;

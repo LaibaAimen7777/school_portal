@@ -34,6 +34,7 @@ const CreateSchedulePage = () => {
     dayOfWeek: "",
     startTime: "",
     endTime: "",
+    room: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -75,6 +76,7 @@ const CreateSchedulePage = () => {
         dayOfWeek: formData.dayOfWeek,
         startTime: formData.startTime,
         endTime: formData.endTime,
+        room: formData.room,
       });
 
       alert("Schedule created successfully");
@@ -86,6 +88,7 @@ const CreateSchedulePage = () => {
         dayOfWeek: "",
         startTime: "",
         endTime: "",
+        room: "",
       });
     } catch (error: any) {
       alert(error.response?.data?.message || "Error creating schedule");
@@ -192,6 +195,15 @@ const CreateSchedulePage = () => {
           type="time"
           name="endTime"
           value={formData.endTime}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          type="text"
+          name="room"
+          placeholder="Room Number"
+          value={formData.room}
           onChange={handleChange}
           required
         />

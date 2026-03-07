@@ -5,4 +5,5 @@ export class CreateScheduleDto {
   dayOfWeek: string;
   startTime: string;
   endTime: string;
+  room: string;
 }

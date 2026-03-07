@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Schedule } from './entities/schedule.entity';
 import { Repository } from 'typeorm';
@@ -30,4 +30,9 @@ export class ScheduleController {
   create(@Body() dto: CreateScheduleDto) {
     return this.scheduleService.create(dto);
   }
+
+  // @Get()
+  // async findAll(){
+  //   return this.scheduleRepo.findAll();
+  // }
 }

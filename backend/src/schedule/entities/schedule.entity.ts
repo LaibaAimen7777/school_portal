@@ -31,4 +31,7 @@ export class Schedule {
 
   @Column()
   endTime: string; // 10:00
+
+  @Column()
+  room: string;
 }

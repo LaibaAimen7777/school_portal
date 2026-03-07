@@ -1,8 +1,18 @@
+// app/teachers/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { api } from "@/services/api";
+import {
+  TeachersContainer,
+  TeachersHeader,
+  TeachersTitle,
+  LoadingMessage,
+  TableWrapper,
+  StyledTable,
+  SubjectBadge,
+  EmptyState,
+} from "@/wrappers/adminTeacher";
 
 interface Subject {
   id: number;
@@ -29,7 +39,6 @@ export default function TeachersPage() {
     const fetchTeachers = async () => {
       try {
         const res = await api.get("/teachers");
-
         setTeachers(res.data);
       } catch (error) {
         console.error(error);
@@ -41,36 +50,71 @@ export default function TeachersPage() {
     fetchTeachers();
   }, []);
 
-  if (loading) return <p>Loading teachers...</p>;
+  if (loading) return <LoadingMessage>Loading teachers...</LoadingMessage>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>All Teachers</h2>
+    <TeachersContainer>
+      <TeachersHeader>
+        <TeachersTitle>
+          All Teachers
+          <span className="star">✦</span>
+        </TeachersTitle>
+        <div className="decorative-line"></div>
+      </TeachersHeader>
 
-      <table border={1} cellPadding={10} width="100%">
-        <thead>
-          <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Qualification</th>
-            <th>Subjects</th>
-            <th>Hire Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {teachers.map((teacher) => (
-            <tr key={teacher.id}>
-              <td>{teacher.teacherCode}</td>
-              <td>{teacher.fullName}</td>
-              <td>{teacher.user?.username}</td>
-              <td>{teacher.qualification}</td>
-              <td>{teacher.subjects.map((s) => s.name).join(", ")}</td>
-              <td>{teacher.hireDate}</td>
+      <TableWrapper>
+        <StyledTable>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Qualification</th>
+              <th>Subjects</th>
+              <th>Hire Date</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {teachers.length === 0 ? (
+              <tr>
+                <td colSpan={6}>
+                  <EmptyState>
+                    <span className="icon">✧</span>
+                    <p>No teachers found</p>
+                    <span className="icon">✧</span>
+                  </EmptyState>
+                </td>
+              </tr>
+            ) : (
+              teachers.map((teacher) => (
+                <tr key={teacher.id}>
+                  <td>
+                    <span className="code-badge">{teacher.teacherCode}</span>
+                  </td>
+                  <td>
+                    <strong>{teacher.fullName}</strong>
+                  </td>
+                  <td>
+                    <span className="username">@{teacher.user?.username}</span>
+                  </td>
+                  <td>{teacher.qualification || "—"}</td>
+                  <td>
+                    <div className="subjects-list">
+                      {teacher.subjects.map((subject) => (
+                        <SubjectBadge key={subject.id}>
+                          {subject.name}
+                        </SubjectBadge>
+                      ))}
+                      {teacher.subjects.length === 0 && "—"}
+                    </div>
+                  </td>
+                  <td>{new Date(teacher.hireDate).toLocaleDateString()}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </StyledTable>
+      </TableWrapper>
+    </TeachersContainer>
   );
 }
