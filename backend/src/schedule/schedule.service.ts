@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { Teacher } from 'src/teachers/entities/teacher.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
 import { SchoolClass } from 'src/school-class/entities/school-class.entity';
+import { Rooms } from 'src/rooms/entities/rooms.entity';
 
 @Injectable()
 export class ScheduleService {
@@ -25,10 +26,20 @@ export class ScheduleService {
 
     @InjectRepository(SchoolClass)
     private classRepo: Repository<SchoolClass>,
+
+    @InjectRepository(Rooms)
+    private roomRepo: Repository<Rooms>,
   ) {}
   async create(createScheduleDto: CreateScheduleDto) {
-    const { classId, subjectId, teacherId, dayOfWeek, startTime, endTime } =
-      createScheduleDto;
+    const {
+      classId,
+      subjectId,
+      teacherId,
+      roomId,
+      dayOfWeek,
+      startTime,
+      endTime,
+    } = createScheduleDto;
 
     const schoolClass = await this.classRepo.findOne({
       where: { id: classId },
@@ -45,6 +56,9 @@ export class ScheduleService {
       relations: ['subjects'],
     });
     if (!teacher) throw new NotFoundException('Teacher not found');
+
+    const room = await this.roomRepo.findOne({ where: { id: roomId } });
+    if (!room) throw new NotFoundException('Room Not Found');
 
     // ✅ Check teacher teaches that subject
     const teachesSubject = teacher.subjects.some((sub) => sub.id === subjectId);
@@ -78,10 +92,24 @@ export class ScheduleService {
     if (classConflict)
       throw new BadRequestException('Class already has a schedule on this day');
 
+    const roomConflict = await this.scheduleRepo
+      .createQueryBuilder('schedule')
+      .where('schedule.roomId=:roomId', { roomId })
+      .andWhere('schedule.dayOfWeek=:dayOfWeek', { dayOfWeek })
+      .andWhere(
+        '(schedule.startTime<:endTime AND schedule.endTime>:startTime',
+        { startTime, endTime },
+      )
+      .getOne();
+
+    if (roomConflict) {
+      throw new BadRequestException('Room is already booked at this time');
+    }
     const schedule = this.scheduleRepo.create({
       schoolClass,
       subject,
       teacher,
+      room,
       dayOfWeek,
       startTime,
       endTime,

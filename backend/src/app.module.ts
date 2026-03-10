@@ -11,6 +11,7 @@ import { ParentModule } from './parent/parent.module';
 import { TeachersModule } from './teachers/teachers.module';
 import { SubjectModule } from './subject/subject.module';
 import { ScheduleModule } from './schedule/schedule.module';
+import { RoomsModule } from './rooms/rooms.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ScheduleModule } from './schedule/schedule.module';
     TeachersModule,
     SubjectModule,
     ScheduleModule,
+    RoomsModule,
   ],
   // controllers: [AppController],
   // providers: [AppService],
