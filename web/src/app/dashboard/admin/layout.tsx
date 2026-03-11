@@ -140,9 +140,12 @@ export default function AdminLayout({
             <span>Create Schedule</span>
           </NavButton>
 
-          <NavButton>
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/schedule")}
+            $active={isActive("/dashboard/admin/schedule")}
+          >
             <FaCog />
-            <span>Settings</span>
+            <span>Display Schedule</span>
           </NavButton>
         </NavSection>
 

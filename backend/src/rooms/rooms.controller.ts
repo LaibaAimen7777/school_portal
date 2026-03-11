@@ -5,10 +5,7 @@ import { Rooms } from './entities/rooms.entity';
 import { Repository } from 'typeorm';
 @Controller('rooms')
 export class RoomsController {
-  constructor(
-    @InjectRepository(Rooms)
-    private roomService: RoomsService,
-  ) {}
+  constructor(private readonly roomsService: RoomsService) {}
 
   @Get('available')
   async getAvailableRooms(
@@ -16,6 +13,6 @@ export class RoomsController {
     @Query('startTime') startTime: string,
     @Query('endTime') endTime: string,
   ) {
-    return this.roomService.getAvailableRooms(dayOfWeek, startTime, endTime);
+    return this.roomsService.getAvailableRooms(dayOfWeek, startTime, endTime);
   }
 }

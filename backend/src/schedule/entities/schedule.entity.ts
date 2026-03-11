@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, ManyToOne, Column } from 'typeorm';
 import { Teacher } from 'src/teachers/entities/teacher.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
 import { SchoolClass } from 'src/school-class/entities/school-class.entity';
+import { Rooms } from 'src/rooms/entities/rooms.entity';
 
 @Entity()
 export class Schedule {
@@ -23,6 +24,9 @@ export class Schedule {
   })
   teacher: Teacher;
 
+  @ManyToOne(() => Rooms, { eager: true })
+  room: Rooms;
+
   @Column()
   dayOfWeek: string; // MONDAY, TUESDAY
 
@@ -31,7 +35,4 @@ export class Schedule {
 
   @Column()
   endTime: string; // 10:00
-
-  @Column()
-  room: string;
 }

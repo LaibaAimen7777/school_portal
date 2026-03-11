@@ -31,7 +31,11 @@ export class RoomsService {
       )
       .getMany();
 
-    const bookedRoomIds = new Set(bookedRooms.map((s) => s.room.id));
+    const bookedRoomIds = new Set(
+      bookedRooms
+        .filter((s) => s.room) // Only keep schedules that have a room
+        .map((s) => s.room.id),
+    );
 
     return allRooms.filter((room) => !bookedRoomIds.has(room.id));
   }

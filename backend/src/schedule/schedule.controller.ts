@@ -31,8 +31,8 @@ export class ScheduleController {
     return this.scheduleService.create(dto);
   }
 
-  // @Get()
-  // async findAll(){
-  //   return this.scheduleRepo.findAll();
-  // }
+  @Get()
+  async findAll() {
+    return this.scheduleService.findAll();
+  }
 }

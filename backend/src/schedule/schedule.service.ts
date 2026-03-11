@@ -81,23 +81,29 @@ export class ScheduleService {
       );
     }
 
-    // ✅ Check class time conflict
-    const classConflict = await this.scheduleRepo.findOne({
-      where: {
-        schoolClass: { id: classId },
-        dayOfWeek,
-      },
-    });
+    // ✅ Check for time conflict in the same class
+    const classConflict = await this.scheduleRepo
+      .createQueryBuilder('schedule')
+      .where('schedule.schoolClassId = :classId', { classId })
+      .andWhere('schedule.dayOfWeek = :dayOfWeek', { dayOfWeek })
+      .andWhere(
+        '(schedule.startTime < :endTime AND schedule.endTime > :startTime)',
+        { startTime, endTime },
+      )
+      .getOne();
 
-    if (classConflict)
-      throw new BadRequestException('Class already has a schedule on this day');
+    if (classConflict) {
+      throw new BadRequestException(
+        `Class already has a schedule from ${classConflict.startTime} to ${classConflict.endTime} on this day`,
+      );
+    }
 
     const roomConflict = await this.scheduleRepo
       .createQueryBuilder('schedule')
       .where('schedule.roomId=:roomId', { roomId })
       .andWhere('schedule.dayOfWeek=:dayOfWeek', { dayOfWeek })
       .andWhere(
-        '(schedule.startTime<:endTime AND schedule.endTime>:startTime',
+        '(schedule.startTime<:endTime AND schedule.endTime>:startTime)',
         { startTime, endTime },
       )
       .getOne();
@@ -116,5 +122,14 @@ export class ScheduleService {
     });
 
     return this.scheduleRepo.save(schedule);
+  }
+  async findAll() {
+    return this.scheduleRepo.find({
+      relations: ['teacher', 'subject', 'schoolClass', 'room'],
+      order: {
+        dayOfWeek: 'ASC',
+        startTime: 'ASC',
+      },
+    });
   }
 }
