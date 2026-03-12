@@ -68,7 +68,7 @@ interface SchoolClass {
 }
 
 const daysOfWeek = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
-
+const timeSlots = ["08:30", "09:30", "10:30", "11:30", "12:30"];
 const formatDay = (day: string) => {
   return day.charAt(0) + day.slice(1).toLowerCase();
 };
@@ -150,6 +150,19 @@ export default function ScheduleDisplayPage() {
     setFilteredSchedules(filtered);
   };
 
+  const schedulesByClass: Record<string, Schedule[]> = classes.reduce(
+    (acc, cls) => {
+      const classKey = `Grade ${cls.grade}-${cls.section}`;
+
+      acc[classKey] = filteredSchedules.filter(
+        (s) => s.schoolClass.id === cls.id,
+      );
+
+      return acc;
+    },
+    {} as Record<string, Schedule[]>,
+  );
+
   const clearFilters = () => {
     setSelectedDay("");
     setSelectedClass("");
@@ -181,6 +194,12 @@ export default function ScheduleDisplayPage() {
       </Container>
     );
   }
+
+  const findSchedule = (day: string, time: string): Schedule | undefined => {
+    return filteredSchedules.find(
+      (s) => s.dayOfWeek === day && formatTime(s.startTime) === time,
+    );
+  };
 
   return (
     <Container>
@@ -282,42 +301,98 @@ export default function ScheduleDisplayPage() {
           </button>
         </EmptyState>
       ) : viewMode === "grid" ? (
-        <ScheduleGrid>
-          {filteredSchedules.map((schedule) => (
-            <ScheduleCard key={schedule.id}>
-              <CardHeader>
-                <DayBadge day={schedule.dayOfWeek}>
-                  {formatDay(schedule.dayOfWeek)}
-                </DayBadge>
-                <TimeBadge>
-                  {formatTime(schedule.startTime)} -{" "}
-                  {formatTime(schedule.endTime)}
-                </TimeBadge>
-              </CardHeader>
-              <CardBody>
-                <InfoRow>
-                  <InfoLabel>Class</InfoLabel>
-                  <InfoValue>
-                    Grade {schedule.schoolClass.grade}-
-                    {schedule.schoolClass.section}
-                  </InfoValue>
-                </InfoRow>
-                <InfoRow>
-                  <InfoLabel>Subject</InfoLabel>
-                  <SubjectName>{schedule.subject.name}</SubjectName>
-                </InfoRow>
-                <InfoRow>
-                  <InfoLabel>Teacher</InfoLabel>
-                  <TeacherName>{schedule.teacher.fullName}</TeacherName>
-                </InfoRow>
-                <InfoRow>
-                  <InfoLabel>Room</InfoLabel>
-                  <RoomName>{schedule.room.name}</RoomName>
-                </InfoRow>
-              </CardBody>
-            </ScheduleCard>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "120px repeat(5, 1fr)",
+            border: "1px solid var(--border-color)",
+          }}
+        >
+          {/* Empty top-left corner */}
+          <div></div>
+
+          {/* Days Header */}
+          {daysOfWeek.map((day) => (
+            <div
+              key={day}
+              style={{
+                padding: "1rem",
+                fontWeight: "bold",
+                textAlign: "center",
+                borderBottom: "1px solid var(--border-color)",
+              }}
+            >
+              {formatDay(day)}
+            </div>
           ))}
-        </ScheduleGrid>
+
+          {/* Time rows */}
+          {timeSlots.map((time) => (
+            <React.Fragment key={time}>
+              {/* Time column */}
+              <div
+                style={{
+                  padding: "1rem",
+                  fontWeight: "bold",
+                  borderTop: "1px solid var(--border-color)",
+                }}
+              >
+                {time}
+              </div>
+
+              {/* Day cells */}
+              {daysOfWeek.map((day) => {
+                const slot = findSchedule(day, time);
+
+                return (
+                  <div
+                    key={day + time}
+                    style={{
+                      padding: "0.75rem",
+                      borderTop: "1px solid var(--border-color)",
+                      borderLeft: "1px solid var(--border-color)",
+                      minHeight: "80px",
+                    }}
+                  >
+                    {slot ? (
+                      <>
+                        <div style={{ fontWeight: "bold" }}>
+                          {slot.subject.name}
+                        </div>
+
+                        <div style={{ fontSize: "0.85rem" }}>
+                          {slot.teacher.fullName}
+                        </div>
+
+                        <div style={{ fontSize: "0.8rem", opacity: 0.7 }}>
+                          Room {slot.room.name}
+                        </div>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          router.push(
+                            `/dashboard/admin/schedule/create?classId=${selectedClass}&day=${day}&time=${time}`,
+                          )
+                        }
+                        style={{
+                          width: "100%",
+                          padding: "0.5rem",
+                          border: "1px dashed var(--border-color)",
+                          borderRadius: "6px",
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        + Add
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </div>
       ) : (
         <WeekView>
           {daysOfWeek.map((day) => (

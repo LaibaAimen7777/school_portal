@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { api } from "@/services/api";
+import { useSearchParams } from "next/navigation";
 import {
   Container,
   Title,
@@ -44,17 +45,20 @@ interface Room {
 
 const Days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
 
-const initialForm = {
-  teacherId: "",
-  subjectId: "",
-  classId: "",
-  dayOfWeek: "",
-  startTime: "",
-  endTime: "",
-  roomId: "",
-};
-
 const CreateSchedulePage = () => {
+  const searchParams = useSearchParams();
+  const day = searchParams.get("day");
+  const time = searchParams.get("time");
+  const classId = searchParams.get("classId");
+  const initialForm = {
+    teacherId: "",
+    subjectId: "",
+    classId: "",
+    dayOfWeek: "",
+    startTime: "",
+    endTime: "",
+    roomId: "",
+  };
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
@@ -67,6 +71,19 @@ const CreateSchedulePage = () => {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
+  useEffect(() => {
+    if (classId || day || time) {
+      console.log("formData.classId", formData.classId);
+      console.log("day", day);
+      console.log("URL classId", classId);
+      setFormData((prev) => ({
+        ...prev,
+        classId: classId || "",
+        dayOfWeek: day || "",
+        startTime: time || "",
+      }));
+    }
+  }, [classId, day, time]);
   useEffect(() => {
     fetchData();
   }, []);
