@@ -295,7 +295,11 @@ export default function ScheduleDisplayPage() {
         <EmptyState>
           <p>No schedules found</p>
           <button
-            onClick={() => router.push("/dashboard/admin/schedule/create")}
+            onClick={() =>
+              router.push(
+                `/dashboard/admin/schedule/create?classId=${selectedClass}`,
+              )
+            }
           >
             Create your first schedule
           </button>
@@ -370,19 +374,12 @@ export default function ScheduleDisplayPage() {
                       </>
                     ) : (
                       <button
+                        disabled={!selectedClass}
                         onClick={() =>
                           router.push(
                             `/dashboard/admin/schedule/create?classId=${selectedClass}&day=${day}&time=${time}`,
                           )
                         }
-                        style={{
-                          width: "100%",
-                          padding: "0.5rem",
-                          border: "1px dashed var(--border-color)",
-                          borderRadius: "6px",
-                          background: "transparent",
-                          cursor: "pointer",
-                        }}
                       >
                         + Add
                       </button>

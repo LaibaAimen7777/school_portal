@@ -34,19 +34,15 @@ import {
 } from "@/wrappers/landingStyles";
 
 export default function DashboardPage() {
-  // const [currentTheme, setCurrentTheme] = useState<"isomania" | "piship">(
-  //   "isomania",
-  // );
   const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+  //   useEffect(() => {
+  //     const token = localStorage.getItem("token");
 
-    if (!token) {
-      router.push("/login");
-    }
-    // document.documentElement.setAttribute("data-theme", currentTheme);
-  }, [router]);
+  //     if (!token) {
+  //       router.push("/login");
+  //     }
+  //   }, [router]);
 
   return (
     <Container>

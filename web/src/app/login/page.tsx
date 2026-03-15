@@ -125,7 +125,7 @@ export default function LoginPage() {
           {isLoading ? "LOGGING IN..." : "LOGIN"}
         </LoginButton>
 
-        <BackToHome onClick={() => router.push("/dashboard")}>
+        <BackToHome onClick={() => router.push("/landing")}>
           ← Back to Home
         </BackToHome>
       </Card>

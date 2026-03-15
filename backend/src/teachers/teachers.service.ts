@@ -40,7 +40,7 @@ export class TeachersService {
       const user = manager.create(User, {
         username,
         password: hashedPassword,
-        role: UserRole.STUDENT,
+        role: UserRole.TEACHER,
         canLogin: 1,
         mustChangePassword: 1,
         isActive: 1,
