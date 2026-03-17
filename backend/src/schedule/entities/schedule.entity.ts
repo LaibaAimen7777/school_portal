@@ -30,9 +30,9 @@ export class Schedule {
   @Column()
   dayOfWeek: string; // MONDAY, TUESDAY
 
-  @Column()
+  @Column({ type: 'time' })
   startTime: string; // 09:00
 
-  @Column()
+  @Column({ type: 'time' })
   endTime: string; // 10:00
 }

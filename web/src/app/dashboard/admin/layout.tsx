@@ -51,12 +51,12 @@ export default function AdminLayout({
     }
 
     if (role !== "admin") {
-      router.replace("/dashboard");
+      router.replace("/landing");
       return;
     }
 
     // Get user data from somewhere
-    const userEmail = localStorage.getItem("userEmail") || "admin@school.com";
+    const userEmail = "admin@school.com";
     setUserData({
       initial: userEmail.charAt(0).toUpperCase(),
       name: "Admin User",
@@ -69,7 +69,6 @@ export default function AdminLayout({
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    localStorage.removeItem("userEmail");
     router.push("/login");
   };
 

@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { Student } from 'src/student/entities/student.entity';
+import { Teacher } from 'src/teachers/entities/teacher.entity';
 
 export enum UserRole {
   STUDENT = 'student',
@@ -56,6 +57,6 @@ export class User {
   @OneToOne(() => Student, (student) => student.user)
   student: Student;
 
-  // @OneToOne(() => Teacher, (teacher) => teacher.user)
-  // teacher: Teacher;
+  @OneToOne(() => Teacher, (teacher) => teacher.user)
+  teacher: Teacher;
 }

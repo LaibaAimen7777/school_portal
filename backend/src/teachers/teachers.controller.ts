@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Post, Body, Get } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Get, Req } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
@@ -19,5 +19,13 @@ export class TeachersController {
   @Get()
   findAll() {
     return this.teachersService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('dashboard')
+  async getDashboard(@Req() req) {
+    console.log(req.user);
+    const userId = req.user.id;
+    return this.teachersService.getDashboard(userId);
   }
 }

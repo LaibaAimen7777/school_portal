@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { Teacher } from './entities/teacher.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
+import { Schedule } from 'src/schedule/entities/schedule.entity';
+import { Student } from 'src/student/entities/student.entity';
 
 function generatePassword() {
   return crypto.randomBytes(8).toString('hex');
@@ -23,6 +25,12 @@ export class TeachersService {
 
     @InjectRepository(Subject)
     private subjectRepository: Repository<Subject>,
+
+    @InjectRepository(Schedule)
+    private scheduleRepository: Repository<Schedule>,
+
+    @InjectRepository(Student)
+    private studentRepository: Repository<Student>,
 
     private dataSource: DataSource,
   ) {}
@@ -76,5 +84,29 @@ export class TeachersService {
       relations: ['subjects', 'user'],
       order: { id: 'DESC' },
     });
+  }
+
+  async getDashboard(userId: number) {
+    console.log('teacher id', userId);
+    const teacher = await this.teacherRepository.findOne({
+      where: { user: { id: userId } },
+    });
+    console.log('teacher', teacher);
+    const teacherId = teacher?.id;
+    const schedules = await this.scheduleRepository.find({
+      where: { teacher: { id: teacherId } },
+    });
+
+    const classIds = schedules.map((s) => s.schoolClass.id);
+
+    const students = await this.studentRepository.find({
+      where: { schoolClass: { id: In(classIds) } },
+    });
+
+    return {
+      schedules,
+      students,
+      teacher,
+    };
   }
 }
