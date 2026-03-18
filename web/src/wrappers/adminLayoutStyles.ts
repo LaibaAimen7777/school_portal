@@ -112,7 +112,7 @@ export const SidebarHeader = styled.div`
     font-size: 0.9rem;
     margin-top: 0.5rem;
     border: none;
-    padding: 0;
+    padding: 2px;
     /* font-style: italic; */
 
     @media (max-width: 768px) {
@@ -240,14 +240,18 @@ export const UserInfo = styled.div`
   position: relative;
 
   &::after {
-    content: "✦";
+    /* content: "✦"; */
     position: absolute;
     top: -8px;
-    right: -8px;
+    right: -7px;
     color: var(--pop-color);
-    font-size: 1rem;
+    font-size: 1.2rem;
     background: var(--bg-color);
-    padding: 2px;
+    /* border: 1px solid var(--pop-color); */
+    border-radius: 80%;
+    /* width: 15px;
+    height: 15px;
+    padding: 2px; */
     transform: rotate(10deg);
   }
 
@@ -297,6 +301,7 @@ export const UserDetails = styled.div`
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    padding: 5px;
   }
 `;
 

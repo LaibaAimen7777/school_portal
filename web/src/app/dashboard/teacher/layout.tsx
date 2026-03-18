@@ -13,49 +13,35 @@ interface TeacherData {
     teacherCode: string;
     qualification: string;
     hireDate: string;
-  };
-  schedules: Array<{
-    id: number;
-    dayOfWeek: string;
-    startTime: string;
-    endTime: string;
-    schoolClass: {
+    schedules: Array<{
       id: number;
-      grade: number;
-      section: string;
-      maxStrength: number;
-      currentStrength: number;
-    };
-    subject: {
+      dayOfWeek: string;
+      startTime: string;
+      endTime: string;
+      schoolClass: {
+        id: number;
+        grade: number;
+        section: string;
+        maxStrength: number;
+        currentStrength: number;
+      };
+      subject: {
+        id: number;
+        name: string;
+        code: string;
+      };
+      room: {
+        id: number;
+        name: string;
+      };
+    }>;
+    subjects: Array<{
       id: number;
       name: string;
       code: string;
-    };
-    room: {
-      id: number;
-      name: string;
-    };
-  }>;
-  students: Array<{
-    id: number;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string;
-    gender: string;
-    rollNumber: number;
-    joiningYear: number;
-    schoolClass: {
-      id: number;
-      grade: number;
-      section: string;
-    };
-    parent?: {
-      fatherName: string;
-      motherName: string;
-      phone: string;
-      email: string;
-    };
-  }>;
+    }>;
+  };
+  students: any[];
 }
 
 export default function TeacherLayout({
@@ -104,7 +90,7 @@ export default function TeacherLayout({
   }, []);
 
   // Group schedules by day
-  const schedulesByDay = teacherData?.schedules.reduce(
+  const schedulesByDay = teacherData?.teacher?.schedules?.reduce(
     (acc, schedule) => {
       const day = schedule.dayOfWeek;
       if (!acc[day]) {
@@ -113,7 +99,7 @@ export default function TeacherLayout({
       acc[day].push(schedule);
       return acc;
     },
-    {} as Record<string, typeof teacherData.schedules>,
+    {} as Record<string, typeof teacherData.teacher.schedules>,
   );
 
   // Sort schedules by time
@@ -158,7 +144,7 @@ export default function TeacherLayout({
       `${student.firstName} ${student.lastName}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      student.rollNumber.toString().includes(searchTerm),
+      student.rollNumber?.toString().includes(searchTerm),
   );
 
   const getTeachingSince = () => {
@@ -173,52 +159,56 @@ export default function TeacherLayout({
 
   return (
     <S.DashboardContainer>
-      {/* Navigation */}
-      <nav>
-        <ul>
-          <li>
-            <Link
-              href="/teacher/dashboard"
-              onClick={() => setSelectedView("overview")}
-              className={selectedView === "overview" ? "active" : ""}
-            >
-              <span className="hand-drawn-underline">Overview</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/teacher/schedule"
-              onClick={() => setSelectedView("schedule")}
-              className={selectedView === "schedule" ? "active" : ""}
-            >
-              <span className="hand-drawn-underline">Schedule</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/teacher/students"
-              onClick={() => setSelectedView("students")}
-              className={selectedView === "students" ? "active" : ""}
-            >
-              <span className="hand-drawn-underline">Students</span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/teacher/analytics">
-              <span className="hand-drawn-underline">Analytics</span>
-            </Link>
-          </li>
-        </ul>
-      </nav>
-
-      <div className="container">
+      <S.Nav>
+        <S.NavContainer>
+          <S.NavLogo>Teacher Dashboard</S.NavLogo>
+          <S.NavList>
+            <S.NavItem>
+              <S.NavLink
+                as={Link}
+                href="/teacher/dashboard"
+                onClick={() => setSelectedView("overview")}
+                $active={selectedView === "overview"}
+              >
+                Overview
+              </S.NavLink>
+            </S.NavItem>
+            <S.NavItem>
+              <S.NavLink
+                as={Link}
+                href="/teacher/schedule"
+                onClick={() => setSelectedView("schedule")}
+                $active={selectedView === "schedule"}
+              >
+                Schedule
+              </S.NavLink>
+            </S.NavItem>
+            <S.NavItem>
+              <S.NavLink
+                as={Link}
+                href="/teacher/students"
+                onClick={() => setSelectedView("students")}
+                $active={selectedView === "students"}
+              >
+                Students
+              </S.NavLink>
+            </S.NavItem>
+            <S.NavItem>
+              <S.NavLink as={Link} href="/teacher/analytics">
+                Analytics
+              </S.NavLink>
+            </S.NavItem>
+          </S.NavList>
+        </S.NavContainer>
+      </S.Nav>
+      <S.Container>
         {/* Header with teacher info */}
-        <S.TeacherCard>
+        <S.HeaderCard>
           <S.HeaderContent>
             <S.TeacherInfo>
-              <S.TeacherAvatar>
+              <S.Avatar>
                 {teacherData?.teacher?.fullName?.charAt(0) || "T"}
-              </S.TeacherAvatar>
+              </S.Avatar>
               <S.TeacherDetails>
                 <h2>{teacherData?.teacher?.fullName || "Teacher"}</h2>
                 <S.BadgeGroup>
@@ -226,11 +216,13 @@ export default function TeacherLayout({
                     {teacherData?.teacher?.qualification || "Educator"}
                   </S.Badge>
                   <S.Badge>
-                    {teacherData?.teacher?.teacherCode || "N/A"}
+                    ID: {teacherData?.teacher?.teacherCode || "N/A"}
                   </S.Badge>
                 </S.BadgeGroup>
                 {teacherData?.teacher?.hireDate && (
-                  <p>Teaching since: {getTeachingSince()}</p>
+                  <S.TeachingSince>
+                    Teaching since: {getTeachingSince()}
+                  </S.TeachingSince>
                 )}
               </S.TeacherDetails>
             </S.TeacherInfo>
@@ -246,7 +238,7 @@ export default function TeacherLayout({
               </p>
             </S.DateDisplay>
           </S.HeaderContent>
-        </S.TeacherCard>
+        </S.HeaderCard>
 
         {/* Loading state */}
         {!teacherData && (
@@ -274,7 +266,7 @@ export default function TeacherLayout({
               <S.StatCard>
                 <p className="stat-label">Weekly Classes</p>
                 <p className="stat-value">
-                  {teacherData?.schedules?.length || 0}
+                  {teacherData?.teacher?.schedules?.length || 0}
                 </p>
               </S.StatCard>
 
@@ -284,7 +276,7 @@ export default function TeacherLayout({
               </S.StatCard>
 
               <S.StatCard>
-                <p className="stat-label">Classes This Week</p>
+                <p className="stat-label">Teaching Days</p>
                 <p className="stat-value">
                   {Object.keys(schedulesByDay || {}).length}
                 </p>
@@ -293,7 +285,7 @@ export default function TeacherLayout({
 
             {/* Today's Schedule Preview */}
             {getTodaySchedule().length > 0 && (
-              <S.TeacherCard>
+              <S.SectionCard>
                 <S.SectionHeader $withAction>
                   <h3>Today's Schedule</h3>
                   <S.ViewButton onClick={() => setSelectedView("schedule")}>
@@ -318,22 +310,17 @@ export default function TeacherLayout({
                         .map((schedule) => (
                           <tr key={schedule.id}>
                             <td>
-                              <S.Badge
-                                style={{
-                                  fontSize: "0.8rem",
-                                  background: "transparent",
-                                }}
-                              >
-                                {formatTime(schedule.startTime)} -{" "}
-                                {formatTime(schedule.endTime)}
-                              </S.Badge>
+                              {formatTime(schedule.startTime)} -{" "}
+                              {formatTime(schedule.endTime)}
                             </td>
                             <td>
                               <strong>{schedule.subject.name}</strong>
                               <br />
-                              <small style={{ opacity: 0.7 }}>
+                              <span
+                                style={{ opacity: 0.7, fontSize: "0.85rem" }}
+                              >
                                 {schedule.subject.code}
-                              </small>
+                              </span>
                             </td>
                             <td>
                               Grade {schedule.schoolClass.grade}-
@@ -342,7 +329,7 @@ export default function TeacherLayout({
                             <td>{schedule.room.name}</td>
                             <td>
                               <S.StudentCount>
-                                <span className="count-badge">
+                                <span className="badge">
                                   {schedule.schoolClass.currentStrength}
                                 </span>
                                 <span>
@@ -355,12 +342,12 @@ export default function TeacherLayout({
                     </tbody>
                   </table>
                 </S.TableWrapper>
-              </S.TeacherCard>
+              </S.SectionCard>
             )}
 
             {/* Recent Students Preview */}
             {teacherData.students && teacherData.students.length > 0 && (
-              <S.TeacherCard>
+              <S.SectionCard>
                 <S.SectionHeader $withAction>
                   <h3>Recent Students</h3>
                   <S.ViewButton onClick={() => setSelectedView("students")}>
@@ -370,35 +357,37 @@ export default function TeacherLayout({
 
                 <S.PreviewGrid>
                   {teacherData.students.slice(0, 4).map((student) => (
-                    <S.PreviewStudentCard key={student.id}>
-                      <S.PreviewStudentContent>
-                        <S.StudentInitials>
-                          {student.firstName.charAt(0)}
-                          {student.lastName.charAt(0)}
+                    <S.PreviewCard key={student.id}>
+                      <S.PreviewContent>
+                        <S.StudentInitials
+                          style={{ width: "40px", height: "40px" }}
+                        >
+                          {student.firstName?.charAt(0)}
+                          {student.lastName?.charAt(0)}
                         </S.StudentInitials>
                         <div>
                           <strong>
                             {student.firstName} {student.lastName}
                           </strong>
                           <br />
-                          <small>
-                            Grade {student.schoolClass.grade}-
-                            {student.schoolClass.section} • Roll #
+                          <span style={{ opacity: 0.7, fontSize: "0.85rem" }}>
+                            Grade {student.schoolClass?.grade}-
+                            {student.schoolClass?.section} • Roll #
                             {student.rollNumber}
-                          </small>
+                          </span>
                         </div>
-                      </S.PreviewStudentContent>
-                    </S.PreviewStudentCard>
+                      </S.PreviewContent>
+                    </S.PreviewCard>
                   ))}
                 </S.PreviewGrid>
-              </S.TeacherCard>
+              </S.SectionCard>
             )}
           </>
         )}
 
         {/* Full Schedule View */}
         {teacherData && selectedView === "schedule" && (
-          <S.TeacherCard>
+          <S.SectionCard>
             <S.SectionHeader>
               <h3>Weekly Schedule</h3>
             </S.SectionHeader>
@@ -430,22 +419,15 @@ export default function TeacherLayout({
                   {getDaySchedule(selectedDay).map((schedule) => (
                     <tr key={schedule.id}>
                       <td>
-                        <S.Badge
-                          style={{
-                            fontSize: "0.8rem",
-                            background: "transparent",
-                          }}
-                        >
-                          {formatTime(schedule.startTime)} -{" "}
-                          {formatTime(schedule.endTime)}
-                        </S.Badge>
+                        {formatTime(schedule.startTime)} -{" "}
+                        {formatTime(schedule.endTime)}
                       </td>
                       <td>
                         <strong>{schedule.subject.name}</strong>
                         <br />
-                        <small style={{ opacity: 0.7 }}>
+                        <span style={{ opacity: 0.7, fontSize: "0.85rem" }}>
                           {schedule.subject.code}
-                        </small>
+                        </span>
                       </td>
                       <td>
                         Grade {schedule.schoolClass.grade}-
@@ -454,7 +436,7 @@ export default function TeacherLayout({
                       <td>{schedule.room.name}</td>
                       <td>
                         <S.StudentCount>
-                          <span className="count-badge">
+                          <span className="badge">
                             {schedule.schoolClass.currentStrength}
                           </span>
                           <span>/ {schedule.schoolClass.maxStrength}</span>
@@ -468,31 +450,23 @@ export default function TeacherLayout({
                         colSpan={5}
                         style={{
                           textAlign: "center",
-                          padding: "var(--spacing-xl)",
+                          padding: "2rem",
+                          opacity: 0.7,
                         }}
                       >
-                        <p
-                          style={{
-                            border: "none",
-                            boxShadow: "none",
-                            margin: 0,
-                            opacity: 0.7,
-                          }}
-                        >
-                          No classes scheduled for {selectedDay.toLowerCase()}
-                        </p>
+                        No classes scheduled for {selectedDay.toLowerCase()}
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </S.TableWrapper>
-          </S.TeacherCard>
+          </S.SectionCard>
         )}
 
         {/* Students View */}
         {teacherData && selectedView === "students" && teacherData.students && (
-          <S.TeacherCard>
+          <S.SectionCard>
             <S.SectionHeader>
               <h3>My Students ({teacherData.students.length})</h3>
             </S.SectionHeader>
@@ -519,8 +493,8 @@ export default function TeacherLayout({
                 >
                   <S.StudentHeader>
                     <S.StudentInitials>
-                      {student.firstName.charAt(0)}
-                      {student.lastName.charAt(0)}
+                      {student.firstName?.charAt(0)}
+                      {student.lastName?.charAt(0)}
                     </S.StudentInitials>
                     <S.StudentInfo>
                       <h4>
@@ -532,8 +506,8 @@ export default function TeacherLayout({
 
                   <S.StudentDetails>
                     <p>
-                      <strong>Class:</strong> Grade {student.schoolClass.grade}-
-                      {student.schoolClass.section}
+                      <strong>Class:</strong> Grade {student.schoolClass?.grade}
+                      -{student.schoolClass?.section}
                     </p>
                     <p>
                       <strong>Gender:</strong> {student.gender}
@@ -547,13 +521,7 @@ export default function TeacherLayout({
                   {expandedStudent === student.id && student.parent && (
                     <S.ParentInfo>
                       <h5>Parent/Guardian Information</h5>
-                      <div
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: "1fr 1fr",
-                          gap: "var(--spacing-sm)",
-                        }}
-                      >
+                      <div className="grid">
                         <p>
                           <strong>Father:</strong> {student.parent.fatherName}
                         </p>
@@ -572,19 +540,14 @@ export default function TeacherLayout({
                 </S.StudentCard>
               ))}
             </S.StudentsGrid>
-          </S.TeacherCard>
+          </S.SectionCard>
         )}
 
         {/* Main content area */}
-        <div className="fun-border" style={{ marginTop: "var(--spacing-xl)" }}>
-          <div
-            className="striped-pattern"
-            style={{ padding: "var(--spacing-lg)" }}
-          >
-            {children}
-          </div>
-        </div>
-      </div>
+        <S.FunBorder>
+          <S.StripedPattern>{children}</S.StripedPattern>
+        </S.FunBorder>
+      </S.Container>
     </S.DashboardContainer>
   );
 }

@@ -90,6 +90,7 @@ export class TeachersService {
     console.log('teacher id', userId);
     const teacher = await this.teacherRepository.findOne({
       where: { user: { id: userId } },
+      relations: ['subjects', 'schedules'],
     });
     console.log('teacher', teacher);
     const teacherId = teacher?.id;
@@ -104,7 +105,7 @@ export class TeachersService {
     });
 
     return {
-      schedules,
+      // schedules,
       students,
       teacher,
     };

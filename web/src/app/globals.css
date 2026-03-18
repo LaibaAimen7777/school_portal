@@ -168,7 +168,8 @@ h3 {
 }
 
 /* Sketchy paragraphs */
-p {
+
+/* p {
   border: var(--border-width) solid var(--border-color);
   border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
   padding: var(--spacing-lg);
@@ -193,10 +194,10 @@ p::before {
   border-radius: inherit;
   opacity: 0.2;
   pointer-events: none;
-}
+} */
 
 /* Navigation with sketchy style */
-nav {
+/* nav {
   background-color: var(--nav-bg);
   border: var(--border-width) solid var(--border-color);
   border-radius: 40px 60px 60px 40px/60px 40px 40px 60px;
@@ -256,7 +257,7 @@ nav a:hover {
 
 nav a:hover::before {
   opacity: 0.3;
-}
+} */
 
 /* Cards with sketchy borders */
 .card {
@@ -650,8 +651,8 @@ ol {
 li {
   margin: var(--spacing-xs) 0;
   padding: var(--spacing-xs) 0;
-  border-bottom: 1px dashed var(--border-color);
-  list-style-type: "✧ ";
+  /* border-bottom: 1px dashed var(--border-color); */
+  /* list-style-type: "✧ "; */
 }
 
 li:last-child {
