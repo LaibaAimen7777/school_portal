@@ -166,7 +166,7 @@ export default function TeacherLayout({
             <S.NavItem>
               <S.NavLink
                 as={Link}
-                href="/teacher/dashboard"
+                href="/dashboard/teacher"
                 onClick={() => setSelectedView("overview")}
                 $active={selectedView === "overview"}
               >
@@ -176,7 +176,7 @@ export default function TeacherLayout({
             <S.NavItem>
               <S.NavLink
                 as={Link}
-                href="/teacher/schedule"
+                href="/dashboard/teacher/schedule"
                 onClick={() => setSelectedView("schedule")}
                 $active={selectedView === "schedule"}
               >
@@ -186,18 +186,18 @@ export default function TeacherLayout({
             <S.NavItem>
               <S.NavLink
                 as={Link}
-                href="/teacher/students"
+                href="/dashboard/teacher/students"
                 onClick={() => setSelectedView("students")}
                 $active={selectedView === "students"}
               >
                 Students
               </S.NavLink>
             </S.NavItem>
-            <S.NavItem>
-              <S.NavLink as={Link} href="/teacher/analytics">
+            {/* <S.NavItem>
+              <S.NavLink as={Link} href="/dashboard/teacher/analytics">
                 Analytics
               </S.NavLink>
-            </S.NavItem>
+            </S.NavItem> */}
           </S.NavList>
         </S.NavContainer>
       </S.Nav>
@@ -542,11 +542,6 @@ export default function TeacherLayout({
             </S.StudentsGrid>
           </S.SectionCard>
         )}
-
-        {/* Main content area */}
-        <S.FunBorder>
-          <S.StripedPattern>{children}</S.StripedPattern>
-        </S.FunBorder>
       </S.Container>
     </S.DashboardContainer>
   );

@@ -12,6 +12,8 @@ import { TeachersModule } from './teachers/teachers.module';
 import { SubjectModule } from './subject/subject.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { RoomsModule } from './rooms/rooms.module';
+import { AttendanceController } from './attendance/attendance.controller';
+import { AttendanceModule } from './attendance/attendance.module';
 
 @Module({
   imports: [
@@ -39,7 +41,9 @@ import { RoomsModule } from './rooms/rooms.module';
     SubjectModule,
     ScheduleModule,
     RoomsModule,
+    AttendanceModule,
   ],
+  controllers: [AttendanceController],
   // controllers: [AppController],
   // providers: [AppService],
 })
