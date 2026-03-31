@@ -14,6 +14,14 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { AttendanceController } from './attendance/attendance.controller';
 import { AttendanceModule } from './attendance/attendance.module';
+import { AssignmentsController } from './assignments/assignments.controller';
+import { AssignmentsService } from './assignments/assignments.service';
+import { AssignmentsModule } from './assignments/assignments.module';
+import { SubmissionsModule } from './submissions/submissions.module';
+import { ExamsController } from './exams/exams.controller';
+import { ExamsService } from './exams/exams.service';
+import { ExamsModule } from './exams/exams.module';
+import { MarksModule } from './marks/marks.module';
 
 @Module({
   imports: [
@@ -42,8 +50,13 @@ import { AttendanceModule } from './attendance/attendance.module';
     ScheduleModule,
     RoomsModule,
     AttendanceModule,
+    AssignmentsModule,
+    SubmissionsModule,
+    ExamsModule,
+    MarksModule,
   ],
-  controllers: [AttendanceController],
+  // controllers: [AttendanceController, AssignmentsController, ExamsController],
+  // providers: [AssignmentsService, ExamsService],
   // controllers: [AppController],
   // providers: [AppService],
 })

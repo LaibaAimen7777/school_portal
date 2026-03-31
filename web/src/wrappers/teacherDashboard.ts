@@ -601,3 +601,158 @@ export const StripedPattern = styled.div`
     pointer-events: none;
   }
 `;
+
+export const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+`;
+
+export const ModalContainer = styled.div`
+  background-color: var(--card-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-hover);
+  transform: rotate(-0.2deg);
+`;
+
+export const ModalHeader = styled.div`
+  border-bottom: 2px dashed var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--heading-color);
+  }
+
+  p {
+    margin: 0.25rem 0 0 0;
+    color: var(--text-color);
+  }
+`;
+
+export const ModalBody = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding-right: 0.5rem;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--pop-color);
+    border-radius: 10px;
+  }
+`;
+
+export const ModalFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 2px dashed var(--border-color);
+`;
+
+export const StudentRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 225px 15px 255px 15px/15px 255px 15px 225px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-sm);
+  }
+`;
+
+export const StatusButton = styled.button<{
+  $active: boolean;
+  $status: "PRESENT" | "ABSENT";
+}>`
+  margin-left: 0.5rem;
+  padding: 0.4rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background-color: ${(props) =>
+    props.$active
+      ? props.$status === "PRESENT"
+        ? "var(--pop-color)"
+        : "var(--text-color)"
+      : "var(--bg-color)"};
+  color: ${(props) => (props.$active ? "white" : "var(--text-color)")};
+  box-shadow: ${(props) => (props.$active ? "var(--shadow-sm)" : "none")};
+  transform: ${(props) => (props.$active ? "rotate(-0.3deg)" : "rotate(0deg)")};
+
+  &:hover {
+    transform: rotate(-0.8deg) translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+`;
+
+export const CancelButton = styled.button`
+  padding: 0.6rem 1.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: rotate(-0.3deg) translateY(-2px);
+    box-shadow: var(--shadow);
+    background-color: var(--text-color);
+    color: var(--bg-color);
+  }
+`;
+
+export const SubmitButton = styled.button`
+  padding: 0.6rem 1.25rem;
+  border: 2px solid var(--border-color);
+  border-radius: 30px 30px 30px 30px/30px 30px 30px 30px;
+  background-color: var(--pop-color);
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+
+  &:hover {
+    transform: rotate(-0.3deg) translateY(-2px);
+    box-shadow: var(--shadow);
+    filter: brightness(0.95);
+  }
+`;

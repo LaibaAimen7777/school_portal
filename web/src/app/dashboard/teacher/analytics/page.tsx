@@ -1,5 +1,10 @@
 "use client";
 
 export default function TeacherAnalytics() {
-  return <h1>Teacher Analysis</h1>;
+  return (
+    <div>
+      <h2>Analytics</h2>
+      <p>Coming soon...</p>
+    </div>
+  );
 }

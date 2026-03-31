@@ -87,12 +87,12 @@ export class TeachersService {
   }
 
   async getDashboard(userId: number) {
-    console.log('teacher id', userId);
+    // console.log('teacher id', userId);
     const teacher = await this.teacherRepository.findOne({
       where: { user: { id: userId } },
       relations: ['subjects', 'schedules'],
     });
-    console.log('teacher', teacher);
+    // console.log('teacher', teacher);
     const teacherId = teacher?.id;
     const schedules = await this.scheduleRepository.find({
       where: { teacher: { id: teacherId } },

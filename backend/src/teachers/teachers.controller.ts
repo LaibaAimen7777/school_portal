@@ -24,7 +24,7 @@ export class TeachersController {
   @UseGuards(JwtAuthGuard)
   @Get('dashboard')
   async getDashboard(@Req() req) {
-    console.log(req.user);
+    // console.log(req.user);
     const userId = req.user.id;
     return this.teachersService.getDashboard(userId);
   }
