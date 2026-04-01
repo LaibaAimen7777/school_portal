@@ -28,6 +28,7 @@ interface Props {
   onClose: () => void;
   onSubmit: (data: any) => void;
   existingAttendance?: Record<number, Status>;
+  selectedDate: string;
 }
 
 export default function AttendanceModal({
@@ -37,6 +38,7 @@ export default function AttendanceModal({
   onClose,
   onSubmit,
   existingAttendance = {},
+  selectedDate,
 }: Props) {
   const [attendance, setAttendance] = useState<Record<number, Status>>(() => {
     const initial: Record<number, Status> = {};
@@ -88,6 +90,9 @@ export default function AttendanceModal({
               </p>
               <p style={{ fontSize: "0.85rem", opacity: 0.8 }}>
                 {schedule.startTime} - {schedule.endTime}
+              </p>
+              <p style={{ fontSize: "0.85rem", opacity: 0.8 }}>
+                Date: {selectedDate}
               </p>
             </div>
           )}

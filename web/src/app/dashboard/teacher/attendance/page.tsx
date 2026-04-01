@@ -26,10 +26,13 @@ export default function AttendancePage() {
   const [attendanceStatus, setAttendanceStatus] = useState<
     Record<number, boolean>
   >({});
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedDate]);
 
   const fetchData = async () => {
     try {
@@ -41,7 +44,7 @@ export default function AttendancePage() {
       setStudents(res.data.students || []);
 
       // ✅ NEW: check attendance for each schedule
-      const date = new Date().toISOString().split("T")[0];
+      const date = selectedDate;
 
       const statusMap: Record<number, boolean> = {};
 
@@ -49,7 +52,7 @@ export default function AttendancePage() {
         schedulesData.map(async (schedule: any) => {
           try {
             const res = await api.get(
-              `/attendance?scheduleId=${schedule.id}&date=${date}`,
+              `/attendance?scheduleId=${schedule.id}&date=${selectedDate}`,
             );
 
             statusMap[schedule.id] = res.data.length > 0; // true if exists
@@ -68,13 +71,13 @@ export default function AttendancePage() {
     }
   };
 
-  const today = new Date()
+  const selectedDay = new Date(selectedDate)
     .toLocaleDateString("en-US", {
       weekday: "long",
     })
     .toUpperCase();
 
-  const todaySchedules = schedules.filter((s) => s.dayOfWeek === today);
+  const todaySchedules = schedules.filter((s) => s.dayOfWeek === selectedDay);
 
   const openAttendance = async (schedule: any) => {
     try {
@@ -100,7 +103,7 @@ export default function AttendancePage() {
   const handleSubmit = async (data: any) => {
     try {
       const date = new Date().toISOString().split("T")[0];
-      await api.post("/attendance/mark", { ...data, date });
+      await api.post("/attendance/mark", { ...data, date: selectedDate });
       alert("Attendance saved!");
       setShowModal(false);
     } catch (err) {
@@ -156,6 +159,14 @@ export default function AttendancePage() {
             </div>
           </StatCard>
         </StatsGrid>
+        <div style={{ marginBottom: "1rem" }}>
+          <label>Select Date: </label>
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
 
         <TableWrapper>
           <table>
@@ -246,6 +257,7 @@ export default function AttendancePage() {
           existingAttendance={existingAttendance}
           onClose={() => setShowModal(false)}
           onSubmit={handleSubmit}
+          selectedDate={selectedDate}
         />
       )}
     </Container>

@@ -108,6 +108,10 @@ export default function TeacherOverview() {
     ? new Date(teacher.hireDate).getFullYear()
     : "N/A";
 
+  const teachesSeniorGrades = schedules.some(
+    (s: any) => s.schoolClass?.grade === 9 || s.schoolClass?.grade === 10,
+  );
+
   return (
     <DashboardContainer>
       <Container>
@@ -130,6 +134,22 @@ export default function TeacherOverview() {
             <div className="value">{subjects.length}</div>
           </StatCard>
         </StatsGrid>
+        {teachesSeniorGrades && (
+          <SectionCard>
+            <SectionHeader>
+              <h3>Assignments</h3>
+            </SectionHeader>
+
+            <button>Upload Assignment</button>
+          </SectionCard>
+        )}
+        <SectionCard>
+          <SectionHeader>
+            <h3>Marks Management</h3>
+          </SectionHeader>
+
+          <button>Enter Marks</button>
+        </SectionCard>
 
         {/* Today's Schedule Section */}
         <SectionCard>
