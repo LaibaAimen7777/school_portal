@@ -6,6 +6,7 @@ import { ThemeProvider } from "styled-components";
 import { theme } from "@/styles/theme";
 import { GlobalStyles } from "@/styles/globalStyles";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
           <ThemeProvider theme={theme}>
             <GlobalStyles />
             {children}
+            <Toaster position="top-right" />
             <ThemeToggle />
           </ThemeProvider>
         </StyledComponentsRegistry>

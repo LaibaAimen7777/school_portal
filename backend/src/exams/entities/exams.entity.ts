@@ -1,6 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Subject } from 'src/subject/entities/subject.entity';
-import { SchoolClass } from 'src/school-class/entities/school-class.entity';
+import { Schedule } from 'src/schedule/entities/schedule.entity';
 
 @Entity('exams')
 export class Exam {
@@ -8,11 +7,11 @@ export class Exam {
   id: number;
 
   @Column()
-  name: string; // Midterm, Final
+  examType: string; // Mid, Final, Quiz
 
-  @ManyToOne(() => Subject)
-  subject: Subject;
+  @Column()
+  date: string; // IMPORTANT
 
-  @ManyToOne(() => SchoolClass)
-  schoolClass: SchoolClass;
+  @ManyToOne(() => Schedule)
+  schedule: Schedule; // IMPORTANT
 }

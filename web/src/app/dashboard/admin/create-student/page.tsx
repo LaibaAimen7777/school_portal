@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { Wrapper } from "@/wrappers/adminCreateStudent";
+import { showSuccess, showError } from "@/components/ui/toast";
 
 type SchoolClass = {
   id: number;
@@ -150,8 +151,8 @@ export default function CreateStudentPage() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedClass) return alert("Please select class first");
-    if (isFull) return alert("Selected section is full");
+    if (!selectedClass) return showError("Please select class first");
+    if (isFull) return showError("Selected section is full");
     if (!validateForm()) return;
     try {
       setLoading(true);
@@ -171,14 +172,14 @@ export default function CreateStudentPage() {
       });
 
       if (res.data.username) {
-        alert(
+        showSuccess(
           `Portal Created!\nUsername: ${res.data.username}\nPassword: ${res.data.temporaryPassword}`,
         );
       } else {
-        alert("Student admitted successfully!");
+        showSuccess("Student admitted successfully!");
       }
     } catch (err) {
-      alert("Failed to create student");
+      showError("Failed to create student");
     } finally {
       setLoading(false);
     }

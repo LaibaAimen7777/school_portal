@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import {
@@ -24,6 +25,8 @@ import {
   StudentCount,
   LoadingContainer,
 } from "@/wrappers/teacherDashboard";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
+import { showError } from "@/components/ui/toast";
 
 export default function TeacherOverview() {
   const [data, setData] = useState<any>(null);
@@ -50,17 +53,20 @@ export default function TeacherOverview() {
 
   if (loading) {
     return (
-      <LoadingContainer>
-        <p>Loading...</p>
-      </LoadingContainer>
+      // <LoadingContainer>
+      //   <p>Loading...</p>
+      // </LoadingContainer>
+      <LoadingOverlay />
     );
   }
 
   if (error) {
+    console.log("Error", error);
     return (
-      <LoadingContainer>
-        <p>Error: {error}</p>
-      </LoadingContainer>
+      // <LoadingContainer>
+      //   <p>Error: {error}</p>
+      // </LoadingContainer>
+      showError("Error occurred check console")
     );
   }
 
@@ -147,8 +153,9 @@ export default function TeacherOverview() {
           <SectionHeader>
             <h3>Marks Management</h3>
           </SectionHeader>
-
-          <button>Enter Marks</button>
+          <Link href="/dashboard/teacher/marks">
+            <button>Enter Marks</button>
+          </Link>
         </SectionCard>
 
         {/* Today's Schedule Section */}
