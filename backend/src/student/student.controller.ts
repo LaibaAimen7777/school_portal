@@ -5,6 +5,7 @@ import {
   Patch,
   Param,
   Get,
+  Req,
   Query,
 } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
@@ -50,5 +51,12 @@ export class StudentController {
   @Roles(UserRole.ADMIN)
   async changeClass(@Param('id') id: number, @Body('classId') classId: number) {
     return this.studentService.updateClass(Number(id), classId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('results')
+  getResults(@Req() req) {
+    const studentId = req.user.id;
+    return this.studentService.getResults(studentId);
   }
 }

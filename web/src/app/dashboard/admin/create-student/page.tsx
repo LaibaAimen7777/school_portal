@@ -3,6 +3,16 @@ import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { Wrapper } from "@/wrappers/adminCreateStudent";
 import { showSuccess, showError } from "@/components/ui/toast";
+import {
+  CredentialCard,
+  CredentialHeader,
+  ResponseTitle,
+  ResponseItem,
+  PasswordValue,
+  PrintButton,
+  ButtonGroup,
+  PDFButton,
+} from "@/wrappers/adminCreateTeacher";
 
 type SchoolClass = {
   id: number;
@@ -21,6 +31,10 @@ export default function CreateStudentPage() {
   const [sections, setSections] = useState<SchoolClass[]>([]);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
+  const [studentCredentials, setStudentCredentials] = useState<{
+    username: string;
+    temporaryPassword: string;
+  } | null>(null);
 
   // Student State
   const [firstName, setFirstName] = useState("Alice");
@@ -172,9 +186,12 @@ export default function CreateStudentPage() {
       });
 
       if (res.data.username) {
-        showSuccess(
-          `Portal Created!\nUsername: ${res.data.username}\nPassword: ${res.data.temporaryPassword}`,
-        );
+        setStudentCredentials({
+          username: res.data.username,
+          temporaryPassword: res.data.temporaryPassword,
+        });
+
+        showSuccess("Student admitted & portal created!");
       } else {
         showSuccess("Student admitted successfully!");
       }
@@ -324,6 +341,66 @@ export default function CreateStudentPage() {
             <button onClick={handleSubmit} disabled={loading}>
               {loading ? "Admitting..." : "Admit Student"}
             </button>
+          </>
+        )}
+        {studentCredentials && (
+          <>
+            <CredentialCard id="studentCredentialCard">
+              <CredentialHeader>
+                <ResponseTitle>Student Credentials</ResponseTitle>
+                <PrintButton onClick={() => window.print()}>
+                  🖨️ Print
+                </PrintButton>
+              </CredentialHeader>
+
+              <ResponseItem>
+                <strong>Username:</strong> {studentCredentials.username}
+              </ResponseItem>
+
+              <ResponseItem>
+                <strong>Password:</strong>{" "}
+                <PasswordValue>
+                  {studentCredentials.temporaryPassword}
+                </PasswordValue>
+              </ResponseItem>
+            </CredentialCard>
+
+            <ButtonGroup>
+              <PDFButton
+                onClick={async () => {
+                  const element = document.getElementById(
+                    "studentCredentialCard",
+                  );
+                  if (!element) return;
+
+                  const html2canvas = (await import("html2canvas")).default;
+                  const jsPDF = (await import("jspdf")).default;
+
+                  const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: "#ffffff",
+                  });
+
+                  const imgData = canvas.toDataURL("image/png");
+
+                  const pdf = new jsPDF({
+                    orientation: "portrait",
+                    unit: "mm",
+                    format: "a4",
+                  });
+
+                  const imgWidth = 190;
+                  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                  pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+                  pdf.save(
+                    `Student-${studentCredentials.username}-Credentials.pdf`,
+                  );
+                }}
+              >
+                📥 Download PDF
+              </PDFButton>
+            </ButtonGroup>
           </>
         )}
       </div>

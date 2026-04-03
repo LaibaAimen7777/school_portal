@@ -12,6 +12,7 @@ import { User, UserRole } from 'src/users/entities/user.entity';
 import { CreateStudentDto } from './dto/create-student.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { Mark } from 'src/marks/entities/marks.entity';
 
 function generatePassword() {
   return crypto.randomBytes(8).toString('hex');
@@ -28,6 +29,9 @@ export class StudentService {
 
     @InjectRepository(User)
     private userRepository: Repository<User>,
+
+    @InjectRepository(Mark)
+    private marksRepo: Repository<Mark>,
 
     private dataSource: DataSource,
   ) {}
@@ -290,5 +294,21 @@ export class StudentService {
 
       return manager.save(student);
     });
+  }
+
+  async getResults(studentId: number) {
+    const marks = await this.marksRepo.find({
+      where: {
+        student: { id: studentId },
+      },
+      relations: ['exam', 'exam.schedule', 'exam.schedule.subject'],
+    });
+
+    return marks.map((m) => ({
+      subject: m.exam.schedule.subject.name,
+      examType: m.exam.examType,
+      score: m.score,
+      date: m.exam.date,
+    }));
   }
 }
