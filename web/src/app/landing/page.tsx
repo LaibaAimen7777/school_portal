@@ -33,7 +33,7 @@ import {
   MoonIcon,
 } from "@/wrappers/landingStyles";
 
-export default function DashboardPage() {
+export default function LandingPage() {
   const router = useRouter();
 
   //   useEffect(() => {

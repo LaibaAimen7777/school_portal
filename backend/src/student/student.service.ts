@@ -311,4 +311,33 @@ export class StudentService {
       date: m.exam.date,
     }));
   }
+
+  async getMyProfile(userId: number) {
+    const student = await this.studentRepository.findOne({
+      where: {
+        user: { id: userId },
+      },
+      relations: ['schoolClass', 'parent'],
+    });
+
+    if (!student) {
+      throw new NotFoundException('Student not found');
+    }
+
+    return {
+      id: student.id,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      rollNumber: student.rollNumber,
+      grade: student.schoolClass.grade,
+      section: student.schoolClass.section,
+      joiningYear: student.joiningYear,
+
+      parent: {
+        fatherName: student.parent?.fatherName,
+        motherName: student.parent?.motherName,
+        phone: student.parent?.phone,
+      },
+    };
+  }
 }

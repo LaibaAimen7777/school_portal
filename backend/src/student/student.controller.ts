@@ -59,4 +59,11 @@ export class StudentController {
     const studentId = req.user.id;
     return this.studentService.getResults(studentId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.STUDENT)
+  @Get('me')
+  getMyProfile(@Req() req) {
+    return this.studentService.getMyProfile(req.user.id);
+  }
 }
