@@ -22,6 +22,8 @@ import { ExamsController } from './exams/exams.controller';
 import { ExamsService } from './exams/exams.service';
 import { ExamsModule } from './exams/exams.module';
 import { MarksModule } from './marks/marks.module';
+import { SchoolConfigModule } from './school-config/school-config.module';
+import { ExamPeriodsModule } from './exam-periods/exam-periods.module';
 
 @Module({
   imports: [
@@ -54,6 +56,8 @@ import { MarksModule } from './marks/marks.module';
     SubmissionsModule,
     ExamsModule,
     MarksModule,
+    SchoolConfigModule,
+    ExamPeriodsModule,
   ],
   // controllers: [AttendanceController, AssignmentsController, ExamsController],
   // providers: [AssignmentsService, ExamsService],

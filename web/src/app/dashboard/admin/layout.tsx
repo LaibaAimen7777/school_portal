@@ -146,6 +146,22 @@ export default function AdminLayout({
             <FaCog />
             <span>Display Schedule</span>
           </NavButton>
+
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/exams")}
+            $active={isActive("/dashboard/admin/exams")}
+          >
+            <FaCog />
+            <span>Create Exam</span>
+          </NavButton>
+
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/school-config")}
+            $active={isActive("/dashboard/admin/school-config")}
+          >
+            <FaCog />
+            <span>Config</span>
+          </NavButton>
         </NavSection>
 
         <SidebarFooter>

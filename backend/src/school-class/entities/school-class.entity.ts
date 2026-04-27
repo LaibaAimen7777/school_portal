@@ -13,23 +13,23 @@ import { Schedule } from 'src/schedule/entities/schedule.entity';
 @Unique(['grade', 'section'])
 export class SchoolClass {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  grade: number;
+  grade!: number;
 
   @Column()
-  section: string;
+  section!: string;
 
   @Column()
-  maxStrength: number;
+  maxStrength!: number;
 
   @Column({ default: 0 })
-  currentStrength: number; // NEW
+  currentStrength!: number; // NEW
 
   @OneToMany(() => Student, (student) => student.schoolClass)
-  students: Student[];
+  students!: Student[];
 
   @OneToMany(() => Schedule, (schedule: Schedule) => schedule.schoolClass)
-  schedules: Schedule[];
+  schedules!: Schedule[];
 }

@@ -7,32 +7,32 @@ import { Rooms } from 'src/rooms/entities/rooms.entity';
 @Entity()
 export class Schedule {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => SchoolClass, (schoolClass) => schoolClass.schedules, {
     eager: true,
   })
-  schoolClass: SchoolClass;
+  schoolClass!: SchoolClass;
 
   @ManyToOne(() => Subject, (subject) => subject.schedules, {
     eager: true,
   })
-  subject: Subject;
+  subject!: Subject;
 
   @ManyToOne(() => Teacher, (teacher) => teacher.schedules, {
     eager: true,
   })
-  teacher: Teacher;
+  teacher!: Teacher;
 
   @ManyToOne(() => Rooms, { eager: true })
-  room: Rooms;
+  room!: Rooms;
 
   @Column()
-  dayOfWeek: string; // MONDAY, TUESDAY
+  dayOfWeek!: string; // MONDAY, TUESDAY
 
   @Column({ type: 'time' })
-  startTime: string; // 09:00
+  startTime!: string; // 09:00
 
   @Column({ type: 'time' })
-  endTime: string; // 10:00
+  endTime!: string; // 10:00
 }

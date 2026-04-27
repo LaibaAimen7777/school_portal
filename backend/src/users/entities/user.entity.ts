@@ -19,10 +19,10 @@ export enum UserRole {
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ unique: true, nullable: true })
-  username: string;
+  username!: string;
 
   // @Column({ unique: true, nullable: true })
   // email: string;
@@ -31,32 +31,32 @@ export class User {
   // phone: string;
 
   @Column({ nullable: true })
-  password: string;
+  password!: string;
 
   @Column({
     type: 'enum',
     enum: UserRole,
   })
-  role: UserRole;
+  role!: UserRole;
 
   @Column({ default: true })
-  can_login: boolean;
+  can_login!: boolean;
 
   @Column({ default: true })
-  must_change_password: boolean;
+  must_change_password!: boolean;
 
   @Column({ default: true })
-  is_active: boolean;
+  is_active!: boolean;
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at!: Date;
 
   @OneToOne(() => Parent, (parent) => parent.user)
-  parent: Parent;
+  parent!: Parent;
 
   @OneToOne(() => Student, (student) => student.user)
-  student: Student;
+  student!: Student;
 
   @OneToOne(() => Teacher, (teacher) => teacher.user)
-  teacher: Teacher;
+  teacher!: Teacher;
 }

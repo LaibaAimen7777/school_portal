@@ -5,14 +5,14 @@ import { Exam } from 'src/exams/entities/exams.entity';
 @Entity('marks')
 export class Mark {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => Student)
-  student: Student;
+  student!: Student;
 
   @ManyToOne(() => Exam)
-  exam: Exam;
+  exam!: Exam;
 
   @Column('float')
-  score: number;
+  score!: number;
 }

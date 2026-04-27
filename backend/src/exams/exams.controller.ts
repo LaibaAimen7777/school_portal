@@ -1,20 +1,31 @@
-import { Controller, Get, Req, Post, Body, UseGuards } from '@nestjs/common';
+// src/exams/exams.controller.ts
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Body,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ExamsService } from './exams.service';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { CreateExamDto } from './dto/create-exam.dto';
 
 @Controller('exams')
 export class ExamsController {
   constructor(private readonly examsService: ExamsService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Get()
-  getTeacherExams(@Req() req) {
-    const teacherId = req.user.id; // from JWT
-    return this.examsService.getTeacherExams(teacherId);
+  @Post()
+  create(@Body() dto: CreateExamDto) {
+    return this.examsService.createExam(dto);
   }
 
-  @Post()
-  createExam(@Body() body) {
-    return this.examsService.createExam(body);
+  @Get()
+  findAll() {
+    return this.examsService.findAll();
+  }
+
+  @Get('teacher/:teacherId')
+  getTeacherExams(@Param('teacherId', ParseIntPipe) teacherId: number) {
+    return this.examsService.getTeacherExams(teacherId);
   }
 }

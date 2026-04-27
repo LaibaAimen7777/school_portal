@@ -301,11 +301,11 @@ export class StudentService {
       where: {
         student: { id: studentId },
       },
-      relations: ['exam', 'exam.schedule', 'exam.schedule.subject'],
+      relations: ['exam', 'exam.subject', 'exam.schoolClass'],
     });
 
     return marks.map((m) => ({
-      subject: m.exam.schedule.subject.name,
+      subject: m.exam.subject.name,
       examType: m.exam.examType,
       score: m.score,
       date: m.exam.date,

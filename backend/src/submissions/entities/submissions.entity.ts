@@ -11,23 +11,23 @@ import { Assignment } from 'src/assignments/entities/assignments.entity';
 @Entity('submissions')
 export class Submission {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => Assignment)
-  assignment: Assignment;
+  assignment!: Assignment;
 
   @ManyToOne(() => Student)
-  student: Student;
+  student!: Student;
 
   @Column()
-  fileUrl: string;
+  fileUrl!: string;
 
   @Column({ nullable: true })
-  marks: number;
+  marks!: number;
 
   @Column({ nullable: true })
-  feedback: string;
+  feedback!: string;
 
   @CreateDateColumn()
-  submittedAt: Date;
+  submittedAt!: Date;
 }

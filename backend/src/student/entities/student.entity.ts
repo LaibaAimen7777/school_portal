@@ -16,25 +16,25 @@ import { Parent } from 'src/parent/entities/parent.entity';
 @Unique(['schoolClass', 'rollNumber']) // roll unique inside class
 export class Student {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  firstName: string;
+  firstName!: string;
 
   @Column()
-  lastName: string;
+  lastName!: string;
 
   @Column({ type: 'date' })
-  dateOfBirth: Date;
+  dateOfBirth!: Date;
 
   @Column()
-  gender: string; // or enum later
+  gender!: string; // or enum later
 
   @Column()
-  rollNumber: number;
+  rollNumber!: number;
 
   @Column()
-  joiningYear: number;
+  joiningYear!: number;
 
   @ManyToOne(() => SchoolClass, (schoolClass) => schoolClass.students, {
     nullable: false,
@@ -42,19 +42,19 @@ export class Student {
     eager: true, // optional: load class automatically
   })
   @JoinColumn({ name: 'schoolClassId' })
-  schoolClass: SchoolClass;
+  schoolClass!: SchoolClass;
 
   //   @RelationId((student: Student) => student.schoolClass)
   //   schoolClassId: number;
 
   @OneToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
-  user: User | null;
+  user!: User | null;
 
   @ManyToOne(() => Parent, (parent) => parent.students, {
     eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'parentId' })
-  parent: Parent;
+  parent!: Parent;
 }

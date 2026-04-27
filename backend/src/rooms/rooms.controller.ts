@@ -15,4 +15,13 @@ export class RoomsController {
   ) {
     return this.roomsService.getAvailableRooms(dayOfWeek, startTime, endTime);
   }
+
+  @Get('available-exam-rooms')
+  getAvailableExamRooms(
+    @Query('date') date: string,
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
+  ) {
+    return this.roomsService.getAvailableExamRooms(date, startTime, endTime);
+  }
 }

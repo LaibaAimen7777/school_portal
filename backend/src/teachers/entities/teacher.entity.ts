@@ -15,31 +15,31 @@ import { Schedule } from 'src/schedule/entities/schedule.entity';
 @Entity('teachers')
 export class Teacher {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ unique: true })
-  teacherCode: string;
+  teacherCode!: string;
 
   @Column()
-  fullName: string;
+  fullName!: string;
 
   @Column()
-  qualification: string;
+  qualification!: string;
 
   // @Column({ nullable: true })
   // specialization: string;
 
   @Column({ type: 'date', nullable: true })
-  hireDate: Date;
+  hireDate!: Date;
 
   @OneToOne(() => User)
   @JoinColumn()
-  user: User;
+  user!: User;
 
   @ManyToMany(() => Subject)
   @JoinTable()
-  subjects: Subject[];
+  subjects!: Subject[];
 
   @OneToMany(() => Schedule, (schedule: Schedule) => schedule.teacher)
-  schedules: Schedule[];
+  schedules!: Schedule[];
 }

@@ -12,21 +12,21 @@ import { Schedule } from 'src/schedule/entities/schedule.entity';
 @Unique(['student', 'schedule', 'date'])
 export class Attendance {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => Student, { eager: true })
-  student: Student;
+  student!: Student;
 
   @ManyToOne(() => Schedule)
-  schedule: Schedule;
+  schedule!: Schedule;
 
   @Column({ type: 'date' })
-  date: string;
+  date!: string;
 
   @Column({
     type: 'enum',
     enum: ['PRESENT', 'ABSENT'],
     default: 'PRESENT',
   })
-  status: 'PRESENT' | 'ABSENT';
+  status!: 'PRESENT' | 'ABSENT';
 }

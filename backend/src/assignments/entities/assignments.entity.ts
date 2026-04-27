@@ -6,23 +6,23 @@ import { SchoolClass } from 'src/school-class/entities/school-class.entity';
 @Entity('assignments')
 export class Assignment {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  title: string;
+  title!: string;
 
   @Column()
-  description: string;
+  description!: string;
 
   @Column({ type: 'date' })
-  dueDate: Date;
+  dueDate!: Date;
 
   @ManyToOne(() => Teacher)
-  teacher: Teacher;
+  teacher!: Teacher;
 
   @ManyToOne(() => Subject)
-  subject: Subject;
+  subject!: Subject;
 
   @ManyToOne(() => SchoolClass)
-  schoolClass: SchoolClass;
+  schoolClass!: SchoolClass;
 }

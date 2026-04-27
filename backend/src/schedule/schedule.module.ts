@@ -7,10 +7,18 @@ import { Teacher } from 'src/teachers/entities/teacher.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
 import { SchoolClass } from 'src/school-class/entities/school-class.entity';
 import { Rooms } from 'src/rooms/entities/rooms.entity';
+import { SchoolConfig } from 'src/school-config/entities/school-config.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Schedule, Teacher, Subject, SchoolClass, Rooms]),
+    TypeOrmModule.forFeature([
+      Schedule,
+      Teacher,
+      Subject,
+      SchoolClass,
+      Rooms,
+      SchoolConfig,
+    ]),
   ],
   providers: [ScheduleService],
   controllers: [ScheduleController],

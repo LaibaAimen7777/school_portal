@@ -1,30 +1,19 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Schedule } from './entities/schedule.entity';
-import { Repository } from 'typeorm';
-import { Teacher } from 'src/teachers/entities/teacher.entity';
-import { Subject } from 'src/subject/entities/subject.entity';
-import { SchoolClass } from 'src/school-class/entities/school-class.entity';
-import { CreateScheduleDto } from './dto/create-schedule.dto';
+// src/schedule/schedule.controller.ts
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
+import { CreateScheduleDto } from './dto/create-schedule.dto';
 
 @Controller('schedule')
 export class ScheduleController {
-  constructor(
-    @InjectRepository(Schedule)
-    private scheduleRepo: Repository<Schedule>,
-
-    @InjectRepository(Teacher)
-    private teacherRepo: Repository<Teacher>,
-
-    @InjectRepository(Subject)
-    private subjectRepo: Repository<Subject>,
-
-    @InjectRepository(SchoolClass)
-    private classRepo: Repository<SchoolClass>,
-
-    private readonly scheduleService: ScheduleService,
-  ) {}
+  constructor(private readonly scheduleService: ScheduleService) {}
 
   @Post()
   create(@Body() dto: CreateScheduleDto) {
@@ -32,7 +21,37 @@ export class ScheduleController {
   }
 
   @Get()
-  async findAll() {
+  findAll() {
     return this.scheduleService.findAll();
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.scheduleService.remove(id);
+  }
+
+  @Get('completeness')
+  getCompletenessReport() {
+    return this.scheduleService.getCompletenessReport();
+  }
+
+  @Get('workload')
+  getTeacherWorkloadReport() {
+    return this.scheduleService.getTeacherWorkloadReport();
+  }
+
+  @Get('reminders')
+  getDashboardReminders() {
+    return this.scheduleService.getDashboardReminders();
+  }
+
+  @Post('auto')
+  autoSchedule() {
+    return this.scheduleService.autoSchedule();
+  }
+
+  @Delete('clear-and-regenerate')
+  clearAndAutoSchedule() {
+    return this.scheduleService.clearAndAutoSchedule();
   }
 }

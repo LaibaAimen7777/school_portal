@@ -4,14 +4,14 @@ import { Schedule } from 'src/schedule/entities/schedule.entity';
 @Entity('subjects')
 export class Subject {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ unique: true })
-  name: string;
+  name!: string;
 
   @Column({ unique: true })
-  code: string;
+  code!: string;
 
   @OneToMany(() => Schedule, (schedule: Schedule) => schedule.subject)
-  schedules: Schedule[];
+  schedules!: Schedule[];
 }
