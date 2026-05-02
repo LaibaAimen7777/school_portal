@@ -29,6 +29,7 @@ interface Teacher {
 interface Subject {
   id: number;
   name: string;
+  grades: number[]; // ✅ added
 }
 
 interface SchoolClass {
@@ -50,6 +51,7 @@ const CreateSchedulePage = () => {
   const day = searchParams.get("day");
   const time = searchParams.get("time");
   const classId = searchParams.get("classId");
+
   const initialForm = {
     teacherId: "",
     subjectId: "",
@@ -59,9 +61,11 @@ const CreateSchedulePage = () => {
     endTime: "",
     roomId: "",
   };
+
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
+  const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]); // ✅ new
   const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [roomsLoading, setRoomsLoading] = useState(false);
@@ -73,9 +77,6 @@ const CreateSchedulePage = () => {
 
   useEffect(() => {
     if (classId || day || time) {
-      console.log("formData.classId", formData.classId);
-      console.log("day", day);
-      console.log("URL classId", classId);
       setFormData((prev) => ({
         ...prev,
         classId: classId || "",
@@ -84,17 +85,29 @@ const CreateSchedulePage = () => {
       }));
     }
   }, [classId, day, time]);
+
   useEffect(() => {
     fetchData();
   }, []);
 
+  // ✅ When classId prefilled from URL, filter subjects once data is loaded
+  useEffect(() => {
+    if (classId && classes.length > 0 && subjects.length > 0) {
+      const selectedClass = classes.find((c) => c.id === Number(classId));
+      if (selectedClass) {
+        setFilteredSubjects(
+          subjects.filter((s) => s.grades?.includes(selectedClass.grade)),
+        );
+      }
+    }
+  }, [classId, classes, subjects]);
+
   const fetchData = async () => {
-    const teachersRes = await api.get("/teachers");
-    const subjectsRes = await api.get("/subject");
-    const classesRes = await api.get("/school-class");
-
-    console.log(classesRes.data);
-
+    const [teachersRes, subjectsRes, classesRes] = await Promise.all([
+      api.get("/teachers"),
+      api.get("/subject"),
+      api.get("/school-class"),
+    ]);
     setTeachers(teachersRes.data);
     setSubjects(subjectsRes.data);
     setClasses(classesRes.data);
@@ -109,7 +122,6 @@ const CreateSchedulePage = () => {
     if (!start || !end) return true;
     const startDate = new Date(`2000-01-01T${start}`);
     const endDate = new Date(`2000-01-01T${end}`);
-
     if (endDate <= startDate) {
       setTimeError("End time must be after start time");
       return false;
@@ -118,29 +130,59 @@ const CreateSchedulePage = () => {
     return true;
   };
 
+  // ✅ Handle class change — filters subjects by grade and resets downstream
+  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedClassId = e.target.value;
+    const selectedClass = classes.find((c) => c.id === Number(selectedClassId));
+
+    setFormData((prev) => ({
+      ...prev,
+      classId: selectedClassId,
+      subjectId: "", // reset subject
+      teacherId: "", // reset teacher
+    }));
+
+    setFilteredTeachers([]);
+
+    if (selectedClass) {
+      setFilteredSubjects(
+        subjects.filter((s) => s.grades?.includes(selectedClass.grade)),
+      );
+    } else {
+      setFilteredSubjects([]);
+    }
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const newData = { ...prev, [name]: value };
-
-      // Validate time when either start or end changes
       if (name === "startTime" || name === "endTime") {
         validateTimeSlot(
           name === "startTime" ? value : prev.startTime,
           name === "endTime" ? value : prev.endTime,
         );
       }
-      // Reset room when time or day changes
       if (name === "dayOfWeek" || name === "startTime" || name === "endTime") {
         newData.roomId = "";
         setAvailableRooms([]);
         setRoomsFetched(false);
       }
-
       return newData;
     });
+  };
+
+  // ✅ Handle subject change — filters teachers by subject
+  const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const subjectId = e.target.value;
+    setFormData((prev) => ({ ...prev, subjectId, teacherId: "" }));
+
+    const filtered = teachers.filter((teacher) =>
+      teacher.subjects?.some((s) => s.id === Number(subjectId)),
+    );
+    setFilteredTeachers(filtered);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,7 +192,6 @@ const CreateSchedulePage = () => {
       return;
     }
     setLoading(true);
-
     try {
       await api.post("/schedule", {
         teacherId: Number(formData.teacherId),
@@ -161,9 +202,10 @@ const CreateSchedulePage = () => {
         startTime: formData.startTime,
         endTime: formData.endTime,
       });
-
       showToast("Schedule created successfully!", true);
       setFormData(initialForm);
+      setFilteredSubjects([]);
+      setFilteredTeachers([]);
       setAvailableRooms([]);
       setRoomsFetched(false);
     } catch (error: any) {
@@ -172,24 +214,7 @@ const CreateSchedulePage = () => {
         false,
       );
     }
-
     setLoading(false);
-  };
-
-  const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const subjectId = e.target.value;
-
-    setFormData({
-      ...formData,
-      subjectId,
-      teacherId: "",
-    });
-
-    const filtered = teachers.filter((teacher) =>
-      teacher.subjects?.some((s) => s.id === Number(subjectId)),
-    );
-
-    setFilteredTeachers(filtered);
   };
 
   const checkRooms = async () => {
@@ -198,9 +223,7 @@ const CreateSchedulePage = () => {
       showToast("Please select day and time first", false);
       return;
     }
-    if (!validateTimeSlot(startTime, endTime)) {
-      return;
-    }
+    if (!validateTimeSlot(startTime, endTime)) return;
     setRoomsLoading(true);
     setRoomsFetched(false);
     setFormData((prev) => ({ ...prev, roomId: "" }));
@@ -208,7 +231,6 @@ const CreateSchedulePage = () => {
       const res = await api.get("/rooms/available", {
         params: { dayOfWeek, startTime, endTime },
       });
-      console.log("res.data in w in sc", res.data);
       setAvailableRooms(res.data);
       setRoomsFetched(true);
     } catch {
@@ -217,17 +239,89 @@ const CreateSchedulePage = () => {
     setRoomsLoading(false);
   };
 
+  const selectedClass = classes.find((c) => c.id === Number(formData.classId));
   const isTimeSlotComplete =
     formData.dayOfWeek && formData.startTime && formData.endTime && !timeError;
 
   return (
     <Container>
       {toast && <Toast $ok={toast.ok}>{toast.msg}</Toast>}
-
       <Title>Create Schedule</Title>
 
       <Form onSubmit={handleSubmit}>
-        {/* DAY AND TIME SECTION */}
+        {/* CLASS — moved up so subject list can react to it */}
+        <FormGroup>
+          <Label>Class</Label>
+          <Select
+            name="classId"
+            value={formData.classId}
+            onChange={handleClassChange}
+            required
+          >
+            <option value="">Select Class</option>
+            {classes.map((c) => (
+              <option key={c.id} value={c.id}>
+                Grade {c.grade}-{c.section} (Strength: {c.currentStrength})
+              </option>
+            ))}
+          </Select>
+        </FormGroup>
+
+        {/* SUBJECT — filtered by selected class grade */}
+        <FormGroup>
+          <Label>Subject</Label>
+          <Select
+            name="subjectId"
+            value={formData.subjectId}
+            onChange={handleSubjectChange}
+            required
+            disabled={!formData.classId}
+          >
+            <option value="">
+              {formData.classId ? "Select Subject" : "Select a class first"}
+            </option>
+            {filteredSubjects.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </Select>
+          {formData.classId && filteredSubjects.length === 0 && (
+            <Message type="error">
+              No subjects assigned to Grade {selectedClass?.grade}. Add them in
+              Curriculum settings.
+            </Message>
+          )}
+        </FormGroup>
+
+        {/* TEACHER — filtered by selected subject */}
+        <FormGroup>
+          <Label>Teacher</Label>
+          <Select
+            name="teacherId"
+            value={formData.teacherId}
+            onChange={handleChange}
+            required
+            disabled={!formData.subjectId}
+          >
+            <option value="">
+              {formData.subjectId ? "Select Teacher" : "Select a subject first"}
+            </option>
+            {filteredTeachers.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.fullName}
+              </option>
+            ))}
+          </Select>
+          {formData.subjectId && filteredTeachers.length === 0 && (
+            <Message type="error">
+              No teachers assigned to this subject. Assign one in teacher
+              settings.
+            </Message>
+          )}
+        </FormGroup>
+
+        {/* DAY */}
         <FormGroup>
           <Label>Day</Label>
           <Select
@@ -245,6 +339,7 @@ const CreateSchedulePage = () => {
           </Select>
         </FormGroup>
 
+        {/* TIME SLOT */}
         <FormGroup>
           <Label>Time Slot</Label>
           <TimeSlotGroup>
@@ -254,7 +349,6 @@ const CreateSchedulePage = () => {
               value={formData.startTime}
               onChange={handleChange}
               required
-              placeholder="Start Time"
             />
             <Input
               type="time"
@@ -262,13 +356,12 @@ const CreateSchedulePage = () => {
               value={formData.endTime}
               onChange={handleChange}
               required
-              placeholder="End Time"
             />
           </TimeSlotGroup>
           {timeError && <Message type="error">{timeError}</Message>}
         </FormGroup>
 
-        {/* CHECK ROOMS BUTTON */}
+        {/* CHECK ROOMS */}
         <CheckRoomsButton
           type="button"
           onClick={checkRooms}
@@ -277,7 +370,6 @@ const CreateSchedulePage = () => {
           {roomsLoading ? "Checking..." : "🔍 Check Available Rooms"}
         </CheckRoomsButton>
 
-        {/* AVAILABLE ROOMS */}
         {roomsFetched && availableRooms.length > 0 && (
           <FormGroup>
             <Label>Available Rooms</Label>
@@ -310,61 +402,6 @@ const CreateSchedulePage = () => {
             Click "Check Available Rooms" to see options
           </Message>
         )}
-
-        {/* CLASS */}
-        <FormGroup>
-          <Label>Class</Label>
-          <Select
-            name="classId"
-            value={formData.classId}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Class</option>
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                Grade {c.grade}-{c.section} (Strength: {c.currentStrength})
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
-
-        {/* SUBJECT */}
-        <FormGroup>
-          <Label>Subject</Label>
-          <Select
-            name="subjectId"
-            value={formData.subjectId}
-            onChange={handleSubjectChange}
-            required
-          >
-            <option value="">Select Subject</option>
-            {subjects.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
-
-        {/* TEACHER */}
-        <FormGroup>
-          <Label>Teacher</Label>
-          <Select
-            name="teacherId"
-            value={formData.teacherId}
-            onChange={handleChange}
-            required
-            disabled={!formData.subjectId}
-          >
-            <option value="">Select Teacher</option>
-            {filteredTeachers.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.fullName}
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
 
         <Button type="submit" disabled={loading || !formData.roomId}>
           {loading ? "Creating..." : "Create Schedule"}

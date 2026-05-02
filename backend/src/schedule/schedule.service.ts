@@ -160,19 +160,27 @@ export class ScheduleService {
     return { message: 'Schedule deleted successfully' };
   }
 
+  // In schedule.service.ts — replace getCompletenessReport()
   async getCompletenessReport() {
     const allClasses = await this.classRepo.find();
-    const allSubjects = await this.subjectRepo.find();
+    const allSubjects = await this.subjectRepo.find({
+      where: { isActive: true },
+    });
 
     const report = await Promise.all(
       allClasses.map(async (schoolClass) => {
+        // ✅ Only subjects that belong to this class's grade
+        const gradeSubjects = allSubjects.filter((s) =>
+          s.grades.includes(schoolClass.grade),
+        );
+
         const scheduled = await this.scheduleRepo.find({
           where: { schoolClass: { id: schoolClass.id } },
           relations: ['subject'],
         });
 
         const scheduledSubjectIds = new Set(scheduled.map((s) => s.subject.id));
-        const missingSubjects = allSubjects.filter(
+        const missingSubjects = gradeSubjects.filter(
           (sub) => !scheduledSubjectIds.has(sub.id),
         );
 
@@ -180,7 +188,7 @@ export class ScheduleService {
           classId: schoolClass.id,
           grade: schoolClass.grade,
           section: schoolClass.section,
-          totalSubjects: allSubjects.length,
+          totalSubjects: gradeSubjects.length,
           scheduledSubjects: scheduledSubjectIds.size,
           missingSubjects: missingSubjects.map((s) => s.name),
           complete: missingSubjects.length === 0,
@@ -358,7 +366,12 @@ export class ScheduleService {
         .filter((s) => s.schoolClass.id === schoolClass.id)
         .map((s) => s.subject.id);
 
-      const neededSubjects = allSubjects.filter(
+      // ✅ Only subjects for this class's grade
+      const gradeSubjects = allSubjects.filter((s) =>
+        s.grades.includes(schoolClass.grade),
+      );
+
+      const neededSubjects = gradeSubjects.filter(
         (sub) => !alreadyScheduled.includes(sub.id),
       );
 

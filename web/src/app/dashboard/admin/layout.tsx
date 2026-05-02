@@ -162,6 +162,14 @@ export default function AdminLayout({
             <FaCog />
             <span>Config</span>
           </NavButton>
+
+          <NavButton
+            onClick={() => router.push("/dashboard/admin/curriculum")}
+            $active={isActive("/dashboard/admin/curriculum")}
+          >
+            <FaCog />
+            <span>Set Curriculum</span>
+          </NavButton>
         </NavSection>
 
         <SidebarFooter>

@@ -36,7 +36,7 @@ export class Teacher {
   @JoinColumn()
   user!: User;
 
-  @ManyToMany(() => Subject)
+  @ManyToMany(() => Subject, (subject) => subject.teachers)
   @JoinTable()
   subjects!: Subject[];
 
