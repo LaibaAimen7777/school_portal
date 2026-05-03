@@ -12,6 +12,9 @@ export class CreateSubjectDto {
   @IsString()
   name!: string;
 
+  @IsString()
+  code!: string;
+
   // e.g. [9, 10] means this subject is for Grade 9 and 10 only
   @IsArray()
   @ArrayNotEmpty()

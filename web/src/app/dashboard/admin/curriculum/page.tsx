@@ -35,6 +35,7 @@ export default function CurriculumPage() {
   const [newGrades, setNewGrades] = useState<number[]>([]);
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newCode, setNewCode] = useState("");
 
   // Edit state
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -62,15 +63,24 @@ export default function CurriculumPage() {
       showError("Enter a subject name");
       return;
     }
+    if (!newCode.trim()) {
+      showError("Enter a subject code");
+      return;
+    }
     if (newGrades.length === 0) {
       showError("Select at least one grade");
       return;
     }
     setCreating(true);
     try {
-      await api.post("/subject", { name: newName.trim(), grades: newGrades });
+      await api.post("/subject", {
+        name: newName.trim(),
+        code: newCode.trim().toUpperCase(),
+        grades: newGrades,
+      });
       showSuccess("Subject created");
       setNewName("");
+      setNewCode("");
       setNewGrades([]);
       setShowCreateForm(false);
       fetchCurriculum();
@@ -198,6 +208,33 @@ export default function CurriculumPage() {
                   borderRadius: "6px",
                   border: "1px solid #d1d5db",
                   width: "300px",
+                }}
+              />
+            </div>
+
+            <div>
+              <label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  display: "block",
+                  marginBottom: "4px",
+                }}
+              >
+                Subject Code
+              </label>
+              <input
+                value={newCode}
+                onChange={(e) => setNewCode(e.target.value.toUpperCase())}
+                placeholder="e.g. BIO101"
+                maxLength={10}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                  width: "200px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
                 }}
               />
             </div>
