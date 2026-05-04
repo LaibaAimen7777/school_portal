@@ -6,6 +6,8 @@ import {
   IsInt,
   IsOptional,
   IsBoolean,
+  Max,
+  Min,
 } from 'class-validator';
 
 export class CreateSubjectDto {
@@ -20,4 +22,10 @@ export class CreateSubjectDto {
   @ArrayNotEmpty()
   @IsInt({ each: true })
   grades!: number[];
+
+  @IsInt()
+  @IsOptional()
+  @Min(1)
+  @Max(10)
+  periodsPerWeek?: number;
 }

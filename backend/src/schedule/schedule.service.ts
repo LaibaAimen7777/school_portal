@@ -288,7 +288,7 @@ export class ScheduleService {
     const [allClasses, allSubjects, allTeachers, allRooms, existingSchedules] =
       await Promise.all([
         this.classRepo.find(),
-        this.subjectRepo.find(),
+        this.subjectRepo.find({ where: { isActive: true } }),
         this.teacherRepo.find({ relations: ['subjects'] }),
         this.roomRepo.find(),
         this.scheduleRepo.find({
@@ -309,8 +309,8 @@ export class ScheduleService {
     const PERIOD_MINS = config.periodDurationMinutes;
     const BREAK_MINS = config.breakDurationMinutes;
 
-    // Generate slots as "HH:MM-HH:MM" strings
-    const slots: string[] = [];
+    // Generate all slots for the week: DAYS × time slots
+    const timeSlots: string[] = [];
     let cursor = START_MINS;
     while (cursor < END_MINS) {
       const slotEnd = cursor + PERIOD_MINS;
@@ -323,27 +323,31 @@ export class ScheduleService {
         .toString()
         .padStart(2, '0');
       const em = (slotEnd % 60).toString().padStart(2, '0');
-      slots.push(`${sh}:${sm}-${eh}:${em}`);
+      timeSlots.push(`${sh}:${sm}-${eh}:${em}`);
       cursor += PERIOD_MINS + BREAK_MINS;
     }
 
-    // Booked state sets
-    const bookedTeachers = new Set<string>();
-    const bookedRooms = new Set<string>();
-    const bookedClasses = new Set<string>();
+    const totalSlotsPerWeek = DAYS.length * timeSlots.length;
+
+    // Booked state — key: `${day}-${slotIdx}`
+    const bookedTeachers = new Set<string>(); // `${day}-${slotIdx}-${teacherId}`
+    const bookedRooms = new Set<string>(); // `${day}-${slotIdx}-${roomId}`
+    const bookedClasses = new Set<string>(); // `${day}-${slotIdx}-${classId}`
 
     // Seed from existing schedules
     for (const s of existingSchedules) {
-      const slotKey = slots.findIndex((slot) => {
+      const slotIdx = timeSlots.findIndex((slot) => {
         const [slotStart] = slot.split('-');
         return slotStart === s.startTime.substring(0, 5);
       });
-      if (slotKey === -1) continue;
-      bookedTeachers.add(`${s.dayOfWeek}-${slotKey}-${s.teacher.id}`);
-      bookedRooms.add(`${s.dayOfWeek}-${slotKey}-${s.room.id}`);
-      bookedClasses.add(`${s.dayOfWeek}-${slotKey}-${s.schoolClass.id}`);
+      if (slotIdx === -1) continue;
+      const day = s.dayOfWeek;
+      bookedTeachers.add(`${day}-${slotIdx}-${s.teacher.id}`);
+      bookedRooms.add(`${day}-${slotIdx}-${s.room.id}`);
+      bookedClasses.add(`${day}-${slotIdx}-${s.schoolClass.id}`);
     }
 
+    // Teacher load balancing counter
     const teacherPeriodCount: Record<number, number> = {};
     for (const t of allTeachers) teacherPeriodCount[t.id] = 0;
     for (const s of existingSchedules)
@@ -354,33 +358,61 @@ export class ScheduleService {
     let skipped = 0;
     const errors: string[] = [];
 
-    // ✅ Key fix: build a flat list of all (class, subject) pairs needed
-    // then shuffle day order per pair so load spreads across the week
+    // Build task list: each (class, subject) pair repeated periodsPerWeek times
     const tasks: {
       schoolClass: (typeof allClasses)[0];
       subject: (typeof allSubjects)[0];
+      remaining: number; // how many more slots still needed for this subject
     }[] = [];
 
     for (const schoolClass of allClasses) {
-      const alreadyScheduled = existingSchedules
-        .filter((s) => s.schoolClass.id === schoolClass.id)
-        .map((s) => s.subject.id);
+      // Count already scheduled slots per subject for this class
+      const scheduledCountPerSubject: Record<number, number> = {};
+      for (const s of existingSchedules.filter(
+        (s) => s.schoolClass.id === schoolClass.id,
+      )) {
+        scheduledCountPerSubject[s.subject.id] =
+          (scheduledCountPerSubject[s.subject.id] || 0) + 1;
+      }
 
-      // ✅ Only subjects for this class's grade
+      // Grade-specific subjects only
       const gradeSubjects = allSubjects.filter((s) =>
-        s.grades.includes(schoolClass.grade),
+        s.grades.map(Number).includes(schoolClass.grade),
       );
 
-      const neededSubjects = gradeSubjects.filter(
-        (sub) => !alreadyScheduled.includes(sub.id),
-      );
+      for (const subject of gradeSubjects) {
+        const periodsNeeded = subject.periodsPerWeek ?? 5;
+        const alreadyScheduled = scheduledCountPerSubject[subject.id] || 0;
+        const remaining = periodsNeeded - alreadyScheduled;
 
-      for (const subject of neededSubjects) {
-        tasks.push({ schoolClass, subject });
+        if (remaining <= 0) continue; // already fully scheduled
+
+        // Add one task per remaining period needed
+        for (let i = 0; i < remaining; i++) {
+          tasks.push({ schoolClass, subject, remaining });
+        }
       }
     }
 
-    // ✅ Shuffle tasks so we don't fill one class completely before moving to next
+    // Validate: check if there are enough slots in the week
+    const slotsPerClass = totalSlotsPerWeek;
+    for (const schoolClass of allClasses) {
+      const gradeSubjects = allSubjects.filter((s) =>
+        s.grades.map(Number).includes(schoolClass.grade),
+      );
+      const totalPeriodsNeeded = gradeSubjects.reduce(
+        (sum, s) => sum + (s.periodsPerWeek ?? 5),
+        0,
+      );
+      if (totalPeriodsNeeded > slotsPerClass) {
+        errors.push(
+          `Grade ${schoolClass.grade}-${schoolClass.section} needs ${totalPeriodsNeeded} periods/week ` +
+            `but only ${slotsPerClass} slots exist. Reduce periods or extend school hours.`,
+        );
+      }
+    }
+
+    // Shuffle so no single class or subject dominates early slots
     for (let i = tasks.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [tasks[i], tasks[j]] = [tasks[j], tasks[i]];
@@ -396,7 +428,8 @@ export class ScheduleService {
 
       if (eligibleTeachers.length === 0) {
         errors.push(
-          `No teacher for "${subject.name}" (Class ${schoolClass.grade}-${schoolClass.section})`,
+          `No teacher for "${subject.name}" — skipping slot for ` +
+            `Grade ${schoolClass.grade}-${schoolClass.section}`,
         );
         skipped++;
         continue;
@@ -404,23 +437,30 @@ export class ScheduleService {
 
       let placed = false;
 
-      // ✅ Rotate day order based on how many slots class already has per day
-      // so subjects spread evenly across the week instead of piling on Monday
-      const classScheduleCountPerDay: Record<string, number> = {};
+      // Sort days by how many periods this class already has on each day
+      // so we spread evenly across Mon-Fri
+      const classPeriodsPerDay: Record<string, number> = {};
       for (const day of DAYS) {
-        classScheduleCountPerDay[day] = [...bookedClasses].filter(
+        classPeriodsPerDay[day] = [...bookedClasses].filter(
           (k) => k.startsWith(`${day}-`) && k.endsWith(`-${schoolClass.id}`),
         ).length;
       }
-
       const sortedDays = [...DAYS].sort(
-        (a, b) => classScheduleCountPerDay[a] - classScheduleCountPerDay[b],
+        (a, b) => classPeriodsPerDay[a] - classPeriodsPerDay[b],
       );
+
+      // Also sort slots so same subject doesn't always land in first period
+      // Shuffle slot order slightly to distribute across the day too
+      const slotOrder = [...Array(timeSlots.length).keys()];
+      for (let i = slotOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [slotOrder[i], slotOrder[j]] = [slotOrder[j], slotOrder[i]];
+      }
 
       for (const day of sortedDays) {
         if (placed) break;
 
-        for (let slotIdx = 0; slotIdx < slots.length; slotIdx++) {
+        for (const slotIdx of slotOrder) {
           if (placed) break;
 
           const classKey = `${day}-${slotIdx}-${schoolClass.id}`;
@@ -435,7 +475,7 @@ export class ScheduleService {
             );
             if (!freeRoom) continue;
 
-            const [startTime, endTime] = slots[slotIdx].split('-');
+            const [startTime, endTime] = timeSlots[slotIdx].split('-');
 
             try {
               const newSchedule = this.scheduleRepo.create({
@@ -457,7 +497,7 @@ export class ScheduleService {
               placed = true;
               break;
             } catch {
-              // DB conflict — skip
+              // DB conflict from race condition — try next slot
             }
           }
         }
@@ -465,7 +505,8 @@ export class ScheduleService {
 
       if (!placed) {
         errors.push(
-          `Could not place "${subject.name}" for Class ${schoolClass.grade}-${schoolClass.section} — no free slot`,
+          `Could not place a slot for "${subject.name}" in ` +
+            `Grade ${schoolClass.grade}-${schoolClass.section} — week is full`,
         );
         skipped++;
       }

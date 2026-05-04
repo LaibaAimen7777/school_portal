@@ -14,6 +14,7 @@ interface Subject {
   id: number;
   name: string;
   grades: number[];
+  periodsPerWeek: number;
   teacherCount: number;
   teachers: Teacher[];
 }
@@ -36,12 +37,14 @@ export default function CurriculumPage() {
   const [creating, setCreating] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newCode, setNewCode] = useState("");
+  const [newPeriods, setNewPeriods] = useState(5);
 
   // Edit state
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const [editGrades, setEditGrades] = useState<number[]>([]);
   const [saving, setSaving] = useState(false);
+  const [editPeriods, setEditPeriods] = useState(5);
 
   useEffect(() => {
     fetchCurriculum();
@@ -77,12 +80,14 @@ export default function CurriculumPage() {
         name: newName.trim(),
         code: newCode.trim().toUpperCase(),
         grades: newGrades,
+        periodsPerWeek: newPeriods,
       });
       showSuccess("Subject created");
       setNewName("");
       setNewCode("");
       setNewGrades([]);
       setShowCreateForm(false);
+      setNewPeriods(5);
       fetchCurriculum();
     } catch (err: any) {
       showError(err.response?.data?.message || "Failed to create subject");
@@ -94,6 +99,7 @@ export default function CurriculumPage() {
     setEditingId(subject.id);
     setEditName(subject.name);
     setEditGrades([...subject.grades]);
+    setEditPeriods(subject.periodsPerWeek ?? 5);
   };
 
   const handleSave = async (id: number) => {
@@ -111,6 +117,7 @@ export default function CurriculumPage() {
       await api.patch(`/subject/${id}`, {
         name: editName.trim(),
         grades: deduped,
+        periodsPerWeek: editPeriods,
       });
       showSuccess("Subject updated");
       setEditingId(null);
@@ -237,6 +244,38 @@ export default function CurriculumPage() {
                   letterSpacing: "0.05em",
                 }}
               />
+            </div>
+            <div>
+              <label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  display: "block",
+                  marginBottom: "4px",
+                }}
+              >
+                Periods Per Week
+              </label>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <input
+                  type="number"
+                  value={newPeriods}
+                  onChange={(e) => setNewPeriods(Number(e.target.value))}
+                  min={1}
+                  max={10}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    border: "1px solid #d1d5db",
+                    width: "80px",
+                  }}
+                />
+                <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                  periods/week
+                </span>
+              </div>
             </div>
             <div>
               <label
@@ -381,6 +420,33 @@ export default function CurriculumPage() {
                               }
                             />
                           </div>
+                          <div>
+                            <p
+                              style={{
+                                fontSize: "12px",
+                                color: "#6b7280",
+                                margin: "0 0 6px",
+                              }}
+                            >
+                              Periods per week:
+                            </p>
+                            <input
+                              type="number"
+                              value={editPeriods}
+                              onChange={(e) =>
+                                setEditPeriods(Number(e.target.value))
+                              }
+                              min={1}
+                              max={10}
+                              style={{
+                                padding: "6px 10px",
+                                borderRadius: "6px",
+                                border: "1px solid #d1d5db",
+                                fontSize: "13px",
+                                width: "80px",
+                              }}
+                            />
+                          </div>
                           <div style={{ display: "flex", gap: "8px" }}>
                             <button
                               onClick={() => handleSave(subject.id)}
@@ -457,6 +523,15 @@ export default function CurriculumPage() {
                               >
                                 {subject.teacherCount} teacher
                                 {subject.teacherCount !== 1 ? "s" : ""} assigned
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: "11px",
+                                  color: "#94a3b8",
+                                  marginLeft: "4px",
+                                }}
+                              >
+                                {subject.periodsPerWeek ?? 5} periods/week
                               </span>
                             </div>
                           </div>

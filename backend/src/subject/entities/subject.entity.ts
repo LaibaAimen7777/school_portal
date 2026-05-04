@@ -22,6 +22,9 @@ export class Subject {
   @Column({ type: 'json', nullable: true })
   grades!: number[];
 
+  @Column({ default: 5 })
+  periodsPerWeek!: number;
+
   @Column({ default: true })
   isActive!: boolean;
 
