@@ -25,11 +25,6 @@ export class ScheduleController {
     return this.scheduleService.findAll();
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.scheduleService.remove(id);
-  }
-
   @Get('completeness')
   getCompletenessReport() {
     return this.scheduleService.getCompletenessReport();
@@ -50,8 +45,15 @@ export class ScheduleController {
     return this.scheduleService.autoSchedule();
   }
 
+  // ✅ Must be ABOVE @Delete(':id') — otherwise ':id' swallows this route
   @Delete('clear-and-regenerate')
   clearAndAutoSchedule() {
     return this.scheduleService.clearAndAutoSchedule();
+  }
+
+  // ✅ Parameterized route always goes last
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.scheduleService.remove(id);
   }
 }

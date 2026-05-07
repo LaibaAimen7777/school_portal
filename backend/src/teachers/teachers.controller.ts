@@ -1,4 +1,14 @@
-import { Controller, UseGuards, Post, Body, Get, Req } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  Post,
+  Body,
+  Get,
+  Req,
+  Delete,
+  Param,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
@@ -27,5 +37,11 @@ export class TeachersController {
     // console.log(req.user);
     const userId = req.user.id;
     return this.teachersService.getDashboard(userId);
+  }
+
+  @Roles('admin')
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.teachersService.remove(id);
   }
 }

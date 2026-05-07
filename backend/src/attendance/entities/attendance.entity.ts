@@ -17,7 +17,7 @@ export class Attendance {
   @ManyToOne(() => Student, { eager: true })
   student!: Student;
 
-  @ManyToOne(() => Schedule)
+  @ManyToOne(() => Schedule, { onDelete: 'CASCADE' })
   schedule!: Schedule;
 
   @Column({ type: 'date' })

@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
+import { showSuccess, showError } from "@/components/ui/toast";
 import {
   TeachersContainer,
   TeachersHeader,
@@ -50,6 +51,17 @@ export default function TeachersPage() {
     fetchTeachers();
   }, []);
 
+  const handleDelete = async (id: number, name: string) => {
+    if (!confirm(`Delete teacher "${name}"? This cannot be undone.`)) return;
+    try {
+      await api.delete(`/teachers/${id}`);
+      setTeachers((prev) => prev.filter((t) => t.id !== id));
+      showSuccess("Teacher deleted");
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to delete teacher");
+    }
+  };
+
   if (loading) return <LoadingMessage>Loading teachers...</LoadingMessage>;
 
   return (
@@ -72,6 +84,7 @@ export default function TeachersPage() {
               <th>Qualification</th>
               <th>Subjects</th>
               <th>Hire Date</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -109,6 +122,22 @@ export default function TeachersPage() {
                     </div>
                   </td>
                   <td>{new Date(teacher.hireDate).toLocaleDateString()}</td>
+                  <td>
+                    <button
+                      onClick={() => handleDelete(teacher.id, teacher.fullName)}
+                      style={{
+                        padding: "4px 0px",
+                        borderRadius: "6px",
+                        border: "1px solid #fecaca",
+                        background: "#fef2f2",
+                        color: "#b91c1c",
+                        cursor: "pointer",
+                        fontSize: "12px",
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))
             )}

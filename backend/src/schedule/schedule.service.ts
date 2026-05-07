@@ -296,11 +296,19 @@ export class ScheduleService {
         }),
       ]);
 
+    console.log('allClasses:', allClasses);
+    console.log('allSubjects:', allSubjects);
+    console.log('allTeachers:', allTeachers);
+    console.log('allRooms:', allRooms);
+    console.log('existingSchedules:', existingSchedules);
+
     const config = await this.schoolConfigRepo.findOne({ where: { id: 1 } });
     if (!config)
       throw new BadRequestException(
         'School config not found. Set it up first.',
       );
+
+    console.log('config:', config);
 
     const [startHour, startMin] = config.schoolStartTime.split(':').map(Number);
     const [endHour, endMin] = config.schoolEndTime.split(':').map(Number);
@@ -308,6 +316,11 @@ export class ScheduleService {
     const END_MINS = endHour * 60 + endMin;
     const PERIOD_MINS = config.periodDurationMinutes;
     const BREAK_MINS = config.breakDurationMinutes;
+
+    console.log('startMins:', START_MINS);
+    console.log('END_MINS:', END_MINS);
+    console.log('PERIOD_MINS:', PERIOD_MINS);
+    console.log('BREAK_MINS:', BREAK_MINS);
 
     // Generate all slots for the week: DAYS × time slots
     const timeSlots: string[] = [];
@@ -522,6 +535,7 @@ export class ScheduleService {
     skipped: number;
     errors: string[];
   }> {
+    console.log('here');
     // Delete all existing schedules first
     const existing = await this.scheduleRepo.find();
     await this.scheduleRepo.remove(existing);

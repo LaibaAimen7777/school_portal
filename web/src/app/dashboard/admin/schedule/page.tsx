@@ -456,29 +456,9 @@ export default function ScheduleDisplayPage() {
                                 borderLeft: `4px solid ${color.text}`,
                                 boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
                                 transition: "0.2s",
+                                marginTop: "10px",
                               }}
                             >
-                              {/* Delete button */}
-                              <button
-                                onClick={() => handleDelete(slot.id)}
-                                disabled={deletingId === slot.id}
-                                title="Delete"
-                                style={{
-                                  position: "absolute",
-                                  top: "4px",
-                                  right: "4px",
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  fontSize: "10px",
-                                  color: "#94a3b8",
-                                  lineHeight: 1,
-                                  padding: "2px",
-                                }}
-                              >
-                                ✕
-                              </button>
-
                               <div
                                 style={{
                                   fontWeight: 700,
@@ -486,6 +466,8 @@ export default function ScheduleDisplayPage() {
                                   marginBottom: "2px",
                                   paddingRight: "14px",
                                   fontSize: "12px",
+                                  height: "40px",
+                                  // marginTop: "10px",
                                 }}
                               >
                                 {slot.subject.name}
@@ -506,6 +488,28 @@ export default function ScheduleDisplayPage() {
                               >
                                 {slot.room.name}
                               </div>
+                              {/* Delete button */}
+                              <button
+                                onClick={() => handleDelete(slot.id)}
+                                disabled={deletingId === slot.id}
+                                title="Delete"
+                                style={{
+                                  // position: "absolute",
+                                  // top: "4px",
+                                  // right: "4px",
+                                  background: "none",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  fontSize: "10px",
+                                  color: "#f8f8f8",
+                                  backgroundColor: "#bc412e",
+                                  lineHeight: 1,
+                                  padding: "2px",
+                                }}
+                              >
+                                ✕
+                              </button>
+                              <div></div>
                             </div>
                           );
                         })

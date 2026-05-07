@@ -9,6 +9,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateSubjectDto {
   @IsString()
@@ -20,11 +21,13 @@ export class CreateSubjectDto {
   // e.g. [9, 10] means this subject is for Grade 9 and 10 only
   @IsArray()
   @ArrayNotEmpty()
+  @Type(() => Number)
   @IsInt({ each: true })
   grades!: number[];
 
   @IsInt()
   @IsOptional()
+  @Type(() => Number)
   @Min(1)
   @Max(10)
   periodsPerWeek?: number;

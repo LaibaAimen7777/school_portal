@@ -37,7 +37,17 @@ export class Teacher {
   user!: User;
 
   @ManyToMany(() => Subject, (subject) => subject.teachers)
-  @JoinTable()
+  @JoinTable({
+    name: 'teachers_subjects_subjects', // ✅ matches existing table exactly
+    joinColumn: {
+      name: 'teachersId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'subjectsId',
+      referencedColumnName: 'id',
+    },
+  })
   subjects!: Subject[];
 
   @OneToMany(() => Schedule, (schedule: Schedule) => schedule.teacher)
