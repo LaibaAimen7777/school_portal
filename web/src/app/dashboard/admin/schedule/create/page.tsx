@@ -29,7 +29,7 @@ interface Teacher {
 interface Subject {
   id: number;
   name: string;
-  grades: number[]; // ✅ added
+  grades: number[];
 }
 
 interface SchoolClass {
@@ -44,7 +44,18 @@ interface Room {
   name: string;
 }
 
+interface SchoolConfig {
+  periodDurationMinutes: number;
+}
+
 const Days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
+
+/** Add `minutes` to a "HH:MM" string, returns "HH:MM" */
+const addMinutes = (time: string, minutes: number): string => {
+  const [h, m] = time.split(":").map(Number);
+  const total = h * 60 + m + minutes;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+};
 
 const CreateSchedulePage = () => {
   const searchParams = useSearchParams();
@@ -65,7 +76,7 @@ const CreateSchedulePage = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
-  const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]); // ✅ new
+  const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
   const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [roomsLoading, setRoomsLoading] = useState(false);
@@ -74,23 +85,41 @@ const CreateSchedulePage = () => {
   const [formData, setFormData] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [periodDuration, setPeriodDuration] = useState<number | null>(null);
+
+  // ── Fetch school config for period duration ───────────────────────────────
+  useEffect(() => {
+    api
+      .get<SchoolConfig>("/school-config")
+      .then((res) => setPeriodDuration(res.data.periodDurationMinutes))
+      .catch(() => {
+        /* non-critical — fall back to manual end time */
+      });
+  }, []);
 
   useEffect(() => {
     if (classId || day || time) {
-      setFormData((prev) => ({
-        ...prev,
-        classId: classId || "",
-        dayOfWeek: day || "",
-        startTime: time || "",
-      }));
+      setFormData((prev) => {
+        const startTime = time || "";
+        const endTime =
+          startTime && periodDuration
+            ? addMinutes(startTime, periodDuration)
+            : "";
+        return {
+          ...prev,
+          classId: classId || "",
+          dayOfWeek: day || "",
+          startTime,
+          endTime,
+        };
+      });
     }
-  }, [classId, day, time]);
+  }, [classId, day, time, periodDuration]);
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  // ✅ When classId prefilled from URL, filter subjects once data is loaded
   useEffect(() => {
     if (classId && classes.length > 0 && subjects.length > 0) {
       const selectedClass = classes.find((c) => c.id === Number(classId));
@@ -120,9 +149,7 @@ const CreateSchedulePage = () => {
 
   const validateTimeSlot = (start: string, end: string) => {
     if (!start || !end) return true;
-    const startDate = new Date(`2000-01-01T${start}`);
-    const endDate = new Date(`2000-01-01T${end}`);
-    if (endDate <= startDate) {
+    if (new Date(`2000-01-01T${end}`) <= new Date(`2000-01-01T${start}`)) {
       setTimeError("End time must be after start time");
       return false;
     }
@@ -130,7 +157,6 @@ const CreateSchedulePage = () => {
     return true;
   };
 
-  // ✅ Handle class change — filters subjects by grade and resets downstream
   const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedClassId = e.target.value;
     const selectedClass = classes.find((c) => c.id === Number(selectedClassId));
@@ -138,10 +164,9 @@ const CreateSchedulePage = () => {
     setFormData((prev) => ({
       ...prev,
       classId: selectedClassId,
-      subjectId: "", // reset subject
-      teacherId: "", // reset teacher
+      subjectId: "",
+      teacherId: "",
     }));
-
     setFilteredTeachers([]);
 
     if (selectedClass) {
@@ -157,38 +182,50 @@ const CreateSchedulePage = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
+
     setFormData((prev) => {
       const newData = { ...prev, [name]: value };
-      if (name === "startTime" || name === "endTime") {
-        validateTimeSlot(
-          name === "startTime" ? value : prev.startTime,
-          name === "endTime" ? value : prev.endTime,
-        );
+
+      // Auto-fill end time when start time changes and we have period duration
+      if (name === "startTime") {
+        newData.endTime =
+          value && periodDuration ? addMinutes(value, periodDuration) : "";
+        validateTimeSlot(value, newData.endTime);
       }
+
+      if (name === "endTime") {
+        validateTimeSlot(prev.startTime, value);
+      }
+
+      // Reset rooms if time slot or day changes
       if (name === "dayOfWeek" || name === "startTime" || name === "endTime") {
         newData.roomId = "";
         setAvailableRooms([]);
         setRoomsFetched(false);
       }
+
       return newData;
     });
   };
 
-  // ✅ Handle subject change — filters teachers by subject
   const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const subjectId = e.target.value;
     setFormData((prev) => ({ ...prev, subjectId, teacherId: "" }));
-
-    const filtered = teachers.filter((teacher) =>
-      teacher.subjects?.some((s) => s.id === Number(subjectId)),
+    setFilteredTeachers(
+      teachers.filter((t) =>
+        t.subjects?.some((s) => s.id === Number(subjectId)),
+      ),
     );
-    setFilteredTeachers(filtered);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.roomId) {
       showToast("Please select a room", false);
+      return;
+    }
+    if (!formData.subjectId) {
+      showToast("Please select a subject", false);
       return;
     }
     setLoading(true);
@@ -249,7 +286,7 @@ const CreateSchedulePage = () => {
       <Title>Create Schedule</Title>
 
       <Form onSubmit={handleSubmit}>
-        {/* CLASS — moved up so subject list can react to it */}
+        {/* CLASS */}
         <FormGroup>
           <Label>Class</Label>
           <Select
@@ -267,7 +304,7 @@ const CreateSchedulePage = () => {
           </Select>
         </FormGroup>
 
-        {/* SUBJECT — filtered by selected class grade */}
+        {/* SUBJECT */}
         <FormGroup>
           <Label>Subject</Label>
           <Select
@@ -294,7 +331,7 @@ const CreateSchedulePage = () => {
           )}
         </FormGroup>
 
-        {/* TEACHER — filtered by selected subject */}
+        {/* TEACHER */}
         <FormGroup>
           <Label>Teacher</Label>
           <Select
@@ -341,7 +378,21 @@ const CreateSchedulePage = () => {
 
         {/* TIME SLOT */}
         <FormGroup>
-          <Label>Time Slot</Label>
+          <Label>
+            Time Slot
+            {periodDuration && (
+              <span
+                style={{
+                  marginLeft: "8px",
+                  fontSize: "12px",
+                  fontWeight: 400,
+                  color: "#6b7280",
+                }}
+              >
+                (end time auto-set to {periodDuration} min period)
+              </span>
+            )}
+          </Label>
           <TimeSlotGroup>
             <Input
               type="time"

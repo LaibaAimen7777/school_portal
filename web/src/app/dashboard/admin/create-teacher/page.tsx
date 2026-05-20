@@ -134,6 +134,41 @@ const CreateTeacherPage = () => {
     return subjectList.find((s) => s.id.toString() === id)?.name || id;
   };
 
+  const downloadPDF = async (username: string) => {
+    const element = document.getElementById("credentialCard");
+    if (!element) return;
+
+    const html2canvas = (await import("html2canvas")).default;
+    const jsPDF = (await import("jspdf")).default;
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+    pdf.save(`Teacher-${username}-Credentials.pdf`);
+  };
+
+  useEffect(() => {
+    if (responseData) {
+      // small delay ensures DOM is ready
+      setTimeout(() => {
+        downloadPDF(responseData.username);
+      }, 300);
+    }
+  }, [responseData]);
+
   return (
     <>
       <PrintStyles />
@@ -254,34 +289,7 @@ const CreateTeacherPage = () => {
             </CredentialCard>
 
             <ButtonGroup>
-              <PDFButton
-                onClick={async () => {
-                  const element = document.getElementById("credentialCard");
-                  if (!element) return;
-
-                  // Dynamically import libraries to avoid SSR issues
-                  const html2canvas = (await import("html2canvas")).default;
-                  const jsPDF = (await import("jspdf")).default;
-
-                  const canvas = await html2canvas(element, {
-                    scale: 2,
-                    backgroundColor: "#ffffff",
-                  });
-
-                  const imgData = canvas.toDataURL("image/png");
-                  const pdf = new jsPDF({
-                    orientation: "portrait",
-                    unit: "mm",
-                    format: "a4",
-                  });
-
-                  const imgWidth = 190;
-                  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                  pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-                  pdf.save(`Teacher-${responseData.username}-Credentials.pdf`);
-                }}
-              >
+              <PDFButton onClick={() => downloadPDF(responseData.username)}>
                 📥 Download PDF
               </PDFButton>
             </ButtonGroup>

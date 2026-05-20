@@ -34,61 +34,82 @@ export class TeachersService {
 
     private dataSource: DataSource,
   ) {}
+
   async create(dto: CreateTeacherDto) {
-    return this.dataSource.transaction(async (manager) => {
-      const teacherRepo = manager.getRepository(Teacher);
-      const userRepo = manager.getRepository(User);
+    const lastUser = await this.userRepository
+      .createQueryBuilder('u')
+      .where('u.username LIKE :pattern', { pattern: 'TCH%' })
+      .orderBy('u.username', 'DESC')
+      .getOne();
 
-      const teacherCount = await teacherRepo.count();
-      const username = `TCH${(teacherCount + 1).toString().padStart(3, '0')}`;
-      const plainPassword = generatePassword();
-      const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    const lastNum = lastUser
+      ? parseInt(lastUser.username.replace('TCH', ''))
+      : 0;
 
-      const user = manager.create(User, {
-        username,
-        password: hashedPassword,
-        role: UserRole.TEACHER,
-        canLogin: 1,
-        mustChangePassword: 1,
-        isActive: 1,
+    const nextNum = lastNum + 1;
+    const username = `TCH${nextNum.toString().padStart(3, '0')}`;
+    const teacherCode = `T-${nextNum.toString().padStart(3, '0')}`;
+    const plainPassword = generatePassword();
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    const user = new User();
+    user.username = username;
+    user.password = hashedPassword;
+    user.role = UserRole.TEACHER;
+    user.can_login = true;
+    user.must_change_password = true;
+    user.is_active = true;
+    const savedUser = await this.userRepository.save(user);
+
+    const teacher = new Teacher();
+    teacher.teacherCode = teacherCode;
+    teacher.fullName = dto.fullName;
+    teacher.qualification = dto.qualification;
+    if (dto.hireDate) teacher.hireDate = dto.hireDate;
+    teacher.user = savedUser;
+    const savedTeacher = await this.teacherRepository.save(teacher);
+
+    const debug: any = {
+      teacherId: savedTeacher.id,
+      subjectIdsReceived: dto.subjectIds,
+      subjectsFoundCount: 0,
+      junctionInserts: [],
+      junctionTableAfter: [],
+    };
+
+    if (dto.subjectIds && dto.subjectIds.length > 0) {
+      const subjects = await this.subjectRepository.findBy({
+        id: In(dto.subjectIds),
       });
-      const savedUser = await userRepo.save(user);
 
-      const teacherCode = `T-${(teacherCount + 1).toString().padStart(3, '0')}`;
+      debug.subjectsFoundCount = subjects.length;
+      debug.subjectsFound = subjects.map((s) => ({ id: s.id, name: s.name }));
 
-      const teacher = teacherRepo.create({
-        teacherCode,
-        fullName: dto.fullName,
-        qualification: dto.qualification,
-        hireDate: dto.hireDate,
-        user: savedUser,
-        subjects: [], // ✅ initialize empty so TypeORM tracks the relation
-      });
-
-      // ✅ Save teacher first to get an ID
-      const savedTeacher = await teacherRepo.save(teacher);
-
-      // ✅ Then assign subjects and save again so junction table gets populated
-      if (dto.subjectIds && dto.subjectIds.length > 0) {
-        const subjects = await manager
-          .createQueryBuilder(Subject, 'subject')
-          .where('subject.id IN (:...ids)', { ids: dto.subjectIds })
-          .getMany();
-
-        console.log('Found subjects:', subjects); // ✅ are subjects actually found?
-        console.log('Teacher ID:', savedTeacher.id);
-
-        savedTeacher.subjects = subjects;
-        const result = await teacherRepo.save(savedTeacher);
-        console.log('Saved teacher subjects:', result.subjects);
+      for (const subject of subjects) {
+        const insertResult = await this.dataSource.query(
+          `INSERT IGNORE INTO teachers_subjects_subjects (teachersId, subjectsId) VALUES (?, ?)`,
+          [savedTeacher.id, subject.id],
+        );
+        debug.junctionInserts.push({
+          teacherId: savedTeacher.id,
+          subjectId: subject.id,
+          affectedRows: insertResult.affectedRows,
+        });
       }
 
-      return {
-        teacherId: savedTeacher.id,
-        username,
-        temporaryPassword: plainPassword,
-      };
-    });
+      // Read back to confirm
+      debug.junctionTableAfter = await this.dataSource.query(
+        `SELECT * FROM teachers_subjects_subjects WHERE teachersId = ?`,
+        [savedTeacher.id],
+      );
+    }
+
+    return {
+      teacherId: savedTeacher.id,
+      username,
+      temporaryPassword: plainPassword,
+      debug, // ✅ visible in API response
+    };
   }
 
   async findAll() {
@@ -106,18 +127,36 @@ export class TeachersService {
     });
     if (!teacher) throw new NotFoundException('Teacher not found');
 
-    // Remove junction table entries first
+    const userId = teacher.user?.id;
+
+    // 1. Delete attendance records linked to this teacher's schedules
+    const schedules = await this.scheduleRepository.find({
+      where: { teacher: { id } },
+    });
+    const scheduleIds = schedules.map((s) => s.id);
+
+    if (scheduleIds.length > 0) {
+      await this.dataSource.query(
+        `DELETE FROM attendance WHERE scheduleId IN (${scheduleIds.join(',')})`,
+      );
+      // 2. Delete the schedules
+      await this.scheduleRepository.delete({ teacher: { id } });
+    }
+
+    // 3. Delete junction table entries
     await this.dataSource.query(
       `DELETE FROM teachers_subjects_subjects WHERE teachersId = ?`,
       [id],
     );
 
-    // Deactivate user account
-    if (teacher.user) {
-      await this.userRepository.update(teacher.user.id, { is_active: false });
+    // 4. Delete teacher
+    await this.teacherRepository.remove(teacher);
+
+    // 5. Delete user
+    if (userId) {
+      await this.userRepository.delete(userId);
     }
 
-    await this.teacherRepository.remove(teacher);
     return { message: 'Teacher deleted successfully' };
   }
 

@@ -3,16 +3,20 @@ import {
   IsNotEmpty,
   IsOptional,
   IsDateString,
+  IsArray,
+  IsInt,
 } from 'class-validator';
+
+import { Type } from 'class-transformer';
 
 export class CreateTeacherDto {
   @IsString()
   @IsNotEmpty()
-  fullName: string;
+  fullName!: string;
 
   @IsString()
   @IsNotEmpty()
-  qualification: string;
+  qualification!: string;
 
   // @IsOptional()
   // @IsString()
@@ -22,5 +26,9 @@ export class CreateTeacherDto {
   @IsDateString()
   hireDate?: Date;
 
-  subjectIds: number[];
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  @Type(() => Number)
+  subjectIds?: number[];
 }

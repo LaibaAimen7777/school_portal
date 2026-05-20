@@ -59,6 +59,12 @@ const initialForm = {
   examType: "MIDTERM",
 };
 
+const initialPeriodForm = {
+  name: "",
+  startDate: "",
+  endDate: "",
+};
+
 export default function AdminExamsPage() {
   const [examPeriods, setExamPeriods] = useState<ExamPeriod[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
@@ -72,6 +78,12 @@ export default function AdminExamsPage() {
   const [roomsLoading, setRoomsLoading] = useState(false);
   const [roomsFetched, setRoomsFetched] = useState(false);
   const [timeError, setTimeError] = useState("");
+
+  // Exam period creation state
+  const [showPeriodForm, setShowPeriodForm] = useState(false);
+  const [periodForm, setPeriodForm] = useState(initialPeriodForm);
+  const [periodLoading, setPeriodLoading] = useState(false);
+  const [periodDateError, setPeriodDateError] = useState("");
 
   // Active exam period from today's date
   const activeExamPeriod = examPeriods.find((ep) => {
@@ -99,6 +111,53 @@ export default function AdminExamsPage() {
     setExams(examsRes.data);
   };
 
+  // ── Exam period creation ──────────────────────────────────────────────────
+
+  const validatePeriodDates = (start: string, end: string) => {
+    if (!start || !end) return true;
+    if (end <= start) {
+      setPeriodDateError("End date must be after start date");
+      return false;
+    }
+    setPeriodDateError("");
+    return true;
+  };
+
+  const handlePeriodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPeriodForm((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === "startDate" || name === "endDate") {
+        validatePeriodDates(
+          name === "startDate" ? value : prev.startDate,
+          name === "endDate" ? value : prev.endDate,
+        );
+      }
+      return next;
+    });
+  };
+
+  const handleCreatePeriod = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validatePeriodDates(periodForm.startDate, periodForm.endDate)) return;
+
+    setPeriodLoading(true);
+    try {
+      const res = await api.post("/exam-periods", periodForm);
+      showSuccess("Exam period created!");
+      setExamPeriods((prev) => [...prev, res.data]);
+      // Auto-select the newly created period in the exam form
+      setForm((prev) => ({ ...prev, examPeriodId: String(res.data.id) }));
+      setPeriodForm(initialPeriodForm);
+      setShowPeriodForm(false);
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to create exam period");
+    }
+    setPeriodLoading(false);
+  };
+
+  // ── Exam form ─────────────────────────────────────────────────────────────
+
   const validateTimes = (start: string, end: string) => {
     if (!start || !end) return true;
     if (end <= start) {
@@ -122,7 +181,6 @@ export default function AdminExamsPage() {
           name === "startTime" ? value : prev.startTime,
           name === "endTime" ? value : prev.endTime,
         );
-        // reset room when time changes
         next.roomId = "";
         setAvailableRooms([]);
         setRoomsFetched(false);
@@ -131,7 +189,6 @@ export default function AdminExamsPage() {
       return next;
     });
 
-    // Filter teachers by subject
     if (name === "subjectId") {
       setForm((prev) => ({ ...prev, subjectId: value, teacherId: "" }));
       setFilteredTeachers(
@@ -193,7 +250,7 @@ export default function AdminExamsPage() {
       setForm(initialForm);
       setAvailableRooms([]);
       setRoomsFetched(false);
-      fetchAll(); // refresh date sheet
+      fetchAll();
     } catch (err: any) {
       showError(err.response?.data?.message || "Failed to create exam");
     }
@@ -205,6 +262,222 @@ export default function AdminExamsPage() {
   return (
     <div style={{ padding: "32px", maxWidth: "900px", margin: "0 auto" }}>
       <h2 style={{ marginBottom: "8px" }}>Schedule Exam</h2>
+
+      {/* ── Exam Period Section ─────────────────────────────────────────── */}
+      <section
+        style={{
+          border: "1px solid #e5e7eb",
+          borderRadius: "10px",
+          marginBottom: "28px",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "14px 18px",
+            background: "#f9fafb",
+            borderBottom: examPeriods.length > 0 ? "1px solid #e5e7eb" : "none",
+          }}
+        >
+          <div>
+            <span style={{ fontWeight: 600, fontSize: "14px" }}>
+              Exam Periods
+            </span>
+            {examPeriods.length > 0 && (
+              <span
+                style={{
+                  marginLeft: "8px",
+                  fontSize: "12px",
+                  color: "#6b7280",
+                }}
+              >
+                {examPeriods.length} period{examPeriods.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowPeriodForm((v) => !v);
+              setPeriodDateError("");
+            }}
+            style={{
+              fontSize: "13px",
+              padding: "5px 14px",
+              borderRadius: "6px",
+              border: "1px solid #d1d5db",
+              background: showPeriodForm ? "#f3f4f6" : "white",
+              cursor: "pointer",
+              fontWeight: 500,
+            }}
+          >
+            {showPeriodForm ? "✕ Cancel" : "+ New Period"}
+          </button>
+        </div>
+
+        {/* Inline create form */}
+        {showPeriodForm && (
+          <form
+            onSubmit={handleCreatePeriod}
+            style={{
+              padding: "18px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "14px",
+              borderBottom:
+                examPeriods.length > 0 ? "1px solid #e5e7eb" : "none",
+              background: "#fafafa",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "2fr 1fr 1fr auto",
+                gap: "12px",
+                alignItems: "flex-end",
+              }}
+            >
+              <Field label="Period name">
+                <input
+                  type="text"
+                  name="name"
+                  value={periodForm.name}
+                  onChange={handlePeriodChange}
+                  placeholder="e.g. Final Term 2025"
+                  required
+                />
+              </Field>
+              <Field label="Start date">
+                <input
+                  type="date"
+                  name="startDate"
+                  value={periodForm.startDate}
+                  onChange={handlePeriodChange}
+                  required
+                />
+              </Field>
+              <Field label="End date">
+                <input
+                  type="date"
+                  name="endDate"
+                  value={periodForm.endDate}
+                  onChange={handlePeriodChange}
+                  min={periodForm.startDate || undefined}
+                  required
+                />
+              </Field>
+              <button
+                type="submit"
+                disabled={periodLoading || !!periodDateError}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: "6px",
+                  background: "#2563eb",
+                  color: "white",
+                  border: "none",
+                  cursor: periodLoading ? "not-allowed" : "pointer",
+                  fontWeight: 500,
+                  fontSize: "13px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {periodLoading ? "Creating..." : "Create"}
+              </button>
+            </div>
+            {periodDateError && (
+              <p style={{ color: "red", fontSize: "13px", margin: 0 }}>
+                {periodDateError}
+              </p>
+            )}
+          </form>
+        )}
+
+        {/* Existing periods list */}
+        {examPeriods.length > 0 ? (
+          <div
+            style={{
+              padding: "12px 18px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "6px",
+            }}
+          >
+            {examPeriods.map((ep) => {
+              const today = new Date().toISOString().split("T")[0];
+              const isActive = ep.startDate <= today && ep.endDate >= today;
+              const isPast = ep.endDate < today;
+              return (
+                <div
+                  key={ep.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontSize: "13px",
+                    padding: "6px 0",
+                    borderBottom: "1px solid #f3f4f6",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      background: isActive
+                        ? "#22c55e"
+                        : isPast
+                          ? "#d1d5db"
+                          : "#fbbf24",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span style={{ fontWeight: 500, flex: 1 }}>{ep.name}</span>
+                  <span style={{ color: "#6b7280" }}>
+                    {ep.startDate} – {ep.endDate}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      background: isActive
+                        ? "#dcfce7"
+                        : isPast
+                          ? "#f3f4f6"
+                          : "#fef9c3",
+                      color: isActive
+                        ? "#15803d"
+                        : isPast
+                          ? "#9ca3af"
+                          : "#92400e",
+                    }}
+                  >
+                    {isActive ? "Active" : isPast ? "Past" : "Upcoming"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          !showPeriodForm && (
+            <div
+              style={{
+                padding: "20px 18px",
+                color: "#6b7280",
+                fontSize: "13px",
+                textAlign: "center",
+              }}
+            >
+              No exam periods yet. Create one to get started.
+            </div>
+          )
+        )}
+      </section>
 
       {/* Active period banner */}
       {activeExamPeriod ? (
@@ -232,7 +505,7 @@ export default function AdminExamsPage() {
             fontSize: "14px",
           }}
         >
-          No active exam period today. Create one before scheduling exams.
+          No active exam period today. Create one above before scheduling exams.
         </div>
       )}
 
@@ -458,7 +731,6 @@ export default function AdminExamsPage() {
   );
 }
 
-// Small layout helper — keeps JSX clean
 function Field({
   label,
   children,

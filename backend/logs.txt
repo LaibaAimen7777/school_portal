@@ -1,0 +1,224 @@
+
+> backend@0.0.1 start:dev
+> nest start --watch
+
+[2J[3J[H[[90m12:12:28 AM[0m] Starting compilation in watch mode...
+
+[[90m12:12:38 AM[0m] Found 0 errors. Watching for file changes.
+
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +131ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mParentModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAssignmentsModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSubmissionsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmCoreModule dependencies initialized[39m[38;5;3m +137ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTypeOrmModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mRoomsModule dependencies initialized[39m[38;5;3m +4ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAttendanceModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMarksModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSchoolConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSubjectModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mScheduleModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mExamsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mExamPeriodsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsersModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mSchoolClassModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mTeachersModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mStudentModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:40 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUsersController {/users}:[39m[38;5;3m +9ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users, POST} route[39m[38;5;3m +6ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSchoolClassController {/school-class}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/school-class, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/school-class, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/school-class/grades, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/school-class/sections, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mStudentController {/student}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/student, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/student/:id/reset-password, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/student, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/student/:id/change-class, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/student/results, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/student/me, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mParentController {/parent}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mTeachersController {/teachers}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/teachers, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/teachers, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/teachers/dashboard, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/teachers/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSubjectController {/subject}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/subject, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/subject, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/subject/by-grade, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/subject/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/subject/:id, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/subject/:id/grades, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/subject/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mScheduleController {/schedule}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/schedule, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/schedule, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/schedule/completeness, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/schedule/workload, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/schedule/reminders, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/schedule/auto, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/schedule/clear-and-regenerate, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/schedule/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mRoomsController {/rooms}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/rooms/available, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/rooms/available-exam-rooms, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAttendanceController {/attendance}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/attendance, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/attendance/mark, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAssignmentsController {/assignments}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSubmissionsController {/submissions}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mExamsController {/exams}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/exams, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/exams, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/exams/teacher/:teacherId, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mMarksController {/marks}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/marks, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/marks, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mSchoolConfigController {/school-config}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/school-config, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/school-config/timing-audit, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/school-config, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mExamPeriodsController {/exam-periods}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/exam-periods, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/exam-periods, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/exam-periods/active, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/exam-periods/:id/affected-schedules, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 7928  - [39m05/08/2026, 12:12:41 AM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +10ms[39m
+context: ExecutionContextHost {
+  args: [
+    IncomingMessage {
+      _events: [Object],
+      _readableState: [ReadableState],
+      _maxListeners: undefined,
+      socket: [Socket],
+      httpVersionMajor: 1,
+      httpVersionMinor: 1,
+      httpVersion: '1.1',
+      complete: true,
+      rawHeaders: [Array],
+      rawTrailers: [],
+      joinDuplicateHeaders: null,
+      aborted: false,
+      upgrade: false,
+      url: '/teachers',
+      method: 'POST',
+      statusCode: null,
+      statusMessage: null,
+      client: [Socket],
+      _consuming: true,
+      _dumped: false,
+      res: [ServerResponse],
+      next: [Function: next],
+      baseUrl: '',
+      originalUrl: '/teachers',
+      _parsedUrl: [Url],
+      params: [Object: null prototype] {},
+      body: [Object],
+      length: undefined,
+      _eventsCount: 0,
+      route: [Route],
+      logIn: [Function (anonymous)],
+      login: [Function (anonymous)],
+      logOut: [Function (anonymous)],
+      logout: [Function (anonymous)],
+      isAuthenticated: [Function (anonymous)],
+      isUnauthenticated: [Function (anonymous)],
+      _sessionManager: [SessionManager],
+      authInfo: undefined,
+      user: [Object],
+      Symbol(shapeMode): true,
+      Symbol(kCapture): false,
+      Symbol(kHeaders): [Object],
+      Symbol(kHeadersCount): 34,
+      Symbol(kTrailers): null,
+      Symbol(kTrailersCount): 0
+    },
+    ServerResponse {
+      _events: [Object: null prototype],
+      _eventsCount: 1,
+      _maxListeners: undefined,
+      outputData: [],
+      outputSize: 0,
+      writable: true,
+      destroyed: false,
+      _last: false,
+      chunkedEncoding: false,
+      shouldKeepAlive: true,
+      maxRequestsOnConnectionReached: false,
+      _defaultKeepAlive: true,
+      useChunkedEncodingByDefault: true,
+      sendDate: true,
+      _removedConnection: false,
+      _removedContLen: false,
+      _removedTE: false,
+      strictContentLength: false,
+      _contentLength: null,
+      _hasBody: true,
+      _trailer: '',
+      finished: false,
+      _headerSent: false,
+      _closed: false,
+      _header: null,
+      _keepAliveTimeout: 5000,
+      _onPendingData: [Function: bound updateOutgoingData],
+      req: [IncomingMessage],
+      _sent100: false,
+      _expect_continue: false,
+      _maxRequestsPerSocket: 0,
+      locals: [Object: null prototype] {},
+      Symbol(shapeMode): false,
+      Symbol(kCapture): false,
+      Symbol(kBytesWritten): 0,
+      Symbol(kNeedDrain): false,
+      Symbol(corked): 0,
+      Symbol(kChunkedBuffer): [],
+      Symbol(kChunkedLength): 0,
+      Symbol(kSocket): [Socket],
+      Symbol(kOutHeaders): [Object: null prototype],
+      Symbol(errored): null,
+      Symbol(kHighWaterMark): 16384,
+      Symbol(kRejectNonStandardBodyWrites): false,
+      Symbol(kUniqueHeaders): null
+    },
+    [Function: next]
+  ],
+  constructorRef: [class TeachersController],
+  handler: [Function: create],
+  contextType: 'http',
+  getRequest: [Function: getRequest],
+  getResponse: [Function: getResponse],
+  getNext: [Function: getNext]
+}
+context.gethandler(): [Function: create]
+reflector: Reflector {}
+user: { id: 1, email: undefined, role: 'admin' }
+in b in ts
+in b in ts
+Terminate batch job (Y/N)? ^C
+^C
