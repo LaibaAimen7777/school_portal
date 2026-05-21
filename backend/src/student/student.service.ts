@@ -163,6 +163,7 @@ export class StudentService {
           await manager.save(parent);
         }
       }
+      console.log('dto', dto);
       // 6️⃣ Create student using classId directly
       const student = manager.create(Student, {
         firstName: dto.firstName,
