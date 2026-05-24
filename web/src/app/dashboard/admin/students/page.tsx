@@ -69,12 +69,15 @@ export default function AdminStudents() {
             </p>
 
             <div className="actions">
-              <button
-                className="reset"
-                onClick={() => resetPassword(student.id)}
-              >
-                Reset
-              </button>
+              {(student.schoolClass.grade === 9 ||
+                student.schoolClass.grade === 10) && (
+                <button
+                  className="reset"
+                  onClick={() => resetPassword(student.id)}
+                >
+                  Reset
+                </button>
+              )}
               <button
                 className="change"
                 onClick={() => changeClass(student.id)}
