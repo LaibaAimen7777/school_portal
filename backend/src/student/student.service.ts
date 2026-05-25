@@ -192,6 +192,9 @@ export class StudentService {
         username,
         temporaryPassword: canLogin ? plainPassword : null,
         canLogin,
+
+        parentUsername: parent?.user?.username || null,
+        parentPassword: parentPlainPassword, // only exists if new
       };
     });
   }

@@ -31,9 +31,11 @@ export default function CreateStudentPage() {
   const [sections, setSections] = useState<SchoolClass[]>([]);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
-  const [studentCredentials, setStudentCredentials] = useState<{
-    username: string;
-    temporaryPassword: string;
+  const [credentials, setCredentials] = useState<{
+    studentUsername?: string;
+    studentPassword?: string;
+    parentUsername?: string;
+    parentPassword?: string;
   } | null>(null);
 
   // Student State
@@ -62,6 +64,15 @@ export default function CreateStudentPage() {
     };
     fetchGrades();
   }, []);
+
+  useEffect(() => {
+    if (credentials) {
+      // wait a bit so UI renders fully
+      setTimeout(() => {
+        handleDownloadPDF();
+      }, 500);
+    }
+  }, [credentials]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -152,15 +163,18 @@ export default function CreateStudentPage() {
 
     try {
       const res = await api.get(`/parent/by-phone?phone=${phone}`);
+
       if (res.data) {
         setFatherName(res.data.fatherName);
         setMotherName(res.data.motherName);
         setEmail(res.data.email);
         setAddress(res.data.address);
         setParentExists(true);
+      } else {
+        setParentExists(false);
       }
-    } catch {
-      setParentExists(false);
+    } catch (err) {
+      console.error("Unexpected error:", err);
     }
   };
 
@@ -185,11 +199,15 @@ export default function CreateStudentPage() {
         joiningYear,
       });
 
-      if (res.data.username) {
-        setStudentCredentials({
-          username: res.data.username,
-          temporaryPassword: res.data.temporaryPassword,
+      if (res.data) {
+        setCredentials({
+          studentUsername: res.data.username,
+          studentPassword: res.data.temporaryPassword,
+          parentUsername: res.data.parentUsername,
+          parentPassword: res.data.parentPassword,
         });
+
+        console.log("Api response", res.data);
 
         showSuccess("Student admitted & portal created!");
       } else {
@@ -200,6 +218,34 @@ export default function CreateStudentPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById("studentCredentialCard");
+    if (!element) return;
+
+    const html2canvas = (await import("html2canvas")).default;
+    const jsPDF = (await import("jspdf")).default;
+
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const imgWidth = 190;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+
+    pdf.save(`Student-${credentials?.studentUsername}-Credentials.pdf`);
   };
 
   return (
@@ -343,63 +389,52 @@ export default function CreateStudentPage() {
             </button>
           </>
         )}
-        {studentCredentials && (
+        {credentials && (
           <>
             <CredentialCard id="studentCredentialCard">
               <CredentialHeader>
-                <ResponseTitle>Student Credentials</ResponseTitle>
+                <ResponseTitle>Login Credentials</ResponseTitle>
                 <PrintButton onClick={() => window.print()}>
                   🖨️ Print
                 </PrintButton>
               </CredentialHeader>
 
+              {/* 🎓 Student Section */}
+              <ResponseTitle style={{ marginTop: "10px" }}>
+                Student Credentials
+              </ResponseTitle>
+
               <ResponseItem>
-                <strong>Username:</strong> {studentCredentials.username}
+                <strong>Username:</strong> {credentials.studentUsername}
               </ResponseItem>
 
               <ResponseItem>
-                <strong>Password:</strong>{" "}
-                <PasswordValue>
-                  {studentCredentials.temporaryPassword}
-                </PasswordValue>
+                <strong>Password:</strong>
+                <PasswordValue>{credentials.studentPassword}</PasswordValue>
               </ResponseItem>
+
+              {/* 👨‍👩‍👧 Parent Section (only if exists) */}
+              {credentials.parentUsername && (
+                <>
+                  <hr style={{ margin: "15px 0" }} />
+
+                  <ResponseTitle>Parent Credentials</ResponseTitle>
+
+                  <ResponseItem>
+                    <strong>Username:</strong> {credentials.parentUsername}
+                  </ResponseItem>
+
+                  <ResponseItem>
+                    <strong>Password:</strong>
+                    <PasswordValue>{credentials.parentPassword}</PasswordValue>
+                  </ResponseItem>
+                </>
+              )}
             </CredentialCard>
 
+            {/* Buttons */}
             <ButtonGroup>
-              <PDFButton
-                onClick={async () => {
-                  const element = document.getElementById(
-                    "studentCredentialCard",
-                  );
-                  if (!element) return;
-
-                  const html2canvas = (await import("html2canvas")).default;
-                  const jsPDF = (await import("jspdf")).default;
-
-                  const canvas = await html2canvas(element, {
-                    scale: 2,
-                    backgroundColor: "#ffffff",
-                  });
-
-                  const imgData = canvas.toDataURL("image/png");
-
-                  const pdf = new jsPDF({
-                    orientation: "portrait",
-                    unit: "mm",
-                    format: "a4",
-                  });
-
-                  const imgWidth = 190;
-                  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                  pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-                  pdf.save(
-                    `Student-${studentCredentials.username}-Credentials.pdf`,
-                  );
-                }}
-              >
-                📥 Download PDF
-              </PDFButton>
+              <PDFButton onClick={handleDownloadPDF}>📥 Download PDF</PDFButton>
             </ButtonGroup>
           </>
         )}
