@@ -4,6 +4,8 @@
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { showSuccess, showError } from "@/components/ui/toast";
+import * as S from "@/wrappers/adminCurriculum";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 
 interface Teacher {
   id: number;
@@ -25,6 +27,30 @@ interface GradeGroup {
 }
 
 const ALL_GRADES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+// Grade picker component
+function GradePicker({
+  selected,
+  onToggle,
+}: {
+  selected: number[];
+  onToggle: (grade: number) => void;
+}) {
+  return (
+    <S.GradePickerContainer>
+      {ALL_GRADES.map((g) => (
+        <S.GradePickerButton
+          key={g}
+          type="button"
+          $selected={selected.includes(g)}
+          onClick={() => onToggle(g)}
+        >
+          {g}
+        </S.GradePickerButton>
+      ))}
+    </S.GradePickerContainer>
+  );
+}
 
 export default function CurriculumPage() {
   const [grouped, setGrouped] = useState<GradeGroup[]>([]);
@@ -151,268 +177,129 @@ export default function CurriculumPage() {
     );
   };
 
-  if (loading) return <div style={{ padding: 32 }}>Loading...</div>;
-
+  if (loading) return <LoadingOverlay />;
   return (
-    <div style={{ padding: "32px", maxWidth: "900px", margin: "0 auto" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "24px",
-        }}
-      >
-        <h2 style={{ margin: 0 }}>Curriculum Management</h2>
-        <button
-          onClick={() => setShowCreateForm((v) => !v)}
-          style={{
-            padding: "8px 18px",
-            borderRadius: "6px",
-            border: "none",
-            background: "#2563eb",
-            color: "white",
-            cursor: "pointer",
-            fontSize: "13px",
-          }}
-        >
+    <S.Container>
+      <S.Header>
+        <S.Title>Curriculum Management</S.Title>
+        <S.AddButton onClick={() => setShowCreateForm((v) => !v)}>
           {showCreateForm ? "Cancel" : "+ Add Subject"}
-        </button>
-      </div>
+        </S.AddButton>
+      </S.Header>
 
       {/* Create form */}
       {showCreateForm && (
-        <div
-          style={{
-            border: "1px solid #bfdbfe",
-            borderRadius: "10px",
-            padding: "20px",
-            marginBottom: "24px",
-            background: "#eff6ff",
-          }}
-        >
-          <h3 style={{ margin: "0 0 16px", fontSize: "15px" }}>New Subject</h3>
+        <S.FormCard>
+          <S.FormTitle>New Subject</S.FormTitle>
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}
           >
-            <div>
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                Subject Name
-              </label>
-              <input
+            <S.FormGroup>
+              <S.Label>Subject Name</S.Label>
+              <S.Input
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="e.g. Mathematics"
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                  width: "300px",
-                }}
               />
-            </div>
+            </S.FormGroup>
 
-            <div>
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                Subject Code
-              </label>
-              <input
+            <S.FormGroup>
+              <S.Label>Subject Code</S.Label>
+              <S.Input
                 value={newCode}
                 onChange={(e) => setNewCode(e.target.value.toUpperCase())}
                 placeholder="e.g. BIO101"
                 maxLength={10}
                 style={{
-                  padding: "8px 12px",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                  width: "200px",
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
+                  width: "200px",
                 }}
               />
-            </div>
-            <div>
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                Periods Per Week
-              </label>
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <input
+            </S.FormGroup>
+
+            <S.FormGroup>
+              <S.Label>Periods Per Week</S.Label>
+              <S.PeriodsWrapper>
+                <S.SmallInput
                   type="number"
                   value={newPeriods}
                   onChange={(e) => setNewPeriods(Number(e.target.value))}
                   min={1}
                   max={10}
-                  style={{
-                    padding: "8px 12px",
-                    borderRadius: "6px",
-                    border: "1px solid #d1d5db",
-                    width: "80px",
-                  }}
                 />
-                <span style={{ fontSize: "12px", color: "#6b7280" }}>
-                  periods/week
-                </span>
-              </div>
-            </div>
-            <div>
-              <label
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  display: "block",
-                  marginBottom: "8px",
-                }}
-              >
-                Applicable Grades
-              </label>
+                <S.PeriodsHint>periods/week</S.PeriodsHint>
+              </S.PeriodsWrapper>
+            </S.FormGroup>
+
+            <S.FormGroup>
+              <S.Label>Applicable Grades</S.Label>
               <GradePicker
                 selected={newGrades}
                 onToggle={(g) => toggleGrade(g, newGrades, setNewGrades)}
               />
-            </div>
-            <button
-              onClick={handleCreate}
-              disabled={creating}
-              style={{
-                alignSelf: "flex-start",
-                padding: "8px 20px",
-                borderRadius: "6px",
-                border: "none",
-                background: "#2563eb",
-                color: "white",
-                cursor: "pointer",
-                fontSize: "13px",
-              }}
-            >
+            </S.FormGroup>
+
+            <S.CreateButton onClick={handleCreate} disabled={creating}>
               {creating ? "Creating..." : "Create Subject"}
-            </button>
+            </S.CreateButton>
           </div>
-        </div>
+        </S.FormCard>
       )}
 
       {/* Grouped by grade */}
       {grouped.length === 0 ? (
-        <div style={{ color: "#6b7280", fontSize: "14px" }}>
+        <S.EmptyState>
           No subjects yet. Add your first subject above.
-        </div>
+        </S.EmptyState>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div>
           {grouped.map(({ grade, subjects }) => (
-            <div
-              key={grade}
-              style={{
-                border: "1px solid #e2e8f0",
-                borderRadius: "10px",
-                overflow: "hidden",
-              }}
-            >
+            <S.GradeGroupCard key={grade}>
               {/* Grade header */}
-              <button
+              <S.GradeHeader
+                $expanded={expandedGrade === grade}
                 onClick={() =>
                   setExpandedGrade(expandedGrade === grade ? null : grade)
                 }
-                style={{
-                  width: "100%",
-                  padding: "14px 20px",
-                  border: "none",
-                  background: expandedGrade === grade ? "#f8fafc" : "white",
-                  cursor: "pointer",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderBottom:
-                    expandedGrade === grade ? "1px solid #e2e8f0" : "none",
-                }}
               >
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
-                >
-                  <span style={{ fontWeight: 700, fontSize: "15px" }}>
-                    Grade {grade}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      padding: "2px 10px",
-                      borderRadius: "99px",
-                      background: "#e0f2fe",
-                      color: "#0369a1",
-                    }}
-                  >
+                <S.GradeTitle>
+                  <S.GradeNumber>Grade {grade}</S.GradeNumber>
+                  <S.SubjectCount>
                     {subjects.length} subject{subjects.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-                <span style={{ color: "#94a3b8" }}>
-                  {expandedGrade === grade ? "▲" : "▼"}
-                </span>
-              </button>
+                  </S.SubjectCount>
+                </S.GradeTitle>
+                <S.ExpandIcon $expanded={expandedGrade === grade}>
+                  ▼
+                </S.ExpandIcon>
+              </S.GradeHeader>
 
               {/* Subject rows */}
               {expandedGrade === grade && (
                 <div>
                   {subjects.map((subject) => (
-                    <div
+                    <S.SubjectRow
                       key={subject.id}
-                      style={{
-                        padding: "14px 20px",
-                        borderBottom: "1px solid #f9fafb",
-                        background:
-                          editingId === subject.id ? "#fafafa" : "white",
-                      }}
+                      $isEditing={editingId === subject.id}
                     >
                       {editingId === subject.id ? (
                         /* Edit mode */
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "10px",
-                          }}
-                        >
-                          <input
+                        <S.EditForm>
+                          <S.Input
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            style={{
-                              padding: "6px 10px",
-                              borderRadius: "6px",
-                              border: "1px solid #d1d5db",
-                              fontSize: "13px",
-                              width: "280px",
-                            }}
+                            style={{ width: "280px" }}
                           />
                           <div>
-                            <p
+                            <S.Label
                               style={{
-                                fontSize: "12px",
-                                color: "#6b7280",
-                                margin: "0 0 6px",
+                                fontSize: "0.75rem",
+                                marginBottom: "0.5rem",
+                                display: "block",
                               }}
                             >
                               Grades:
-                            </p>
+                            </S.Label>
                             <GradePicker
                               selected={editGrades}
                               onToggle={(g) =>
@@ -421,16 +308,16 @@ export default function CurriculumPage() {
                             />
                           </div>
                           <div>
-                            <p
+                            <S.Label
                               style={{
-                                fontSize: "12px",
-                                color: "#6b7280",
-                                margin: "0 0 6px",
+                                fontSize: "0.75rem",
+                                marginBottom: "0.5rem",
+                                display: "block",
                               }}
                             >
                               Periods per week:
-                            </p>
-                            <input
+                            </S.Label>
+                            <S.SmallInput
                               type="number"
                               value={editPeriods}
                               onChange={(e) =>
@@ -438,144 +325,62 @@ export default function CurriculumPage() {
                               }
                               min={1}
                               max={10}
-                              style={{
-                                padding: "6px 10px",
-                                borderRadius: "6px",
-                                border: "1px solid #d1d5db",
-                                fontSize: "13px",
-                                width: "80px",
-                              }}
                             />
                           </div>
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <button
+                          <S.EditActions>
+                            <S.SaveButton
                               onClick={() => handleSave(subject.id)}
                               disabled={saving}
-                              style={{
-                                padding: "6px 16px",
-                                borderRadius: "6px",
-                                border: "none",
-                                background: "#2563eb",
-                                color: "white",
-                                cursor: "pointer",
-                                fontSize: "13px",
-                              }}
                             >
                               {saving ? "Saving..." : "Save"}
-                            </button>
-                            <button
-                              onClick={() => setEditingId(null)}
-                              style={{
-                                padding: "6px 16px",
-                                borderRadius: "6px",
-                                border: "1px solid #e2e8f0",
-                                background: "white",
-                                cursor: "pointer",
-                                fontSize: "13px",
-                              }}
-                            >
+                            </S.SaveButton>
+                            <S.CancelButton onClick={() => setEditingId(null)}>
                               Cancel
-                            </button>
-                          </div>
-                        </div>
+                            </S.CancelButton>
+                          </S.EditActions>
+                        </S.EditForm>
                       ) : (
                         /* View mode */
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
+                        <S.SubjectInfo>
                           <div>
-                            <span style={{ fontWeight: 600, fontSize: "14px" }}>
-                              {subject.name}
-                            </span>
-                            <div
-                              style={{
-                                marginTop: "4px",
-                                display: "flex",
-                                gap: "4px",
-                                flexWrap: "wrap",
-                              }}
-                            >
+                            <S.SubjectName>{subject.name}</S.SubjectName>
+                            <S.SubjectMeta>
                               {subject.grades.map((g, index) => (
-                                <span
-                                  key={`${g}-${index}`}
-                                  style={{
-                                    fontSize: "11px",
-                                    padding: "1px 8px",
-                                    borderRadius: "99px",
-                                    background: "#f1f5f9",
-                                    color: "#475569",
-                                    border: "1px solid #e2e8f0",
-                                  }}
-                                >
+                                <S.GradeBadge key={`${g}-${index}`}>
                                   Gr {g}
-                                </span>
+                                </S.GradeBadge>
                               ))}
-                              <span
-                                style={{
-                                  fontSize: "11px",
-                                  color: "#94a3b8",
-                                  marginLeft: "4px",
-                                }}
-                              >
+                              <S.MetaText>
                                 {subject.teacherCount} teacher
                                 {subject.teacherCount !== 1 ? "s" : ""} assigned
-                              </span>
-                              <span
-                                style={{
-                                  fontSize: "11px",
-                                  color: "#94a3b8",
-                                  marginLeft: "4px",
-                                }}
-                              >
+                              </S.MetaText>
+                              <S.MetaText>
                                 {subject.periodsPerWeek ?? 5} periods/week
-                              </span>
-                            </div>
+                              </S.MetaText>
+                            </S.SubjectMeta>
                           </div>
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <button
-                              onClick={() => startEdit(subject)}
-                              style={{
-                                padding: "5px 14px",
-                                borderRadius: "6px",
-                                border: "1px solid #e2e8f0",
-                                background: "white",
-                                cursor: "pointer",
-                                fontSize: "12px",
-                              }}
-                            >
+                          <S.ButtonGroup>
+                            <S.EditButton onClick={() => startEdit(subject)}>
                               Edit
-                            </button>
-                            <button
+                            </S.EditButton>
+                            <S.DeleteButton
                               onClick={() =>
                                 handleDelete(subject.id, subject.name)
                               }
-                              style={{
-                                padding: "5px 14px",
-                                borderRadius: "6px",
-                                border: "1px solid #fecaca",
-                                background: "#fef2f2",
-                                color: "#b91c1c",
-                                cursor: "pointer",
-                                fontSize: "12px",
-                              }}
                             >
                               Remove
-                            </button>
-                          </div>
-                        </div>
+                            </S.DeleteButton>
+                          </S.ButtonGroup>
+                        </S.SubjectInfo>
                       )}
-                    </div>
+                    </S.SubjectRow>
                   ))}
 
                   {subjects.length === 0 && (
                     <div
                       style={{
-                        padding: "14px 20px",
-                        fontSize: "13px",
+                        padding: "1rem 1.5rem",
+                        fontSize: "0.8rem",
                         color: "#9ca3af",
                       }}
                     >
@@ -584,44 +389,10 @@ export default function CurriculumPage() {
                   )}
                 </div>
               )}
-            </div>
+            </S.GradeGroupCard>
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-// Grade picker component
-function GradePicker({
-  selected,
-  onToggle,
-}: {
-  selected: number[];
-  onToggle: (grade: number) => void;
-}) {
-  return (
-    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-      {ALL_GRADES.map((g) => (
-        <button
-          key={g}
-          type="button"
-          onClick={() => onToggle(g)}
-          style={{
-            padding: "4px 12px",
-            borderRadius: "6px",
-            border: "1px solid",
-            borderColor: selected.includes(g) ? "#2563eb" : "#e2e8f0",
-            background: selected.includes(g) ? "#eff6ff" : "white",
-            color: selected.includes(g) ? "#2563eb" : "#6b7280",
-            cursor: "pointer",
-            fontSize: "13px",
-            fontWeight: selected.includes(g) ? 600 : 400,
-          }}
-        >
-          {g}
-        </button>
-      ))}
-    </div>
+    </S.Container>
   );
 }
