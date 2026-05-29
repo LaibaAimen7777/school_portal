@@ -41,7 +41,7 @@ export class ParentService {
       where: parent.students.map((s) => ({ id: s.id })),
       relations: [
         'schoolClass',
-        'schoolClass.attendance',
+        // 'schoolClass.attendance',
         'schoolClass.schedules.subject',
         'schoolClass.schedules.teacher',
         'schoolClass.schedules.room',

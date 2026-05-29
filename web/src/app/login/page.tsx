@@ -15,9 +15,9 @@ import {
   ForgotPassword,
   ErrorMessage,
   BackToHome,
+  TogglePassword,
 } from "@/wrappers/loginStyles";
-import { FaUser, FaLock } from "react-icons/fa";
-// import { ThemeToggle } from "@/components/ThemeToggle";
+import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function LoginPage() {
@@ -27,6 +27,7 @@ export default function LoginPage() {
   });
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
 
@@ -109,7 +110,7 @@ export default function LoginPage() {
             <FaLock />
           </IconWrapper>
           <Input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Password"
             onChange={handleChange}
@@ -117,9 +118,12 @@ export default function LoginPage() {
             value={form.password}
             autoComplete="current-password"
           />
+          <TogglePassword onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </TogglePassword>
         </InputGroup>
 
-        <ForgotPassword>Forgot Password?</ForgotPassword>
+        {/* <ForgotPassword>Forgot Password?</ForgotPassword> */}
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -128,7 +132,7 @@ export default function LoginPage() {
         </LoginButton>
 
         <BackToHome onClick={() => router.push("/landing")}>
-          ← Back to Home
+          Back to Home
         </BackToHome>
       </Card>
       <ThemeToggle />

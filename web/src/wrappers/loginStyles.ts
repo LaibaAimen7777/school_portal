@@ -75,7 +75,7 @@ export const IconWrapper = styled.div`
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--pop-color);
+  color: var(--accent-color);
   font-size: 1.2rem;
   /* opacity: 0.7; */
   z-index: 1;
@@ -83,7 +83,7 @@ export const IconWrapper = styled.div`
 
 export const Input = styled.input`
   width: 100%;
-  padding: 1rem 1rem 1rem 3rem;
+  padding: 1rem 3rem 1rem 3rem;
   border: 2px solid transparent;
   border-radius: 12px;
   background: var(--secondary-color);
@@ -179,4 +179,15 @@ export const BackToHome = styled.a`
     color: var(--accent-color);
     opacity: 1;
   }
+`;
+
+export const TogglePassword = styled.div`
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent-color);
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 2;
 `;
