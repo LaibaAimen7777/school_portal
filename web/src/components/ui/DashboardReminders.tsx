@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/services/api";
+import * as S from "@/wrappers/dashboardReminder";
 
 interface Reminder {
   type: "warning" | "error";
@@ -85,370 +86,170 @@ export default function DashboardReminders() {
   const hasIssues = reminders.length > 0;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <S.Container>
       {/* Auto-schedule card */}
-      <div
-        style={{
-          border: "1px solid #e2e8f0",
-          borderRadius: "10px",
-          padding: "20px",
-          background: "white",
-        }}
-      >
-        <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-          <button
+      <S.Card>
+        <S.ButtonGroup>
+          <S.PrimaryButton
             onClick={() => runAutoSchedule(false)}
             disabled={autoLoading || completeness.allComplete}
-            style={{
-              whiteSpace: "nowrap",
-              padding: "8px 18px",
-              borderRadius: "6px",
-              border: "none",
-              background: completeness.allComplete ? "#e5e7eb" : "#2563eb",
-              color: completeness.allComplete ? "#9ca3af" : "white",
-              cursor: completeness.allComplete ? "not-allowed" : "pointer",
-              fontSize: "13px",
-              fontWeight: 500,
-            }}
+            $disabled={completeness.allComplete}
           >
             {autoLoading
               ? "Running..."
               : completeness.allComplete
                 ? "All scheduled ✓"
                 : "Run Auto-Schedule"}
-          </button>
+          </S.PrimaryButton>
 
           {/* Regenerate — always available */}
           {!showConfirm ? (
-            <button
+            <S.SecondaryButton
               onClick={() => setShowConfirm(true)}
               disabled={autoLoading}
-              style={{
-                whiteSpace: "nowrap",
-                padding: "8px 18px",
-                borderRadius: "6px",
-                border: "1px solid #e2e8f0",
-                background: "white",
-                color: "#374151",
-                cursor: "pointer",
-                fontSize: "13px",
-              }}
             >
               🔄 Regenerate
-            </button>
+            </S.SecondaryButton>
           ) : (
-            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-              <span
-                style={{
-                  fontSize: "12px",
-                  color: "#b91c1c",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Clears all schedules!
-              </span>
-              <button
-                onClick={() => runAutoSchedule(true)}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: "6px",
-                  border: "none",
-                  background: "#dc2626",
-                  color: "white",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                }}
-              >
+            <S.ConfirmContainer>
+              <S.ConfirmText>Clears all schedules!</S.ConfirmText>
+              <S.DangerButton onClick={() => runAutoSchedule(true)}>
                 Confirm
-              </button>
-              <button
-                onClick={() => setShowConfirm(false)}
-                style={{
-                  padding: "8px 14px",
-                  borderRadius: "6px",
-                  border: "1px solid #e2e8f0",
-                  background: "white",
-                  cursor: "pointer",
-                  fontSize: "13px",
-                }}
-              >
+              </S.DangerButton>
+              <S.CancelButton onClick={() => setShowConfirm(false)}>
                 Cancel
-              </button>
-            </div>
+              </S.CancelButton>
+            </S.ConfirmContainer>
           )}
-        </div>
+        </S.ButtonGroup>
 
         {/* Auto-schedule result */}
         {autoResult && (
-          <div
-            style={{
-              marginTop: "16px",
-              padding: "12px",
-              borderRadius: "6px",
-              background: autoResult.errors.length > 0 ? "#fef9c3" : "#f0fdf4",
-              border: `1px solid ${autoResult.errors.length > 0 ? "#fde047" : "#86efac"}`,
-              fontSize: "13px",
-            }}
-          >
-            <p style={{ margin: "0 0 4px", fontWeight: 500 }}>
+          <S.ResultBox $hasError={autoResult.errors.length > 0}>
+            <S.ResultTitle>
               ✅ {autoResult.scheduled} slot(s) scheduled
               {autoResult.skipped > 0 && `, ⚠️ ${autoResult.skipped} skipped`}
-            </p>
+            </S.ResultTitle>
             {autoResult.errors.map((e, i) => (
-              <p key={i} style={{ margin: "2px 0", color: "#b45309" }}>
-                • {e}
-              </p>
+              <S.ErrorItem key={i}>• {e}</S.ErrorItem>
             ))}
-          </div>
+          </S.ResultBox>
         )}
-      </div>
+      </S.Card>
 
       {/* Reminders */}
       {hasIssues && (
-        <div
-          style={{
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            overflow: "hidden",
-            background: "white",
-          }}
-        >
-          <div
-            style={{
-              padding: "14px 20px",
-              borderBottom: "1px solid #f3f4f6",
-              fontWeight: 600,
-              fontSize: "14px",
-            }}
-          >
+        <S.RemindersCard>
+          <S.RemindersHeader>
             ⚠️ Action Required ({reminders.length})
-          </div>
+          </S.RemindersHeader>
 
           {reminders.map((r, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "12px 20px",
-                borderBottom:
-                  i < reminders.length - 1 ? "1px solid #f9fafb" : "none",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: "12px",
-                background: r.type === "error" ? "#fef2f2" : "#fffbeb",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "13px",
-                  color: r.type === "error" ? "#b91c1c" : "#92400e",
-                }}
-              >
+            <S.ReminderItem key={i} $type={r.type}>
+              <S.ReminderMessage $type={r.type}>
                 {r.type === "error" ? "🔴" : "🟡"} {r.message}
-              </span>
+              </S.ReminderMessage>
               {r.link && (
-                <button
-                  onClick={() => router.push(r.link!)}
-                  style={{
-                    whiteSpace: "nowrap",
-                    fontSize: "12px",
-                    padding: "4px 12px",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "4px",
-                    background: "white",
-                    cursor: "pointer",
-                  }}
-                >
+                <S.ReminderButton onClick={() => router.push(r.link!)}>
                   Fix →
-                </button>
+                </S.ReminderButton>
               )}
-            </div>
+            </S.ReminderItem>
           ))}
-        </div>
+        </S.RemindersCard>
       )}
 
       {/* Incomplete classes detail */}
       {completeness.incompleteClasses.length > 0 && (
-        <div
-          style={{
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            overflow: "hidden",
-            background: "white",
-          }}
-        >
-          <button
+        <S.ExpandableCard>
+          <S.ExpandButton
             onClick={() =>
               setExpanded(expanded === "classes" ? null : "classes")
             }
-            style={{
-              width: "100%",
-              padding: "14px 20px",
-              border: "none",
-              borderBottom:
-                expanded === "classes" ? "1px solid #f3f4f6" : "none",
-              background: "none",
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "space-between",
-              fontWeight: 600,
-              fontSize: "14px",
-            }}
+            $expanded={expanded === "classes"}
           >
             <span>
               📋 Schedule completeness — {completeness.completeClasses}/
               {completeness.totalClasses} classes done
             </span>
-            <span>{expanded === "classes" ? "▲" : "▼"}</span>
-          </button>
+            <S.ExpandIcon $expanded={expanded === "classes"}>▼</S.ExpandIcon>
+          </S.ExpandButton>
 
           {expanded === "classes" && (
-            <div>
+            <S.ExpandContent>
               {completeness.incompleteClasses.map((c) => (
-                <div
-                  key={c.classId}
-                  style={{
-                    padding: "10px 20px",
-                    borderBottom: "1px solid #f9fafb",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    fontSize: "13px",
-                  }}
-                >
-                  <div>
+                <S.IncompleteClassItem key={c.classId}>
+                  <S.ClassInfo>
                     <strong>
                       Grade {c.grade}-{c.section}
                     </strong>
-                    <span style={{ color: "#6b7280", marginLeft: "8px" }}>
+                    <S.MissingSubjects>
                       Missing: {c.missingSubjects.join(", ")}
-                    </span>
-                  </div>
-                  <button
+                    </S.MissingSubjects>
+                  </S.ClassInfo>
+                  <S.SmallButton
                     onClick={() =>
                       router.push(
                         `/dashboard/admin/schedule/create?classId=${c.classId}`,
                       )
                     }
-                    style={{
-                      fontSize: "12px",
-                      padding: "4px 10px",
-                      border: "1px solid #d1d5db",
-                      borderRadius: "4px",
-                      background: "white",
-                      cursor: "pointer",
-                    }}
                   >
                     Schedule →
-                  </button>
-                </div>
+                  </S.SmallButton>
+                </S.IncompleteClassItem>
               ))}
-            </div>
+            </S.ExpandContent>
           )}
-        </div>
+        </S.ExpandableCard>
       )}
 
       {/* Teacher workload detail */}
       {(workload.overloadedTeachers.length > 0 ||
         workload.uncoveredSubjects.length > 0) && (
-        <div
-          style={{
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            overflow: "hidden",
-            background: "white",
-          }}
-        >
-          <button
+        <S.ExpandableCard>
+          <S.ExpandButton
             onClick={() =>
               setExpanded(expanded === "teachers" ? null : "teachers")
             }
-            style={{
-              width: "100%",
-              padding: "14px 20px",
-              border: "none",
-              borderBottom:
-                expanded === "teachers" ? "1px solid #f3f4f6" : "none",
-              background: "none",
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "space-between",
-              fontWeight: 600,
-              fontSize: "14px",
-            }}
+            $expanded={expanded === "teachers"}
           >
             <span>👨‍🏫 Teacher workload issues</span>
-            <span>{expanded === "teachers" ? "▲" : "▼"}</span>
-          </button>
+            <S.ExpandIcon $expanded={expanded === "teachers"}>▼</S.ExpandIcon>
+          </S.ExpandButton>
 
           {expanded === "teachers" && (
-            <div>
+            <S.ExpandContent>
               {workload.uncoveredSubjects.length > 0 && (
-                <div
-                  style={{
-                    padding: "12px 20px",
-                    borderBottom: "1px solid #f9fafb",
-                    background: "#fef2f2",
-                    fontSize: "13px",
-                    color: "#b91c1c",
-                  }}
-                >
+                <S.WarningBox>
                   🔴 Subjects with no teacher:{" "}
                   {workload.uncoveredSubjects.join(", ")}
-                </div>
+                </S.WarningBox>
               )}
               {workload.overloadedTeachers.map((t, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: "10px 20px",
-                    borderBottom: "1px solid #f9fafb",
-                    fontSize: "13px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <span>🟡 {t.teacherName}</span>
-                  <span style={{ color: "#92400e" }}>
+                <S.TeacherItem key={i}>
+                  <S.TeacherName>🟡 {t.teacherName}</S.TeacherName>
+                  <S.TeacherPeriods>
                     {t.weeklyPeriods} periods/week
-                  </span>
-                </div>
+                  </S.TeacherPeriods>
+                </S.TeacherItem>
               ))}
-              <div style={{ padding: "10px 20px" }}>
-                <button
+              <S.AddButtonContainer>
+                <S.AddTeacherButton
                   onClick={() => router.push("/dashboard/admin/create-teacher")}
-                  style={{
-                    fontSize: "13px",
-                    padding: "6px 14px",
-                    border: "1px solid #2563eb",
-                    borderRadius: "6px",
-                    background: "white",
-                    color: "#2563eb",
-                    cursor: "pointer",
-                  }}
                 >
                   + Add new teacher
-                </button>
-              </div>
-            </div>
+                </S.AddTeacherButton>
+              </S.AddButtonContainer>
+            </S.ExpandContent>
           )}
-        </div>
+        </S.ExpandableCard>
       )}
 
       {!hasIssues && (
-        <div
-          style={{
-            padding: "16px 20px",
-            borderRadius: "10px",
-            background: "#f0fdf4",
-            border: "1px solid #86efac",
-            fontSize: "13px",
-            color: "#166534",
-          }}
-        >
+        <S.SuccessMessage>
           ✅ All classes are fully scheduled and teacher workloads look healthy.
-        </div>
+        </S.SuccessMessage>
       )}
-    </div>
+    </S.Container>
   );
 }

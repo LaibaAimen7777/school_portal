@@ -75,9 +75,9 @@ export const IconWrapper = styled.div`
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--accent-color);
+  color: var(--pop-color);
   font-size: 1.2rem;
-  opacity: 0.7;
+  /* opacity: 0.7; */
   z-index: 1;
 `;
 
