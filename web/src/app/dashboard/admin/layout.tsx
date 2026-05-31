@@ -6,15 +6,19 @@ import {
   LayoutWrapper,
   Sidebar,
   SidebarHeader,
+  Logo,
+  LogoText,
   NavSection,
-  NavLabel,
-  NavButton,
+  NavItem,
   SidebarFooter,
   UserInfo,
   UserAvatar,
   UserDetails,
   LogoutButton,
   ContentArea,
+  TopBar,
+  PageTitle,
+  TopBarRight,
 } from "@/wrappers/adminLayoutStyles";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import {
@@ -25,6 +29,8 @@ import {
   FaTachometerAlt,
   FaBook,
   FaCog,
+  FaCalendarAlt,
+  FaHome,
 } from "react-icons/fa";
 
 export default function AdminLayout({
@@ -55,7 +61,6 @@ export default function AdminLayout({
       return;
     }
 
-    // Get user data from somewhere
     const userEmail = "admin@school.com";
     setUserData({
       initial: userEmail.charAt(0).toUpperCase(),
@@ -76,100 +81,91 @@ export default function AdminLayout({
 
   if (!checked) return null;
 
+  const navItems = [
+    {
+      section: "MAIN",
+      items: [
+        { path: "/dashboard/admin", icon: FaTachometerAlt, label: "Dashboard" },
+      ],
+    },
+    {
+      section: "MANAGEMENT",
+      items: [
+        { path: "/dashboard/admin/students", icon: FaUsers, label: "Students" },
+        {
+          path: "/dashboard/admin/create-student",
+          icon: FaUserPlus,
+          label: "Add Student",
+        },
+        {
+          path: "/dashboard/admin/teachers",
+          icon: FaChalkboardTeacher,
+          label: "Teachers",
+        },
+        {
+          path: "/dashboard/admin/create-teacher",
+          icon: FaUserPlus,
+          label: "Add Teacher",
+        },
+      ],
+    },
+    {
+      section: "ACADEMIC",
+      items: [
+        {
+          path: "/dashboard/admin/schedule",
+          icon: FaCalendarAlt,
+          label: "Schedule",
+        },
+        { path: "/dashboard/admin/exams", icon: FaBook, label: "Exams" },
+      ],
+    },
+    {
+      section: "SYSTEM",
+      items: [
+        {
+          path: "/dashboard/admin/school-config",
+          icon: FaCog,
+          label: "Configuration",
+        },
+        {
+          path: "/dashboard/admin/curriculum",
+          icon: FaCog,
+          label: "Curriculum",
+        },
+      ],
+    },
+  ];
+
   return (
     <LayoutWrapper>
       <Sidebar>
         <SidebarHeader>
-          <h2>ADMIN</h2>
-          <p>Management Panel</p>
+          <Logo>EA</Logo>
+          <LogoText>Élan Admin</LogoText>
         </SidebarHeader>
 
         <NavSection>
-          <NavLabel>Main</NavLabel>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin")}
-            $active={isActive("/dashboard/admin")}
-          >
-            <FaTachometerAlt />
-            <span>Dashboard</span>
-          </NavButton>
-
-          <NavLabel>Management</NavLabel>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/students")}
-            $active={isActive("/dashboard/admin/students")}
-          >
-            <FaUsers />
-            <span>Students</span>
-          </NavButton>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/create-student")}
-            $active={isActive("/dashboard/admin/create-student")}
-          >
-            <FaUserPlus />
-            <span>Add Student</span>
-          </NavButton>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/teachers")}
-            $active={isActive("/dashboard/admin/teachers")}
-          >
-            <FaChalkboardTeacher />
-            <span>Teachers</span>
-          </NavButton>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/create-teacher")}
-            $active={isActive("/dashboard/admin/create-teacher")}
-          >
-            <FaUserPlus />
-            <span>Add Teacher</span>
-          </NavButton>
-
-          <NavLabel>Academic</NavLabel>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/schedule/create")}
-            $active={isActive("/dashboard/admin/schedule/create")}
-          >
-            <FaBook />
-            <span>Create Schedule</span>
-          </NavButton>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/schedule")}
-            $active={isActive("/dashboard/admin/schedule")}
-          >
-            <FaCog />
-            <span>Display Schedule</span>
-          </NavButton>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/exams")}
-            $active={isActive("/dashboard/admin/exams")}
-          >
-            <FaCog />
-            <span>Create Exam</span>
-          </NavButton>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/school-config")}
-            $active={isActive("/dashboard/admin/school-config")}
-          >
-            <FaCog />
-            <span>Config</span>
-          </NavButton>
-
-          <NavButton
-            onClick={() => router.push("/dashboard/admin/curriculum")}
-            $active={isActive("/dashboard/admin/curriculum")}
-          >
-            <FaCog />
-            <span>Set Curriculum</span>
-          </NavButton>
+          {navItems.map((section, idx) => (
+            <div key={idx}>
+              <div className="section-label">{section.section}</div>
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const active = isActive(item.path);
+                return (
+                  <NavItem
+                    key={item.path}
+                    onClick={() => router.push(item.path)}
+                    $active={active}
+                  >
+                    <Icon />
+                    <span>{item.label}</span>
+                    {active && <div className="active-indicator" />}
+                  </NavItem>
+                );
+              })}
+            </div>
+          ))}
         </NavSection>
 
         <SidebarFooter>
@@ -188,9 +184,18 @@ export default function AdminLayout({
         </SidebarFooter>
       </Sidebar>
 
-      <ContentArea>{children}</ContentArea>
-
-      <ThemeToggle />
+      <ContentArea>
+        <TopBar>
+          <PageTitle>
+            {pathname.split("/").pop()?.replace(/-/g, " ").toUpperCase() ||
+              "DASHBOARD"}
+          </PageTitle>
+          <TopBarRight>
+            <ThemeToggle />
+          </TopBarRight>
+        </TopBar>
+        {children}
+      </ContentArea>
     </LayoutWrapper>
   );
 }

@@ -5,6 +5,20 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/services/api";
 import * as S from "@/wrappers/dashboardReminder";
+import {
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaSyncAlt,
+  FaTrashAlt,
+  FaTimes,
+  FaRegCalendarAlt,
+  FaChalkboardTeacher,
+  FaUserPlus,
+  FaArrowRight,
+  FaChevronDown,
+  FaClock,
+  FaBook,
+} from "react-icons/fa";
 
 interface Reminder {
   type: "warning" | "error";
@@ -95,28 +109,31 @@ export default function DashboardReminders() {
             disabled={autoLoading || completeness.allComplete}
             $disabled={completeness.allComplete}
           >
+            <FaRegCalendarAlt />
             {autoLoading
               ? "Running..."
               : completeness.allComplete
-                ? "All scheduled ✓"
+                ? "All Scheduled"
                 : "Run Auto-Schedule"}
           </S.PrimaryButton>
 
-          {/* Regenerate — always available */}
           {!showConfirm ? (
             <S.SecondaryButton
               onClick={() => setShowConfirm(true)}
               disabled={autoLoading}
             >
-              🔄 Regenerate
+              <FaSyncAlt />
+              Regenerate
             </S.SecondaryButton>
           ) : (
             <S.ConfirmContainer>
               <S.ConfirmText>Clears all schedules!</S.ConfirmText>
               <S.DangerButton onClick={() => runAutoSchedule(true)}>
+                <FaTrashAlt />
                 Confirm
               </S.DangerButton>
               <S.CancelButton onClick={() => setShowConfirm(false)}>
+                <FaTimes />
                 Cancel
               </S.CancelButton>
             </S.ConfirmContainer>
@@ -127,8 +144,9 @@ export default function DashboardReminders() {
         {autoResult && (
           <S.ResultBox $hasError={autoResult.errors.length > 0}>
             <S.ResultTitle>
-              ✅ {autoResult.scheduled} slot(s) scheduled
-              {autoResult.skipped > 0 && `, ⚠️ ${autoResult.skipped} skipped`}
+              <FaCheckCircle />
+              {autoResult.scheduled} slot(s) scheduled
+              {autoResult.skipped > 0 && `, ${autoResult.skipped} skipped`}
             </S.ResultTitle>
             {autoResult.errors.map((e, i) => (
               <S.ErrorItem key={i}>• {e}</S.ErrorItem>
@@ -141,7 +159,8 @@ export default function DashboardReminders() {
       {hasIssues && (
         <S.RemindersCard>
           <S.RemindersHeader>
-            ⚠️ Action Required ({reminders.length})
+            <FaExclamationTriangle />
+            Action Required ({reminders.length})
           </S.RemindersHeader>
 
           {reminders.map((r, i) => (
@@ -151,7 +170,7 @@ export default function DashboardReminders() {
               </S.ReminderMessage>
               {r.link && (
                 <S.ReminderButton onClick={() => router.push(r.link!)}>
-                  Fix →
+                  Fix <FaArrowRight />
                 </S.ReminderButton>
               )}
             </S.ReminderItem>
@@ -169,10 +188,13 @@ export default function DashboardReminders() {
             $expanded={expanded === "classes"}
           >
             <span>
-              📋 Schedule completeness — {completeness.completeClasses}/
-              {completeness.totalClasses} classes done
+              <FaRegCalendarAlt /> Schedule completeness —{" "}
+              {completeness.completeClasses}/{completeness.totalClasses} classes
+              done
             </span>
-            <S.ExpandIcon $expanded={expanded === "classes"}>▼</S.ExpandIcon>
+            <S.ExpandIcon $expanded={expanded === "classes"}>
+              <FaChevronDown />
+            </S.ExpandIcon>
           </S.ExpandButton>
 
           {expanded === "classes" && (
@@ -194,7 +216,7 @@ export default function DashboardReminders() {
                       )
                     }
                   >
-                    Schedule →
+                    Schedule <FaArrowRight />
                   </S.SmallButton>
                 </S.IncompleteClassItem>
               ))}
@@ -213,21 +235,28 @@ export default function DashboardReminders() {
             }
             $expanded={expanded === "teachers"}
           >
-            <span>👨‍🏫 Teacher workload issues</span>
-            <S.ExpandIcon $expanded={expanded === "teachers"}>▼</S.ExpandIcon>
+            <span>
+              <FaChalkboardTeacher /> Teacher workload issues
+            </span>
+            <S.ExpandIcon $expanded={expanded === "teachers"}>
+              <FaChevronDown />
+            </S.ExpandIcon>
           </S.ExpandButton>
 
           {expanded === "teachers" && (
             <S.ExpandContent>
               {workload.uncoveredSubjects.length > 0 && (
                 <S.WarningBox>
-                  🔴 Subjects with no teacher:{" "}
+                  <FaExclamationTriangle />
+                  Subjects with no teacher:{" "}
                   {workload.uncoveredSubjects.join(", ")}
                 </S.WarningBox>
               )}
               {workload.overloadedTeachers.map((t, i) => (
                 <S.TeacherItem key={i}>
-                  <S.TeacherName>🟡 {t.teacherName}</S.TeacherName>
+                  <S.TeacherName>
+                    <FaClock /> {t.teacherName}
+                  </S.TeacherName>
                   <S.TeacherPeriods>
                     {t.weeklyPeriods} periods/week
                   </S.TeacherPeriods>
@@ -237,7 +266,8 @@ export default function DashboardReminders() {
                 <S.AddTeacherButton
                   onClick={() => router.push("/dashboard/admin/create-teacher")}
                 >
-                  + Add new teacher
+                  <FaUserPlus />
+                  Add new teacher
                 </S.AddTeacherButton>
               </S.AddButtonContainer>
             </S.ExpandContent>
@@ -247,7 +277,8 @@ export default function DashboardReminders() {
 
       {!hasIssues && (
         <S.SuccessMessage>
-          ✅ All classes are fully scheduled and teacher workloads look healthy.
+          <FaCheckCircle />
+          All classes are fully scheduled and teacher workloads look healthy.
         </S.SuccessMessage>
       )}
     </S.Container>

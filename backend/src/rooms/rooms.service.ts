@@ -38,10 +38,10 @@ export class RoomsService {
     endTime: string,
   ) {
     const allRooms = await this.roomRepo.find();
-    console.log('allrooms in rs in b:', allRooms);
 
     const bookedRooms = await this.scheduleRepo
       .createQueryBuilder('schedule')
+      .leftJoinAndSelect('schedule.room', 'room')
       .where('schedule.dayOfWeek =:dayOfWeek', { dayOfWeek })
       .andWhere(
         '(schedule.startTime <:endTime AND schedule.endTime >:startTime)',
@@ -54,6 +54,12 @@ export class RoomsService {
         .filter((s) => s.room) // Only keep schedules that have a room
         .map((s) => s.room.id),
     );
+
+    console.log({
+      dayOfWeek,
+      startTime,
+      endTime,
+    });
 
     return allRooms.filter((room) => !bookedRoomIds.has(room.id));
   }

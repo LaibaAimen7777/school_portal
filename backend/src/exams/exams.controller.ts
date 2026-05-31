@@ -28,4 +28,14 @@ export class ExamsController {
   getTeacherExams(@Param('teacherId', ParseIntPipe) teacherId: number) {
     return this.examsService.getTeacherExams(teacherId);
   }
+
+  @Get('reminders')
+  getReminders() {
+    return this.examsService.getExamReminders();
+  }
+
+  @Post('auto-schedule')
+  autoSchedule() {
+    return this.examsService.autoScheduleExams();
+  }
 }

@@ -3,41 +3,60 @@
 
 :root {
   /* LIGHT MODE */
-  --bg-color: #f2e0d2; /* Oat Milk - Warm, premium creamy canvas */
-  --bg-secondary: #e9d3c2; /* Slightly deeper oat tint for section blocks */
-  --text-color: #2d080c; /* Deep Midnight Wine - Excellent readability */
-  --heading-color: #9e182b; /* Red Wine - Deep, striking academic headlines */
-  --accent-color: #9e182b; /* Red Wine - Dominant choice for main buttons */
-  --secondary-color: #f2afbc; /* Blush - Softer tone for tags, icons, active states */
-  --nav-bg: #f2e0d2; /* Oat Milk navigation bar */
-  --card-bg: #ffffff; /* Pure white cards to jump off the oat background */
+  --bg-color: #eaeff2; /* Arctic Mist - High-end, pristine cool-grey canvas */
+  --bg-secondary: #d9e2e8; /* Frosted Glaze - Crisp structural section block */
+  --text-color: #1a262c; /* Iron Ink - Sharp, definitive readability */
+  --heading-color: #2c3e46; /* Dark Nordic Slate - Distinguished, minimal titles */
+  --accent-color: #2c3e46; /* Nordic Slate - Main crisp buttons */
+  --secondary-color: #9bb1bb; /* Muted Steel - Soft slate-blue for tags and dividers */
+  --nav-bg: #eaeff2;
+  --card-bg: #ffffff;
   --button-text: #ffffff;
-  --button-text-hover: #f2e0d2;
-  --border-color: #dcc3b0;
+  --button-text-hover: #eaeff2;
+  --border-color: #c5d2d9;
   --border-width: 1px;
-  --shadow:
-    0 20px 35px -12px rgba(158, 24, 43, 0.06), 0 1px 2px rgba(158, 24, 43, 0.02);
-  --shadow-hover: 0 30px 45px -18px rgba(158, 24, 43, 0.12);
+  --shadow: 0 20px 35px -12px rgba(44, 62, 70, 0.06);
+  --shadow-hover: 0 30px 45px -18px rgba(44, 62, 70, 0.12);
+
+  /* RGB Translations for Glass Translucency */
+  --bg-color-rgb: 234, 239, 242;
+  --bg-secondary-rgb: 217, 226, 232;
+  --border-color-rgb: 197, 210, 217;
+  --accent-color-rgb: 44, 62, 70;
+  --text-color-rgb: 26, 38, 44;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
 }
 
 [data-theme="dark"] {
   /* DARK MODE */
-  --bg-color: #2b070a; /* Deep Velvet Wine - Luxurious, dark background */
-  --bg-secondary: #1f0507; /* Near-black crimson for block structure depth */
-  --text-color: #f2e0d2; /* Oat Milk - Highly visible, easy-on-the-eyes text */
-  --heading-color: #f9cbd6; /* Rose Quartz - Glowing pink headlines in the dark */
-  --accent-color: #f2afbc; /* Blush - Pops brightly as a link/action item */
-  --secondary-color: #9e182b; /* Red Wine - Subtle container borders or filled states */
-  --nav-bg: #2b070a;
-  --card-bg: #3d0d12; /* Shifted lighter wine tone for card containers */
-  --button-text: #2b070a; /* Dark text for great contrast on light buttons */
-  --button-text-hover: #1f0507;
-  --border-color: #5c131d;
+  --bg-color: #141c20; /* Midnight Ink - Luxurious deep charcoal canvas */
+  --bg-secondary: #0d1316; /* Obsidian - Absolute deep background layouts */
+  --text-color: #eaeff2; /* Arctic Mist - Luminescent reading typography */
+  --heading-color: #b9cbd3; /* Ice Blue - Crisp, crystal clear headings */
+  --accent-color: #9bb1bb; /* Muted Steel - Elegant interactives that cut the dark */
+  --secondary-color: #2c3e46; /* Nordic Slate - For dark layout internal borders */
+  --nav-bg: #141c20;
+  --card-bg: #202b30; /* Soft slate elevation panels */
+  --button-text: #141c20;
+  --button-text-hover: #0d1316;
+  --border-color: #2c3e46;
   --border-width: 1px;
-  --shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-  --shadow-hover: 0 30px 45px -18px rgba(0, 0, 0, 0.6);
-}
+  --shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.55);
+  --shadow-hover: 0 30px 45px -18px rgba(0, 0, 0, 0.65);
 
+  /* RGB Translations for Glass Translucency */
+  --bg-color-rgb: 20, 28, 32;
+  --bg-secondary-rgb: 13, 19, 22;
+  --border-color-rgb: 44, 62, 70;
+  --accent-color-rgb: 155, 177, 187;
+  --text-color-rgb: 234, 239, 242;
+}
 /* Base styles */
 * {
   box-sizing: border-box;
