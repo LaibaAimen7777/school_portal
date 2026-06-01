@@ -6,13 +6,7 @@ import {
   IsEnum,
   Matches,
 } from 'class-validator';
-
-export enum ExamType {
-  MIDTERM = 'MIDTERM',
-  FINAL = 'FINAL',
-  QUIZ = 'QUIZ',
-  PRACTICAL = 'PRACTICAL',
-}
+import { ExamTermType } from 'src/exam-periods/entities/exam-periods.entity';
 
 export class CreateExamDto {
   @IsInt()
@@ -45,6 +39,6 @@ export class CreateExamDto {
   })
   endTime!: string; // "11:00"
 
-  @IsEnum(ExamType)
-  examType!: ExamType;
+  @IsEnum(ExamTermType)
+  examType!: ExamTermType;
 }

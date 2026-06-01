@@ -12,6 +12,7 @@ import { Subject } from 'src/subject/entities/subject.entity';
 import { Teacher } from 'src/teachers/entities/teacher.entity';
 import { Rooms } from 'src/rooms/entities/rooms.entity';
 import { CreateExamDto } from './dto/create-exam.dto';
+import { ExamTermType } from 'src/exam-periods/entities/exam-periods.entity';
 
 // exams/exams.service.ts
 @Injectable()
@@ -121,7 +122,7 @@ export class ExamsService {
       );
     }
 
-    return this.examRepo.save({
+    const exam = this.examRepo.create({
       schoolClass,
       subject,
       teacher,
@@ -132,6 +133,8 @@ export class ExamsService {
       endTime,
       examType,
     });
+
+    return this.examRepo.save(exam);
   }
 
   async getTeacherExams(teacherId: number) {
@@ -366,7 +369,7 @@ export class ExamsService {
             date,
             startTime: DEFAULT_START,
             endTime: DEFAULT_END,
-            examType: 'FINAL',
+            examType: activePeriod.examType,
           });
 
           dateUsage.set(date, (dateUsage.get(date) ?? 0) + 1);

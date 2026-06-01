@@ -1,49 +1,33 @@
 // exam-periods/dto/create-exam-period.dto.ts
 import {
   IsString,
+  IsEnum,
+  IsInt,
   IsDateString,
-  IsBoolean,
-  IsOptional,
-  ValidationArguments,
-  registerDecorator,
-  ValidationOptions,
+  Min,
+  Max,
 } from 'class-validator';
-
-function IsAfterDate(property: string, options?: ValidationOptions) {
-  return (object: object, propertyName: string) => {
-    registerDecorator({
-      name: 'isAfterDate',
-      target: object.constructor,
-      propertyName,
-      constraints: [property],
-      options,
-      validator: {
-        validate(value: string, args: ValidationArguments) {
-          const [relatedField] = args.constraints;
-          const relatedValue = (args.object as any)[relatedField];
-          if (!value || !relatedValue) return true;
-          return value > relatedValue;
-        },
-        defaultMessage(args: ValidationArguments) {
-          return `${args.property} must be after ${args.constraints[0]}`;
-        },
-      },
-    });
-  };
-}
+import {
+  ExamTermType,
+  TERM_DEFAULT_DURATIONS,
+} from '../entities/exam-periods.entity';
 
 export class CreateExamPeriodDto {
   @IsString()
   name!: string;
 
+  @IsEnum(ExamTermType)
+  examType!: ExamTermType;
+
+  // Optional override — if not provided, defaults to TERM_DEFAULT_DURATIONS[examType]
+  @IsInt()
+  @Min(30)
+  @Max(300)
+  durationMinutes?: number;
+
   @IsDateString()
   startDate!: string;
 
   @IsDateString()
-  @IsAfterDate('startDate')
   endDate!: string;
-
-  @IsBoolean()
-  @IsOptional()
-  isActive?: boolean;
 }

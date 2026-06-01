@@ -7,6 +7,8 @@ import { showSuccess, showError } from "@/components/ui/toast";
 interface ExamPeriod {
   id: number;
   name: string;
+  examType: string;
+  durationMinutes: number;
   startDate: string;
   endDate: string;
 }
@@ -16,18 +18,15 @@ interface SchoolClass {
   grade: number;
   section: string;
 }
-
 interface Subject {
   id: number;
   name: string;
 }
-
 interface Teacher {
   id: number;
   fullName: string;
   subjects: { id: number }[];
 }
-
 interface Room {
   id: number;
   name: string;
@@ -45,7 +44,58 @@ interface Exam {
   room: Room;
 }
 
-const EXAM_TYPES = ["MIDTERM", "FINAL", "QUIZ", "PRACTICAL"] as const;
+interface ExamReminderData {
+  hasActivePeriod: boolean;
+  activePeriod: {
+    id: number;
+    name: string;
+    startDate: string;
+    endDate: string;
+  } | null;
+  completeness: {
+    totalClasses: number;
+    completeClasses: number;
+    allComplete: boolean;
+    incompleteClasses: {
+      classId: number;
+      grade: number;
+      section: string;
+      missingSubjects: string[];
+    }[];
+  };
+}
+
+// Fixed term types — name is auto-generated from these, admin can still edit it
+const EXAM_TYPES = [
+  {
+    value: "FIRST TERM",
+    label: "First Term",
+    defaultName: "First Term",
+    defaultDuration: 60,
+  },
+  {
+    value: "SECOND TERM",
+    label: "Second Term",
+    defaultName: "Second Term",
+    defaultDuration: 120,
+  },
+  {
+    value: "THIRD TERM",
+    label: "Third Term",
+    defaultName: "Third Term",
+    defaultDuration: 180,
+  },
+] as const;
+
+type ExamTypeValue = (typeof EXAM_TYPES)[number]["value"];
+
+const addMinutes = (time: string, minutes: number): string => {
+  const [h, m] = time.split(":").map(Number);
+  const total = h * 60 + m + minutes;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+};
+
+const currentYear = new Date().getFullYear();
 
 const initialForm = {
   examPeriodId: "",
@@ -56,11 +106,12 @@ const initialForm = {
   date: "",
   startTime: "",
   endTime: "",
-  examType: "MIDTERM",
 };
 
 const initialPeriodForm = {
+  examType: "" as ExamTypeValue | "",
   name: "",
+  durationMinutes: 60,
   startDate: "",
   endDate: "",
 };
@@ -79,20 +130,34 @@ export default function AdminExamsPage() {
   const [roomsFetched, setRoomsFetched] = useState(false);
   const [timeError, setTimeError] = useState("");
 
-  // Exam period creation state
   const [showPeriodForm, setShowPeriodForm] = useState(false);
   const [periodForm, setPeriodForm] = useState(initialPeriodForm);
   const [periodLoading, setPeriodLoading] = useState(false);
   const [periodDateError, setPeriodDateError] = useState("");
 
-  // Active exam period from today's date
+  const [reminderData, setReminderData] = useState<ExamReminderData | null>(
+    null,
+  );
+  const [autoLoading, setAutoLoading] = useState(false);
+  const [autoResult, setAutoResult] = useState<{
+    scheduled: number;
+    skipped: number;
+    errors: string[];
+  } | null>(null);
+  const [showIncomplete, setShowIncomplete] = useState(false);
+
   const activeExamPeriod = examPeriods.find((ep) => {
     const today = new Date().toISOString().split("T")[0];
     return ep.startDate <= today && ep.endDate >= today;
   });
 
+  const selectedPeriodDuration =
+    examPeriods.find((ep) => String(ep.id) === form.examPeriodId)
+      ?.durationMinutes ?? null;
+
   useEffect(() => {
     fetchAll();
+    fetchReminders();
   }, []);
 
   const fetchAll = async () => {
@@ -111,7 +176,31 @@ export default function AdminExamsPage() {
     setExams(examsRes.data);
   };
 
-  // ── Exam period creation ──────────────────────────────────────────────────
+  const fetchReminders = async () => {
+    try {
+      const res = await api.get<ExamReminderData>("/exams/reminders");
+      setReminderData(res.data);
+    } catch {
+      /* non-critical */
+    }
+  };
+
+  const runAutoSchedule = async () => {
+    setAutoLoading(true);
+    setAutoResult(null);
+    try {
+      const res = await api.post("/exams/auto-schedule");
+      setAutoResult(res.data);
+      showSuccess(`${res.data.scheduled} exam(s) scheduled!`);
+      fetchAll();
+      fetchReminders();
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Auto-schedule failed");
+    }
+    setAutoLoading(false);
+  };
+
+  // ── Period form ────────────────────────────────────────────────────────────
 
   const validatePeriodDates = (start: string, end: string) => {
     if (!start || !end) return true;
@@ -123,10 +212,28 @@ export default function AdminExamsPage() {
     return true;
   };
 
-  const handlePeriodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePeriodChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setPeriodForm((prev) => {
-      const next = { ...prev, [name]: value };
+      const next = {
+        ...prev,
+        [name]: name === "durationMinutes" ? Number(value) : value,
+      };
+
+      // When exam type changes: auto-fill name and reset duration to default
+      if (name === "examType") {
+        const match = EXAM_TYPES.find((t) => t.value === value);
+        if (match) {
+          next.name = `${match.defaultName} ${currentYear}`;
+          next.durationMinutes = match.defaultDuration;
+        } else {
+          next.name = "";
+          next.durationMinutes = 60;
+        }
+      }
+
       if (name === "startDate" || name === "endDate") {
         validatePeriodDates(
           name === "startDate" ? value : prev.startDate,
@@ -139,24 +246,27 @@ export default function AdminExamsPage() {
 
   const handleCreatePeriod = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!periodForm.examType) {
+      showError("Select a term type");
+      return;
+    }
     if (!validatePeriodDates(periodForm.startDate, periodForm.endDate)) return;
-
     setPeriodLoading(true);
     try {
       const res = await api.post("/exam-periods", periodForm);
       showSuccess("Exam period created!");
       setExamPeriods((prev) => [...prev, res.data]);
-      // Auto-select the newly created period in the exam form
       setForm((prev) => ({ ...prev, examPeriodId: String(res.data.id) }));
       setPeriodForm(initialPeriodForm);
       setShowPeriodForm(false);
+      fetchReminders();
     } catch (err: any) {
       showError(err.response?.data?.message || "Failed to create exam period");
     }
     setPeriodLoading(false);
   };
 
-  // ── Exam form ─────────────────────────────────────────────────────────────
+  // ── Exam form ──────────────────────────────────────────────────────────────
 
   const validateTimes = (start: string, end: string) => {
     if (!start || !end) return true;
@@ -176,14 +286,26 @@ export default function AdminExamsPage() {
     setForm((prev) => {
       const next = { ...prev, [name]: value };
 
-      if (name === "startTime" || name === "endTime") {
-        validateTimes(
-          name === "startTime" ? value : prev.startTime,
-          name === "endTime" ? value : prev.endTime,
-        );
+      if (name === "startTime") {
+        next.endTime =
+          value && selectedPeriodDuration
+            ? addMinutes(value, selectedPeriodDuration)
+            : "";
+        validateTimes(value, next.endTime);
+      }
+      if (name === "endTime") validateTimes(prev.startTime, value);
+
+      if (["startTime", "endTime", "examPeriodId"].includes(name)) {
         next.roomId = "";
         setAvailableRooms([]);
         setRoomsFetched(false);
+      }
+
+      if (name === "examPeriodId") {
+        const period = examPeriods.find((ep) => String(ep.id) === value);
+        if (prev.startTime && period) {
+          next.endTime = addMinutes(prev.startTime, period.durationMinutes);
+        }
       }
 
       return next;
@@ -204,11 +326,9 @@ export default function AdminExamsPage() {
       return;
     }
     if (!validateTimes(startTime, endTime)) return;
-
     setRoomsLoading(true);
     setRoomsFetched(false);
     setForm((prev) => ({ ...prev, roomId: "" }));
-
     try {
       const res = await api.get("/rooms/available", {
         params: { date, startTime, endTime },
@@ -233,6 +353,9 @@ export default function AdminExamsPage() {
     }
     if (timeError) return;
 
+    const period = examPeriods.find(
+      (ep) => String(ep.id) === form.examPeriodId,
+    );
     setLoading(true);
     try {
       await api.post("/exams", {
@@ -244,13 +367,14 @@ export default function AdminExamsPage() {
         date: form.date,
         startTime: form.startTime,
         endTime: form.endTime,
-        examType: form.examType,
+        examType: period?.examType,
       });
       showSuccess("Exam scheduled successfully!");
       setForm(initialForm);
       setAvailableRooms([]);
       setRoomsFetched(false);
       fetchAll();
+      fetchReminders();
     } catch (err: any) {
       showError(err.response?.data?.message || "Failed to create exam");
     }
@@ -258,21 +382,22 @@ export default function AdminExamsPage() {
   };
 
   const isTimeReady = form.date && form.startTime && form.endTime && !timeError;
+  const allComplete = reminderData?.completeness.allComplete ?? false;
+  const incompleteClasses = reminderData?.completeness.incompleteClasses ?? [];
 
   return (
     <div style={{ padding: "32px", maxWidth: "900px", margin: "0 auto" }}>
       <h2 style={{ marginBottom: "8px" }}>Schedule Exam</h2>
 
-      {/* ── Exam Period Section ─────────────────────────────────────────── */}
+      {/* ── Exam Periods ──────────────────────────────────────────────────── */}
       <section
         style={{
           border: "1px solid #e5e7eb",
           borderRadius: "10px",
-          marginBottom: "28px",
+          marginBottom: "20px",
           overflow: "hidden",
         }}
       >
-        {/* Header row */}
         <div
           style={{
             display: "flex",
@@ -319,7 +444,7 @@ export default function AdminExamsPage() {
           </button>
         </div>
 
-        {/* Inline create form */}
+        {/* ── Period creation form ── */}
         {showPeriodForm && (
           <form
             onSubmit={handleCreatePeriod}
@@ -333,24 +458,50 @@ export default function AdminExamsPage() {
               background: "#fafafa",
             }}
           >
+            {/* Row 1: term type dropdown + auto-filled editable name */}
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "2fr 1fr 1fr auto",
+                gridTemplateColumns: "1fr 1fr",
                 gap: "12px",
-                alignItems: "flex-end",
               }}
             >
-              <Field label="Period name">
+              <Field label="Term type *">
+                <select
+                  name="examType"
+                  value={periodForm.examType}
+                  onChange={handlePeriodChange}
+                  required
+                >
+                  <option value="">Select term type</option>
+                  {EXAM_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Period name (auto-filled, editable)">
                 <input
                   type="text"
                   name="name"
                   value={periodForm.name}
                   onChange={handlePeriodChange}
-                  placeholder="e.g. Final Term 2025"
+                  placeholder="Select a term type first"
                   required
                 />
               </Field>
+            </div>
+
+            {/* Row 2: dates + duration + submit */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr 130px auto",
+                gap: "12px",
+                alignItems: "flex-end",
+              }}
+            >
               <Field label="Start date">
                 <input
                   type="date"
@@ -370,9 +521,22 @@ export default function AdminExamsPage() {
                   required
                 />
               </Field>
+              <Field label="Duration (min)">
+                <input
+                  type="number"
+                  name="durationMinutes"
+                  value={periodForm.durationMinutes}
+                  onChange={handlePeriodChange}
+                  min={30}
+                  max={300}
+                  required
+                />
+              </Field>
               <button
                 type="submit"
-                disabled={periodLoading || !!periodDateError}
+                disabled={
+                  periodLoading || !!periodDateError || !periodForm.examType
+                }
                 style={{
                   padding: "8px 18px",
                   borderRadius: "6px",
@@ -388,6 +552,19 @@ export default function AdminExamsPage() {
                 {periodLoading ? "Creating..." : "Create"}
               </button>
             </div>
+
+            {periodForm.examType && (
+              <p style={{ margin: 0, fontSize: "12px", color: "#6b7280" }}>
+                Default duration for{" "}
+                {EXAM_TYPES.find((t) => t.value === periodForm.examType)?.label}
+                :{" "}
+                {
+                  EXAM_TYPES.find((t) => t.value === periodForm.examType)
+                    ?.defaultDuration
+                }{" "}
+                min — adjust above if needed.
+              </p>
+            )}
             {periodDateError && (
               <p style={{ color: "red", fontSize: "13px", margin: 0 }}>
                 {periodDateError}
@@ -396,7 +573,7 @@ export default function AdminExamsPage() {
           </form>
         )}
 
-        {/* Existing periods list */}
+        {/* Periods list */}
         {examPeriods.length > 0 ? (
           <div
             style={{
@@ -437,6 +614,20 @@ export default function AdminExamsPage() {
                     }}
                   />
                   <span style={{ fontWeight: 500, flex: 1 }}>{ep.name}</span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      padding: "2px 8px",
+                      borderRadius: "99px",
+                      background: "#f1f5f9",
+                      color: "#475569",
+                    }}
+                  >
+                    {ep.examType}
+                  </span>
+                  <span style={{ color: "#6b7280", fontSize: "12px" }}>
+                    {ep.durationMinutes} min
+                  </span>
                   <span style={{ color: "#6b7280" }}>
                     {ep.startDate} – {ep.endDate}
                   </span>
@@ -479,6 +670,207 @@ export default function AdminExamsPage() {
         )}
       </section>
 
+      {/* ── Reminders + Auto-scheduler ─────────────────────────────────────── */}
+      {reminderData && (
+        <section
+          style={{
+            border: "1px solid #e5e7eb",
+            borderRadius: "10px",
+            marginBottom: "28px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "12px 18px",
+              background: allComplete
+                ? "#f0fdf4"
+                : !reminderData.hasActivePeriod
+                  ? "#fef2f2"
+                  : "#fffbeb",
+              borderBottom: "1px solid #e5e7eb",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span style={{ fontSize: "16px" }}>
+              {allComplete ? "✅" : !reminderData.hasActivePeriod ? "🔴" : "🟡"}
+            </span>
+            <span
+              style={{
+                fontSize: "13px",
+                fontWeight: 500,
+                flex: 1,
+                color: allComplete
+                  ? "#15803d"
+                  : !reminderData.hasActivePeriod
+                    ? "#dc2626"
+                    : "#92400e",
+              }}
+            >
+              {allComplete
+                ? "All exams are scheduled for the active period."
+                : !reminderData.hasActivePeriod
+                  ? "No active exam period — create one above."
+                  : `${reminderData.completeness.completeClasses}/${reminderData.completeness.totalClasses} classes have all exams scheduled.`}
+            </span>
+            {!allComplete &&
+              reminderData.hasActivePeriod &&
+              incompleteClasses.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowIncomplete((v) => !v)}
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  {showIncomplete
+                    ? "Hide details"
+                    : `Show ${incompleteClasses.length} class(es)`}
+                </button>
+              )}
+          </div>
+
+          {showIncomplete && incompleteClasses.length > 0 && (
+            <div
+              style={{
+                padding: "12px 18px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                borderBottom: "1px solid #e5e7eb",
+                background: "#fafafa",
+              }}
+            >
+              {incompleteClasses.map((c) => (
+                <div
+                  key={c.classId}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontSize: "13px",
+                  }}
+                >
+                  <span style={{ fontWeight: 600, minWidth: "110px" }}>
+                    Grade {c.grade}-{c.section}
+                  </span>
+                  <span style={{ color: "#6b7280", flex: 1 }}>
+                    Missing: {c.missingSubjects.join(", ")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForm((prev) => ({
+                        ...prev,
+                        classId: String(c.classId),
+                      }));
+                      window.scrollTo({ top: 400, behavior: "smooth" });
+                    }}
+                    style={{
+                      fontSize: "12px",
+                      color: "#2563eb",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Fill ↓
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div
+            style={{
+              padding: "14px 18px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              type="button"
+              onClick={runAutoSchedule}
+              disabled={
+                autoLoading || !reminderData.hasActivePeriod || allComplete
+              }
+              style={{
+                padding: "9px 20px",
+                borderRadius: "7px",
+                border: "none",
+                background:
+                  autoLoading || !reminderData.hasActivePeriod || allComplete
+                    ? "#e5e7eb"
+                    : "#0f172a",
+                color:
+                  autoLoading || !reminderData.hasActivePeriod || allComplete
+                    ? "#9ca3af"
+                    : "white",
+                fontWeight: 600,
+                fontSize: "13px",
+                cursor:
+                  autoLoading || !reminderData.hasActivePeriod || allComplete
+                    ? "not-allowed"
+                    : "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              📅{" "}
+              {autoLoading
+                ? "Scheduling..."
+                : allComplete
+                  ? "All Scheduled"
+                  : "Auto-Schedule Exams"}
+            </button>
+            <span style={{ fontSize: "12px", color: "#9ca3af" }}>
+              Uses each period's duration to set exam end times automatically.
+            </span>
+          </div>
+
+          {autoResult && (
+            <div
+              style={{
+                margin: "0 18px 14px",
+                padding: "12px 14px",
+                borderRadius: "8px",
+                background:
+                  autoResult.errors.length > 0 ? "#fef2f2" : "#f0fdf4",
+                border: `1px solid ${autoResult.errors.length > 0 ? "#fecaca" : "#bbf7d0"}`,
+                fontSize: "13px",
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 600,
+                  marginBottom: autoResult.errors.length > 0 ? "6px" : 0,
+                  color: autoResult.errors.length > 0 ? "#dc2626" : "#15803d",
+                }}
+              >
+                ✓ {autoResult.scheduled} exam(s) scheduled
+                {autoResult.skipped > 0 && `, ${autoResult.skipped} skipped`}
+              </div>
+              {autoResult.errors.map((e, i) => (
+                <div key={i} style={{ color: "#dc2626", marginTop: "3px" }}>
+                  • {e}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Active period banner */}
       {activeExamPeriod ? (
         <div
@@ -491,7 +883,8 @@ export default function AdminExamsPage() {
             fontSize: "14px",
           }}
         >
-          Active exam period: <strong>{activeExamPeriod.name}</strong> (
+          Active: <strong>{activeExamPeriod.name}</strong> (
+          {activeExamPeriod.examType} · {activeExamPeriod.durationMinutes} min ·{" "}
           {activeExamPeriod.startDate} – {activeExamPeriod.endDate})
         </div>
       ) : (
@@ -509,11 +902,11 @@ export default function AdminExamsPage() {
         </div>
       )}
 
+      {/* ── Exam scheduling form ───────────────────────────────────────────── */}
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: "16px" }}
       >
-        {/* Exam Period */}
         <Field label="Exam Period">
           <select
             name="examPeriodId"
@@ -524,13 +917,13 @@ export default function AdminExamsPage() {
             <option value="">Select exam period</option>
             {examPeriods.map((ep) => (
               <option key={ep.id} value={ep.id}>
-                {ep.name} ({ep.startDate} – {ep.endDate})
+                {ep.name} — {ep.examType} ({ep.durationMinutes} min ·{" "}
+                {ep.startDate} – {ep.endDate})
               </option>
             ))}
           </select>
         </Field>
 
-        {/* Class */}
         <Field label="Class">
           <select
             name="classId"
@@ -547,7 +940,6 @@ export default function AdminExamsPage() {
           </select>
         </Field>
 
-        {/* Subject */}
         <Field label="Subject">
           <select
             name="subjectId"
@@ -564,7 +956,6 @@ export default function AdminExamsPage() {
           </select>
         </Field>
 
-        {/* Teacher — filtered by subject */}
         <Field label="Teacher">
           <select
             name="teacherId"
@@ -584,7 +975,6 @@ export default function AdminExamsPage() {
           </select>
         </Field>
 
-        {/* Date */}
         <Field label="Date">
           <input
             type="date"
@@ -596,8 +986,9 @@ export default function AdminExamsPage() {
           />
         </Field>
 
-        {/* Time slot */}
-        <Field label="Time slot">
+        <Field
+          label={`Time slot${selectedPeriodDuration ? ` — end auto-set to ${selectedPeriodDuration} min` : ""}`}
+        >
           <div style={{ display: "flex", gap: "8px" }}>
             <input
               type="time"
@@ -621,7 +1012,6 @@ export default function AdminExamsPage() {
           )}
         </Field>
 
-        {/* Check rooms */}
         <button
           type="button"
           onClick={checkRooms}
@@ -630,7 +1020,6 @@ export default function AdminExamsPage() {
           {roomsLoading ? "Checking..." : "Check available rooms"}
         </button>
 
-        {/* Room selection */}
         {roomsFetched && availableRooms.length > 0 && (
           <Field label="Room">
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
@@ -665,23 +1054,12 @@ export default function AdminExamsPage() {
           </p>
         )}
 
-        {/* Exam type */}
-        <Field label="Exam type">
-          <select name="examType" value={form.examType} onChange={handleChange}>
-            {EXAM_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </Field>
-
         <button type="submit" disabled={loading || !form.roomId}>
           {loading ? "Scheduling..." : "Schedule Exam"}
         </button>
       </form>
 
-      {/* Date sheet */}
+      {/* ── Date sheet ─────────────────────────────────────────────────────── */}
       <h3 style={{ marginTop: "48px" }}>Exam Date Sheet</h3>
       {exams.length === 0 ? (
         <p style={{ color: "#6b7280", fontSize: "14px" }}>
