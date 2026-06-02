@@ -1,34 +1,40 @@
+// src/teachers/dto/create-teacher.dto.ts
 import {
   IsString,
-  IsNotEmpty,
   IsOptional,
   IsDateString,
   IsArray,
+  ValidateNested,
   IsInt,
+  Min,
+  Max,
 } from 'class-validator';
-
 import { Type } from 'class-transformer';
+
+export class SubjectGradeDto {
+  @IsInt()
+  subjectId!: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  grade!: number;
+}
 
 export class CreateTeacherDto {
   @IsString()
-  @IsNotEmpty()
   fullName!: string;
 
   @IsString()
-  @IsNotEmpty()
-  qualification!: string;
-
-  // @IsOptional()
-  // @IsString()
-  // specialization?: string;
-
   @IsOptional()
+  qualification?: string;
+
   @IsDateString()
-  hireDate?: Date;
-
   @IsOptional()
+  hireDate?: string;
+
   @IsArray()
-  @IsInt({ each: true })
-  @Type(() => Number)
-  subjectIds?: number[];
+  @ValidateNested({ each: true })
+  @Type(() => SubjectGradeDto)
+  subjectGrades!: SubjectGradeDto[]; // replaces subjectIds
 }

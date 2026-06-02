@@ -1,3 +1,4 @@
+// src/teachers/teachers.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User, UserRole } from 'src/users/entities/user.entity';
@@ -6,6 +7,7 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { Teacher } from './entities/teacher.entity';
+import { TeacherSubjectGrade } from './entities/teacher-subject-grade.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
 import { Schedule } from 'src/schedule/entities/schedule.entity';
 import { Student } from 'src/student/entities/student.entity';
@@ -22,6 +24,9 @@ export class TeachersService {
 
     @InjectRepository(Teacher)
     private teacherRepository: Repository<Teacher>,
+
+    @InjectRepository(TeacherSubjectGrade)
+    private tsgRepository: Repository<TeacherSubjectGrade>,
 
     @InjectRepository(Subject)
     private subjectRepository: Repository<Subject>,
@@ -45,7 +50,6 @@ export class TeachersService {
     const lastNum = lastUser
       ? parseInt(lastUser.username.replace('TCH', ''))
       : 0;
-
     const nextNum = lastNum + 1;
     const username = `TCH${nextNum.toString().padStart(3, '0')}`;
     const teacherCode = `T-${nextNum.toString().padStart(3, '0')}`;
@@ -64,59 +68,76 @@ export class TeachersService {
     const teacher = new Teacher();
     teacher.teacherCode = teacherCode;
     teacher.fullName = dto.fullName;
-    teacher.qualification = dto.qualification;
+    teacher.qualification = dto.qualification ?? '';
     if (dto.hireDate) teacher.hireDate = dto.hireDate;
     teacher.user = savedUser;
     const savedTeacher = await this.teacherRepository.save(teacher);
 
-    const debug: any = {
-      teacherId: savedTeacher.id,
-      subjectIdsReceived: dto.subjectIds,
-      subjectsFoundCount: 0,
-      junctionInserts: [],
-      junctionTableAfter: [],
-    };
-
-    if (dto.subjectIds && dto.subjectIds.length > 0) {
-      const subjects = await this.subjectRepository.findBy({
-        id: In(dto.subjectIds),
-      });
-
-      debug.subjectsFoundCount = subjects.length;
-      debug.subjectsFound = subjects.map((s) => ({ id: s.id, name: s.name }));
-
-      for (const subject of subjects) {
-        const insertResult = await this.dataSource.query(
-          `INSERT IGNORE INTO teachers_subjects_subjects (teachersId, subjectsId) VALUES (?, ?)`,
-          [savedTeacher.id, subject.id],
-        );
-        debug.junctionInserts.push({
-          teacherId: savedTeacher.id,
-          subjectId: subject.id,
-          affectedRows: insertResult.affectedRows,
-        });
-      }
-
-      // Read back to confirm
-      debug.junctionTableAfter = await this.dataSource.query(
-        `SELECT * FROM teachers_subjects_subjects WHERE teachersId = ?`,
-        [savedTeacher.id],
+    // Save subject+grade combos
+    if (dto.subjectGrades && dto.subjectGrades.length > 0) {
+      const tsgEntries = dto.subjectGrades.map((sg) =>
+        this.tsgRepository.create({
+          teacher: { id: savedTeacher.id },
+          subject: { id: sg.subjectId },
+          grade: sg.grade,
+        }),
       );
+      await this.tsgRepository.save(tsgEntries);
     }
 
     return {
       teacherId: savedTeacher.id,
       username,
       temporaryPassword: plainPassword,
-      debug, // ✅ visible in API response
     };
   }
 
   async findAll() {
-    console.log('in b in ts');
     return this.teacherRepository.find({
-      relations: ['subjects', 'user'],
+      relations: ['subjectGrades', 'subjectGrades.subject', 'user'],
       order: { id: 'DESC' },
+    });
+  }
+
+  /**
+   * Returns teachers who can teach a specific subject in a specific grade.
+   * Used by schedule and exam creation to filter the teacher dropdown.
+   * Throws if no teachers qualify (blocks scheduling).
+   */
+  async findBySubjectAndGrade(subjectId: number, grade: number) {
+    const tsgs = await this.tsgRepository.find({
+      where: { subject: { id: subjectId }, grade },
+      relations: ['teacher', 'teacher.user'],
+    });
+    return tsgs.map((tsg) => tsg.teacher);
+  }
+
+  async updateSubjectGrades(
+    teacherId: number,
+    subjectGrades: { subjectId: number; grade: number }[],
+  ) {
+    const teacher = await this.teacherRepository.findOne({
+      where: { id: teacherId },
+    });
+    if (!teacher) throw new NotFoundException('Teacher not found');
+
+    // Replace all existing combos
+    await this.tsgRepository.delete({ teacher: { id: teacherId } });
+
+    if (subjectGrades.length > 0) {
+      const entries = subjectGrades.map((sg) =>
+        this.tsgRepository.create({
+          teacher: { id: teacherId },
+          subject: { id: sg.subjectId },
+          grade: sg.grade,
+        }),
+      );
+      await this.tsgRepository.save(entries);
+    }
+
+    return this.teacherRepository.findOne({
+      where: { id: teacherId },
+      relations: ['subjectGrades', 'subjectGrades.subject'],
     });
   }
 
@@ -129,7 +150,6 @@ export class TeachersService {
 
     const userId = teacher.user?.id;
 
-    // 1. Delete attendance records linked to this teacher's schedules
     const schedules = await this.scheduleRepository.find({
       where: { teacher: { id } },
     });
@@ -139,23 +159,15 @@ export class TeachersService {
       await this.dataSource.query(
         `DELETE FROM attendance WHERE scheduleId IN (${scheduleIds.join(',')})`,
       );
-      // 2. Delete the schedules
       await this.scheduleRepository.delete({ teacher: { id } });
     }
 
-    // 3. Delete junction table entries
-    await this.dataSource.query(
-      `DELETE FROM teachers_subjects_subjects WHERE teachersId = ?`,
-      [id],
-    );
+    // Remove subject+grade combos
+    await this.tsgRepository.delete({ teacher: { id } });
 
-    // 4. Delete teacher
     await this.teacherRepository.remove(teacher);
 
-    // 5. Delete user
-    if (userId) {
-      await this.userRepository.delete(userId);
-    }
+    if (userId) await this.userRepository.delete(userId);
 
     return { message: 'Teacher deleted successfully' };
   }
@@ -163,20 +175,16 @@ export class TeachersService {
   async getDashboard(userId: number) {
     const teacher = await this.teacherRepository.findOne({
       where: { user: { id: userId } },
-      relations: ['subjects', 'schedules'],
+      relations: ['subjectGrades', 'subjectGrades.subject', 'schedules'],
     });
-
     if (!teacher) throw new NotFoundException('Teacher not found');
 
-    const teacherId = teacher.id;
-
     const schedules = await this.scheduleRepository.find({
-      where: { teacher: { id: teacherId } },
-      relations: ['schoolClass', 'subject', 'room'], // ✅ load relations
+      where: { teacher: { id: teacher.id } },
+      relations: ['schoolClass', 'subject', 'room'],
       order: { dayOfWeek: 'ASC', startTime: 'ASC' },
     });
 
-    // ✅ Guard against empty schedules before mapping
     const classIds = schedules
       .map((s) => s.schoolClass?.id)
       .filter(Boolean) as number[];
@@ -189,10 +197,6 @@ export class TeachersService {
           })
         : [];
 
-    return {
-      teacher,
-      schedules,
-      students,
-    };
+    return { teacher, schedules, students };
   }
 }

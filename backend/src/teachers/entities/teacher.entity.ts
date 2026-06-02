@@ -1,55 +1,39 @@
+// src/teachers/entities/teacher.entity.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   OneToOne,
-  JoinColumn,
-  ManyToMany,
-  JoinTable,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
-import { Subject } from 'src/subject/entities/subject.entity';
-import { Schedule } from 'src/schedule/entities/schedule.entity';
+import { TeacherSubjectGrade } from './teacher-subject-grade.entity';
 
-@Entity('teachers')
+@Entity()
 export class Teacher {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ unique: true })
+  @Column()
   teacherCode!: string;
 
   @Column()
   fullName!: string;
 
-  @Column()
+  @Column({ nullable: true })
   qualification!: string;
 
-  // @Column({ nullable: true })
-  // specialization: string;
-
   @Column({ type: 'date', nullable: true })
-  hireDate!: Date;
+  hireDate!: string;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
   user!: User;
 
-  @ManyToMany(() => Subject, (subject) => subject.teachers)
-  @JoinTable({
-    name: 'teachers_subjects_subjects', // ✅ matches existing table exactly
-    joinColumn: {
-      name: 'teachersId',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'subjectsId',
-      referencedColumnName: 'id',
-    },
+  // Replaces the old ManyToMany subjects relation
+  @OneToMany(() => TeacherSubjectGrade, (tsg) => tsg.teacher, {
+    cascade: true,
   })
-  subjects!: Subject[];
-
-  @OneToMany(() => Schedule, (schedule: Schedule) => schedule.teacher)
-  schedules!: Schedule[];
+  subjectGrades!: TeacherSubjectGrade[];
 }
