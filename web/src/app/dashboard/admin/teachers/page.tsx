@@ -1,19 +1,31 @@
-// app/teachers/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/services/api";
 import { showSuccess, showError } from "@/components/ui/toast";
 import {
   TeachersContainer,
   TeachersHeader,
   TeachersTitle,
+  AddButton,
   LoadingMessage,
   TableWrapper,
   StyledTable,
   SubjectBadge,
+  DeleteButton,
   EmptyState,
 } from "@/wrappers/adminTeacher";
+import {
+  FaChalkboardTeacher,
+  FaPlus,
+  FaTrash,
+  FaUser,
+  FaIdCard,
+  FaGraduationCap,
+  FaCalendarAlt,
+  FaBook,
+} from "react-icons/fa";
 
 interface Subject {
   id: number;
@@ -33,6 +45,7 @@ interface Teacher {
 }
 
 export default function TeachersPage() {
+  const router = useRouter();
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,10 +81,15 @@ export default function TeachersPage() {
     <TeachersContainer>
       <TeachersHeader>
         <TeachersTitle>
+          <FaChalkboardTeacher />
           All Teachers
-          <span className="star">✦</span>
         </TeachersTitle>
-        <div className="decorative-line"></div>
+        <AddButton
+          onClick={() => router.push("/dashboard/admin/create-teacher")}
+        >
+          <FaPlus />
+          Add Teacher
+        </AddButton>
       </TeachersHeader>
 
       <TableWrapper>
@@ -84,17 +102,16 @@ export default function TeachersPage() {
               <th>Qualification</th>
               <th>Subjects</th>
               <th>Hire Date</th>
-              <th>Delete</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
             {teachers.length === 0 ? (
               <tr>
-                <td colSpan={6}>
+                <td colSpan={7}>
                   <EmptyState>
-                    <span className="icon">✧</span>
+                    <FaChalkboardTeacher />
                     <p>No teachers found</p>
-                    <span className="icon">✧</span>
                   </EmptyState>
                 </td>
               </tr>
@@ -123,20 +140,12 @@ export default function TeachersPage() {
                   </td>
                   <td>{new Date(teacher.hireDate).toLocaleDateString()}</td>
                   <td>
-                    <button
+                    <DeleteButton
                       onClick={() => handleDelete(teacher.id, teacher.fullName)}
-                      style={{
-                        padding: "4px 0px",
-                        borderRadius: "6px",
-                        border: "1px solid #fecaca",
-                        background: "#fef2f2",
-                        color: "#b91c1c",
-                        cursor: "pointer",
-                        fontSize: "12px",
-                      }}
                     >
+                      <FaTrash />
                       Delete
-                    </button>
+                    </DeleteButton>
                   </td>
                 </tr>
               ))

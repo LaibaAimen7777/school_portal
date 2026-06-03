@@ -271,7 +271,9 @@ export class ExamsService {
       relations: ['schedules', 'schedules.subject', 'schedules.teacher'],
     });
     const rooms = await this.roomRepo.find();
-    const teachers = await this.teacherRepo.find({ relations: ['subjects'] });
+    const teachers = await this.teacherRepo.find({
+      relations: ['subjectGrades', 'subjectGrades.subject'],
+    });
 
     // Skip already-scheduled class+subject combos
     const existingExams = await this.examRepo.find({
@@ -336,7 +338,9 @@ export class ExamsService {
 
         // Find a teacher for this subject
         const teacher = teachers.find((t) =>
-          t.subjects?.some((s) => s.id === subject.id),
+          t.subjectGrades?.some(
+            (sg) => sg.subject.id === subject.id && sg.grade === cls.grade,
+          ),
         );
         if (!teacher) {
           errors.push(`No teacher found for subject: ${subject.name}`);
