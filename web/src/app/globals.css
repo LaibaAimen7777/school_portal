@@ -3,27 +3,32 @@
 
 :root {
   /* LIGHT MODE */
-  --bg-color: #eaeff2; /* Arctic Mist - High-end, pristine cool-grey canvas */
-  --bg-secondary: #d9e2e8; /* Frosted Glaze - Crisp structural section block */
-  --text-color: #1a262c; /* Iron Ink - Sharp, definitive readability */
-  --heading-color: #2c3e46; /* Dark Nordic Slate - Distinguished, minimal titles */
-  --accent-color: #2c3e46; /* Nordic Slate - Main crisp buttons */
-  --secondary-color: #9bb1bb; /* Muted Steel - Soft slate-blue for tags and dividers */
-  --nav-bg: #eaeff2;
-  --card-bg: #ffffff;
+  --bg-color: #f1f5f7; /* Arctic Mist - Lightened slightly for a cleaner, fresher canvas */
+  --bg-secondary: #e2e9ed; /* Frosted Glaze - Crisp structural section block */
+  --text-color: #1a252c; /* Iron Ink - Deep charcoal for sharp readability */
+  --heading-color: #24333a; /* Dark Nordic Slate - Distinguished, minimal titles */
+  --accent-color: #2c3e46; /* Nordic Slate - Main crisp buttons and primary actions */
+  --secondary-color: #8fa7b3; /* Muted Steel - Optimized slate-blue for tags and dividers */
+  --nav-bg: rgba(
+    241,
+    245,
+    247,
+    0.8
+  ); /* Native support for the glass translucency you want */
+  --card-bg: #ffffff; /* Pure crisp white panels */
   --button-text: #ffffff;
-  --button-text-hover: #eaeff2;
-  --border-color: #c5d2d9;
+  --button-text-hover: #f1f5f7;
+  --border-color: #cbd7de; /* Adjusted for perfect soft-contrast borders */
   --border-width: 1px;
-  --shadow: 0 20px 35px -12px rgba(44, 62, 70, 0.06);
-  --shadow-hover: 0 30px 45px -18px rgba(44, 62, 70, 0.12);
+  --shadow: 0 20px 35px -12px rgba(44, 62, 70, 0.04);
+  --shadow-hover: 0 30px 45px -18px rgba(44, 62, 70, 0.08);
 
-  /* RGB Translations for Glass Translucency */
-  --bg-color-rgb: 234, 239, 242;
-  --bg-secondary-rgb: 217, 226, 232;
-  --border-color-rgb: 197, 210, 217;
+  /* RGB Translations for Glass Translucency (Strictly Matched) */
+  --bg-color-rgb: 241, 245, 247;
+  --bg-secondary-rgb: 226, 233, 237;
+  --border-color-rgb: 203, 215, 222;
   --accent-color-rgb: 44, 62, 70;
-  --text-color-rgb: 26, 38, 44;
+  --text-color-rgb: 26, 37, 44;
 
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -35,27 +40,27 @@
 
 [data-theme="dark"] {
   /* DARK MODE */
-  --bg-color: #141c20; /* Midnight Ink - Luxurious deep charcoal canvas */
-  --bg-secondary: #0d1316; /* Obsidian - Absolute deep background layouts */
-  --text-color: #eaeff2; /* Arctic Mist - Luminescent reading typography */
-  --heading-color: #b9cbd3; /* Ice Blue - Crisp, crystal clear headings */
-  --accent-color: #9bb1bb; /* Muted Steel - Elegant interactives that cut the dark */
-  --secondary-color: #2c3e46; /* Nordic Slate - For dark layout internal borders */
-  --nav-bg: #141c20;
-  --card-bg: #202b30; /* Soft slate elevation panels */
-  --button-text: #141c20;
-  --button-text-hover: #0d1316;
-  --border-color: #2c3e46;
+  --bg-color: #0b0f12; /* Obsidian Deep - Lowered base to make elements pop beautifully */
+  --bg-secondary: #12181c; /* Midnight Ink - Elevated back-panel layout layer */
+  --card-bg: #192227; /* Soft Slate Elevation - Consistent upward lighting step */
+  --text-color: #e3ecf0; /* Luminescent Reading Typography - Softened slightly to reduce eye strain */
+  --heading-color: #ffffff; /* Ice White - Piercing crisp headers */
+  --accent-color: #7da0b0; /* Electric Frost - Shifted slightly for vibrant, premium dark-mode interactive state */
+  --secondary-color: #24333a; /* Dark Nordic Slate - Clean, non-distracting inner borders */
+  --nav-bg: rgba(11, 15, 18, 0.8);
+  --button-text: #0b0f12; /* Matches deep background for stark contrast on light buttons */
+  --button-text-hover: #0b0f12;
+  --border-color: #202e35; /* Crisp, ultra-thin dark framing borders */
   --border-width: 1px;
-  --shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.55);
-  --shadow-hover: 0 30px 45px -18px rgba(0, 0, 0, 0.65);
+  --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.65);
+  --shadow-hover: 0 30px 50px -20px rgba(0, 0, 0, 0.8);
 
-  /* RGB Translations for Glass Translucency */
-  --bg-color-rgb: 20, 28, 32;
-  --bg-secondary-rgb: 13, 19, 22;
-  --border-color-rgb: 44, 62, 70;
-  --accent-color-rgb: 155, 177, 187;
-  --text-color-rgb: 234, 239, 242;
+  /* RGB Translations for Glass Translucency (Strictly Matched) */
+  --bg-color-rgb: 11, 15, 18;
+  --bg-secondary-rgb: 18, 24, 28;
+  --border-color-rgb: 32, 46, 53;
+  --accent-color-rgb: 125, 160, 176;
+  --text-color-rgb: 227, 236, 240;
 }
 /* Base styles */
 * {

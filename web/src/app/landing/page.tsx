@@ -143,10 +143,10 @@ export default function LandingPage() {
           <CircleCard>
             <CircleImageFrame>
               <Image
-                src="/images/circle-1.png"
+                src="/images/circle-13.png"
                 alt="Science Lab"
-                width={100}
-                height={100}
+                width={90}
+                height={90}
               />
             </CircleImageFrame>
             <h5>STEM Innovation</h5>
@@ -155,10 +155,10 @@ export default function LandingPage() {
           <CircleCard>
             <CircleImageFrame>
               <Image
-                src="/images/circle-2.png"
+                src="/images/circle-22.png"
                 alt="Global Studies"
-                width={100}
-                height={100}
+                width={90}
+                height={90}
               />
             </CircleImageFrame>
             <h5>Global Citizenship</h5>
@@ -169,8 +169,8 @@ export default function LandingPage() {
               <Image
                 src="/images/circle-3.png"
                 alt="Community Service"
-                width={100}
-                height={100}
+                width={90}
+                height={90}
               />
             </CircleImageFrame>
             <h5>Community Impact</h5>
@@ -181,8 +181,8 @@ export default function LandingPage() {
               <Image
                 src="/images/circle-4.png"
                 alt="Leadership"
-                width={100}
-                height={100}
+                width={90}
+                height={90}
               />
             </CircleImageFrame>
             <h5>Leadership Academy</h5>
@@ -206,7 +206,7 @@ export default function LandingPage() {
 
           <EditorialIllustration>
             <Image
-              src="/images/bottom-editorial.png"
+              src="/images/bottom-editorial.jfif"
               alt="Élan Academy Community"
               width={320}
               height={180}
