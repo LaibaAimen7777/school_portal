@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { api } from "@/services/api";
 import Link from "next/link";
 import * as S from "@/wrappers/teacherDashboard";
@@ -12,6 +12,7 @@ export default function TeacherLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [checked, setChecked] = useState(false);
   const [teacherData, setTeacherData] = useState<any>(null);
 
@@ -44,42 +45,63 @@ export default function TeacherLayout({
     fetchTeacherData();
   }, []);
 
+  const isActive = (path: string) => pathname === path;
+
   if (!checked) return null;
 
   return (
     <S.DashboardContainer>
-      {/* NAVBAR */}
       <S.Nav>
         <S.NavContainer>
-          <S.NavLogo>Teacher Dashboard</S.NavLogo>
+          <S.NavLogo>Teacher Portal</S.NavLogo>
 
           <S.NavList>
             <S.NavItem>
-              <S.NavLink as={Link} href="/dashboard/teacher">
+              <S.NavLink
+                as={Link}
+                href="/dashboard/teacher"
+                $active={isActive("/dashboard/teacher")}
+              >
                 Overview
               </S.NavLink>
             </S.NavItem>
 
             <S.NavItem>
-              <S.NavLink as={Link} href="/dashboard/teacher/schedule">
+              <S.NavLink
+                as={Link}
+                href="/dashboard/teacher/schedule"
+                $active={isActive("/dashboard/teacher/schedule")}
+              >
                 Schedule
               </S.NavLink>
             </S.NavItem>
 
             <S.NavItem>
-              <S.NavLink as={Link} href="/dashboard/teacher/students">
+              <S.NavLink
+                as={Link}
+                href="/dashboard/teacher/students"
+                $active={isActive("/dashboard/teacher/students")}
+              >
                 Students
               </S.NavLink>
             </S.NavItem>
 
             <S.NavItem>
-              <S.NavLink as={Link} href="/dashboard/teacher/attendance">
+              <S.NavLink
+                as={Link}
+                href="/dashboard/teacher/attendance"
+                $active={isActive("/dashboard/teacher/attendance")}
+              >
                 Attendance
               </S.NavLink>
             </S.NavItem>
 
             <S.NavItem>
-              <S.NavLink as={Link} href="/dashboard/teacher/analytics">
+              <S.NavLink
+                as={Link}
+                href="/dashboard/teacher/analytics"
+                $active={isActive("/dashboard/teacher/analytics")}
+              >
                 Analytics
               </S.NavLink>
             </S.NavItem>
@@ -87,7 +109,6 @@ export default function TeacherLayout({
         </S.NavContainer>
       </S.Nav>
 
-      {/* HEADER */}
       <S.Container>
         <S.HeaderCard>
           <S.HeaderContent>
@@ -98,18 +119,17 @@ export default function TeacherLayout({
               <S.TeacherDetails>
                 <h2>{teacherData?.teacher?.fullName || "Teacher"}</h2>
                 <S.BadgeGroup>
-                  {/* Display subjects as badges */}
                   {teacherData?.teacher?.subjects?.map((subject: any) => (
                     <S.Badge key={subject.id} $primary>
                       {subject.name}
                     </S.Badge>
                   ))}
                   {(!teacherData?.teacher?.subjects ||
-                    teacherData.teacher.subjects.length === 0) && (
-                    <S.Badge $primary>No Subjects</S.Badge>
+                    teacherData.teacher.subjects?.length === 0) && (
+                    <S.Badge>No Subjects</S.Badge>
                   )}
                   <S.Badge>
-                    Teacher Code: {teacherData?.teacher?.teacherCode || "N/A"}
+                    ID: {teacherData?.teacher?.teacherCode || "N/A"}
                   </S.Badge>
                 </S.BadgeGroup>
                 <S.TeachingSince>
@@ -133,7 +153,6 @@ export default function TeacherLayout({
           </S.HeaderContent>
         </S.HeaderCard>
 
-        {/* 👇 THIS IS THE MOST IMPORTANT LINE */}
         {children}
       </S.Container>
     </S.DashboardContainer>

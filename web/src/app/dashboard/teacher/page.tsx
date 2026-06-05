@@ -6,23 +6,11 @@ import { api } from "@/services/api";
 import {
   DashboardContainer,
   Container,
-  HeaderCard,
-  HeaderContent,
-  TeacherInfo,
-  Avatar,
-  TeacherDetails,
-  BadgeGroup,
-  Badge,
-  TeachingSince,
-  DateDisplay,
   StatsGrid,
   StatCard,
   SectionCard,
   SectionHeader,
   TableWrapper,
-  DaySelector,
-  DayButton,
-  StudentCount,
   LoadingContainer,
 } from "@/wrappers/teacherDashboard";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
@@ -30,20 +18,17 @@ import { showError } from "@/components/ui/toast";
 
 export default function TeacherOverview() {
   const [data, setData] = useState<any>(null);
-  const [selectedDay, setSelectedDay] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const res = await api.get("/teachers/dashboard");
-        console.log("API Response:", res.data);
         setData(res.data);
       } catch (err) {
         console.error("Failed to fetch:", err);
-        setError("Failed to load dashboard data");
+        showError("Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
@@ -52,22 +37,7 @@ export default function TeacherOverview() {
   }, []);
 
   if (loading) {
-    return (
-      // <LoadingContainer>
-      //   <p>Loading...</p>
-      // </LoadingContainer>
-      <LoadingOverlay />
-    );
-  }
-
-  if (error) {
-    console.log("Error", error);
-    return (
-      // <LoadingContainer>
-      //   <p>Error: {error}</p>
-      // </LoadingContainer>
-      showError("Error occurred check console")
-    );
+    return <LoadingOverlay />;
   }
 
   if (!data) {
@@ -78,7 +48,6 @@ export default function TeacherOverview() {
     );
   }
 
-  // Safe data access with fallbacks
   const teacher = data.teacher || {};
   const students = data.students || [];
   const schedules = teacher.schedules || [];
@@ -99,21 +68,6 @@ export default function TeacherOverview() {
     (s: any) => s.dayOfWeek === dayMap[today],
   );
 
-  const daysOfWeek = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
-  const filteredSchedules = schedules.filter(
-    (s: any) => !selectedDay || s.dayOfWeek === selectedDay,
-  );
-
-  // Safe access for teacher info with fallbacks
-  const teacherName = teacher.fullName || "Teacher";
-  const teacherInitial = teacherName.charAt(0).toUpperCase();
-  // Get subject names from the subjects array
-  const subjectNames = subjects.map((s: any) => s.name).join(", ");
-  const teacherGrade = teacher.grade || "N/A";
-  const teacherJoiningYear = teacher.hireDate
-    ? new Date(teacher.hireDate).getFullYear()
-    : "N/A";
-
   const teachesSeniorGrades = schedules.some(
     (s: any) => s.schoolClass?.grade === 9 || s.schoolClass?.grade === 10,
   );
@@ -121,7 +75,6 @@ export default function TeacherOverview() {
   return (
     <DashboardContainer>
       <Container>
-        {/* Stats Grid */}
         <StatsGrid>
           <StatCard>
             <div className="label">Total Students</div>
@@ -140,25 +93,25 @@ export default function TeacherOverview() {
             <div className="value">{subjects.length}</div>
           </StatCard>
         </StatsGrid>
+
         {teachesSeniorGrades && (
           <SectionCard>
             <SectionHeader>
               <h3>Assignments</h3>
+              <button>Upload Assignment</button>
             </SectionHeader>
-
-            <button>Upload Assignment</button>
           </SectionCard>
         )}
+
         <SectionCard>
           <SectionHeader>
             <h3>Marks Management</h3>
+            <Link href="/dashboard/teacher/marks">
+              <button>Enter Marks</button>
+            </Link>
           </SectionHeader>
-          <Link href="/dashboard/teacher/marks">
-            <button>Enter Marks</button>
-          </Link>
         </SectionCard>
 
-        {/* Today's Schedule Section */}
         <SectionCard>
           <SectionHeader>
             <h3>Today's Schedule</h3>
