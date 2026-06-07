@@ -9,19 +9,19 @@ import { Repository } from 'typeorm';
 import { Subject } from './entities/subject.entity';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
-import { Teacher } from 'src/teachers/entities/teacher.entity';
+import { TeacherSubjectGrade } from 'src/teachers/entities/teacher-subject-grade.entity';
 
 @Injectable()
 export class SubjectService {
   constructor(
     @InjectRepository(Subject)
     private subjectRepo: Repository<Subject>,
-    @InjectRepository(Teacher)
-    private teacherRepo: Repository<Teacher>,
+
+    @InjectRepository(TeacherSubjectGrade)
+    private tsgRepo: Repository<TeacherSubjectGrade>,
   ) {}
 
   async create(dto: CreateSubjectDto) {
-    // Check duplicate name within same grades
     const existing = await this.subjectRepo.findOne({
       where: { name: dto.name },
     });
@@ -30,15 +30,12 @@ export class SubjectService {
         `Subject "${dto.name}" already exists. Edit it to change its grades.`,
       );
     }
-
     return this.subjectRepo.save(this.subjectRepo.create({ ...dto }));
   }
 
-  // All subjects, optionally filtered by grade
   async findAll(grade?: number) {
     const all = await this.subjectRepo.find({
       where: { isActive: true },
-      relations: ['teachers'],
       order: { name: 'ASC' },
     });
 
@@ -52,9 +49,18 @@ export class SubjectService {
   async findGroupedByGrade() {
     const subjects = await this.subjectRepo.find({
       where: { isActive: true },
-      relations: ['teachers'],
       order: { name: 'ASC' },
     });
+
+    // Load all TSG rows for these subjects in one query
+    const subjectIds = subjects.map((s) => s.id);
+    const tsgs =
+      subjectIds.length > 0
+        ? await this.tsgRepo.find({
+            where: subjectIds.map((id) => ({ subject: { id } })),
+            relations: ['teacher', 'subject'],
+          })
+        : [];
 
     const allGrades = [
       ...new Set(subjects.flatMap((s) => s.grades.map(Number))),
@@ -64,46 +70,49 @@ export class SubjectService {
       grade,
       subjects: subjects
         .filter((s) => s.grades.map(Number).includes(grade))
-        .map((s) => ({
-          id: s.id,
-          name: s.name,
-          grades: s.grades.map(Number),
-          teacherCount: s.teachers?.length ?? 0,
-          teachers: s.teachers?.map((t) => ({
-            id: t.id,
-            fullName: t.fullName,
-          })),
-        })),
+        .map((s) => {
+          // Teachers for this subject at this specific grade
+          const gradeTeachers = tsgs.filter(
+            (tsg) => tsg.subject.id === s.id && tsg.grade === grade,
+          );
+          return {
+            id: s.id,
+            name: s.name,
+            grades: s.grades.map(Number),
+            teacherCount: gradeTeachers.length,
+            teachers: gradeTeachers.map((tsg) => ({
+              id: tsg.teacher.id,
+              fullName: tsg.teacher.fullName,
+            })),
+          };
+        }),
     }));
   }
 
   async findOne(id: number) {
-    const subject = await this.subjectRepo.findOne({
-      where: { id },
-      relations: ['teachers'],
-    });
+    const subject = await this.subjectRepo.findOne({ where: { id } });
     if (!subject) throw new NotFoundException('Subject not found');
     return subject;
   }
 
   async update(id: number, dto: UpdateSubjectDto) {
     const subject = await this.findOne(id);
-
     if (dto.name) subject.name = dto.name;
     if (dto.isActive !== undefined) subject.isActive = dto.isActive;
-    if (dto.grades) subject.grades = [...new Set(dto.grades)]; // dedupe just in case
-
+    if (dto.grades) subject.grades = [...new Set(dto.grades)];
     return this.subjectRepo.save(subject);
   }
 
-  // Soft delete — keeps historical schedule/exam data intact
   async remove(id: number) {
     const subject = await this.findOne(id);
 
-    // Warn if teachers are assigned
-    if (subject.teachers?.length > 0) {
+    // Check if any teachers are assigned via TSG
+    const assignedCount = await this.tsgRepo.count({
+      where: { subject: { id } },
+    });
+    if (assignedCount > 0) {
       throw new BadRequestException(
-        `Cannot delete subject with ${subject.teachers.length} teacher(s) assigned. ` +
+        `Cannot delete subject with ${assignedCount} teacher assignment(s). ` +
           `Remove teacher assignments first.`,
       );
     }

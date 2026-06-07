@@ -8,6 +8,7 @@ import { Subject } from 'src/subject/entities/subject.entity';
 import { SchoolClass } from 'src/school-class/entities/school-class.entity';
 import { Rooms } from 'src/rooms/entities/rooms.entity';
 import { SchoolConfig } from 'src/school-config/entities/school-config.entity';
+import { TeacherSubjectGrade } from 'src/teachers/entities/teacher-subject-grade.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SchoolConfig } from 'src/school-config/entities/school-config.entity';
       SchoolClass,
       Rooms,
       SchoolConfig,
+      TeacherSubjectGrade,
     ]),
   ],
   providers: [ScheduleService],

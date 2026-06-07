@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Schedule } from './entities/schedule.entity';
 import { Repository } from 'typeorm';
 import { Teacher } from 'src/teachers/entities/teacher.entity';
+import { TeacherSubjectGrade } from 'src/teachers/entities/teacher-subject-grade.entity';
 import { Subject } from 'src/subject/entities/subject.entity';
 import { SchoolClass } from 'src/school-class/entities/school-class.entity';
 import { Rooms } from 'src/rooms/entities/rooms.entity';
@@ -23,6 +24,8 @@ export class ScheduleService {
     private scheduleRepo: Repository<Schedule>,
     @InjectRepository(Teacher)
     private teacherRepo: Repository<Teacher>,
+    @InjectRepository(TeacherSubjectGrade)
+    private tsgRepo: Repository<TeacherSubjectGrade>,
     @InjectRepository(Subject)
     private subjectRepo: Repository<Subject>,
     @InjectRepository(SchoolClass)
@@ -56,18 +59,22 @@ export class ScheduleService {
 
     const teacher = await this.teacherRepo.findOne({
       where: { id: teacherId },
-      relations: ['subjects'],
+      relations: ['subjectGrades', 'subjectGrades.subject'],
     });
     if (!teacher) throw new NotFoundException('Teacher not found');
 
     const room = await this.roomRepo.findOne({ where: { id: roomId } });
     if (!room) throw new NotFoundException('Room not found');
 
-    const teachesSubject = teacher.subjects.some((sub) => sub.id === subjectId);
-    if (!teachesSubject)
-      throw new BadRequestException('Teacher is not assigned to this subject');
+    // Check teacher is qualified for this subject+grade combo
+    const qualified = teacher.subjectGrades.some(
+      (tsg) => tsg.subject.id === subjectId && tsg.grade === schoolClass.grade,
+    );
+    if (!qualified)
+      throw new BadRequestException(
+        `Teacher is not assigned to teach this subject for Grade ${schoolClass.grade}`,
+      );
 
-    // ✅ Fix: was 'schedule.room' — must be 'schedule.roomId'
     await this.checkConflicts({
       teacherId,
       classId,
@@ -90,7 +97,6 @@ export class ScheduleService {
     return this.scheduleRepo.save(schedule);
   }
 
-  // Extracted so auto-scheduler can reuse it
   private async checkConflicts({
     teacherId,
     classId,
@@ -134,7 +140,6 @@ export class ScheduleService {
         `Class already has a schedule from ${classConflict.startTime} to ${classConflict.endTime} on this day`,
       );
 
-    // ✅ Fix: was 'schedule.room = :roomId' which never matched
     const roomQ = this.scheduleRepo
       .createQueryBuilder('s')
       .where('s.roomId = :roomId', { roomId })
@@ -152,7 +157,6 @@ export class ScheduleService {
     });
   }
 
-  // ✅ New: delete endpoint for conflict resolution screen
   async remove(id: number) {
     const schedule = await this.scheduleRepo.findOne({ where: { id } });
     if (!schedule) throw new NotFoundException('Schedule not found');
@@ -160,7 +164,6 @@ export class ScheduleService {
     return { message: 'Schedule deleted successfully' };
   }
 
-  // In schedule.service.ts — replace getCompletenessReport()
   async getCompletenessReport() {
     const allClasses = await this.classRepo.find();
     const allSubjects = await this.subjectRepo.find({
@@ -169,7 +172,6 @@ export class ScheduleService {
 
     const report = await Promise.all(
       allClasses.map(async (schoolClass) => {
-        // ✅ Only subjects that belong to this class's grade
         const gradeSubjects = allSubjects.filter((s) =>
           s.grades.includes(schoolClass.grade),
         );
@@ -204,9 +206,10 @@ export class ScheduleService {
     };
   }
 
-  // ✅ Teacher workload report for dashboard reminders
   async getTeacherWorkloadReport() {
-    const teachers = await this.teacherRepo.find({ relations: ['subjects'] });
+    const teachers = await this.teacherRepo.find({
+      relations: ['subjectGrades', 'subjectGrades.subject'],
+    });
     const allSubjects = await this.subjectRepo.find();
 
     const report = await Promise.all(
@@ -218,16 +221,19 @@ export class ScheduleService {
         return {
           teacherId: teacher.id,
           teacherName: teacher.fullName,
-          subjects: teacher.subjects.map((s) => s.name),
+          // Use subjectGrades instead of subjects
+          subjects: teacher.subjectGrades.map(
+            (tsg) => `${tsg.subject.name} (G${tsg.grade})`,
+          ),
           weeklyPeriods: scheduleCount,
-          overloaded: scheduleCount > 25, // flag if > 25 periods/week
+          overloaded: scheduleCount > 25,
         };
       }),
     );
 
-    // Find subjects with no teacher assigned
+    // A subject is uncovered if no TeacherSubjectGrade row exists for it at any grade
     const coveredSubjectIds = new Set(
-      teachers.flatMap((t) => t.subjects.map((s) => s.id)),
+      teachers.flatMap((t) => t.subjectGrades.map((tsg) => tsg.subject.id)),
     );
     const uncoveredSubjects = allSubjects
       .filter((s) => !coveredSubjectIds.has(s.id))
@@ -240,7 +246,6 @@ export class ScheduleService {
     };
   }
 
-  // ✅ Combined dashboard reminders — single endpoint
   async getDashboardReminders() {
     const [completeness, workload] = await Promise.all([
       this.getCompletenessReport(),
@@ -289,26 +294,21 @@ export class ScheduleService {
       await Promise.all([
         this.classRepo.find(),
         this.subjectRepo.find({ where: { isActive: true } }),
-        this.teacherRepo.find({ relations: ['subjects'] }),
+        // Load subjectGrades instead of subjects
+        this.teacherRepo.find({
+          relations: ['subjectGrades', 'subjectGrades.subject'],
+        }),
         this.roomRepo.find(),
         this.scheduleRepo.find({
           relations: ['schoolClass', 'subject', 'teacher', 'room'],
         }),
       ]);
 
-    console.log('allClasses:', allClasses);
-    console.log('allSubjects:', allSubjects);
-    console.log('allTeachers:', allTeachers);
-    console.log('allRooms:', allRooms);
-    console.log('existingSchedules:', existingSchedules);
-
     const config = await this.schoolConfigRepo.findOne({ where: { id: 1 } });
     if (!config)
       throw new BadRequestException(
         'School config not found. Set it up first.',
       );
-
-    console.log('config:', config);
 
     const [startHour, startMin] = config.schoolStartTime.split(':').map(Number);
     const [endHour, endMin] = config.schoolEndTime.split(':').map(Number);
@@ -317,12 +317,6 @@ export class ScheduleService {
     const PERIOD_MINS = config.periodDurationMinutes;
     const BREAK_MINS = config.breakDurationMinutes;
 
-    console.log('startMins:', START_MINS);
-    console.log('END_MINS:', END_MINS);
-    console.log('PERIOD_MINS:', PERIOD_MINS);
-    console.log('BREAK_MINS:', BREAK_MINS);
-
-    // Generate all slots for the week: DAYS × time slots
     const timeSlots: string[] = [];
     let cursor = START_MINS;
     while (cursor < END_MINS) {
@@ -341,13 +335,10 @@ export class ScheduleService {
     }
 
     const totalSlotsPerWeek = DAYS.length * timeSlots.length;
+    const bookedTeachers = new Set<string>();
+    const bookedRooms = new Set<string>();
+    const bookedClasses = new Set<string>();
 
-    // Booked state — key: `${day}-${slotIdx}`
-    const bookedTeachers = new Set<string>(); // `${day}-${slotIdx}-${teacherId}`
-    const bookedRooms = new Set<string>(); // `${day}-${slotIdx}-${roomId}`
-    const bookedClasses = new Set<string>(); // `${day}-${slotIdx}-${classId}`
-
-    // Seed from existing schedules
     for (const s of existingSchedules) {
       const slotIdx = timeSlots.findIndex((slot) => {
         const [slotStart] = slot.split('-');
@@ -360,7 +351,6 @@ export class ScheduleService {
       bookedClasses.add(`${day}-${slotIdx}-${s.schoolClass.id}`);
     }
 
-    // Teacher load balancing counter
     const teacherPeriodCount: Record<number, number> = {};
     for (const t of allTeachers) teacherPeriodCount[t.id] = 0;
     for (const s of existingSchedules)
@@ -371,15 +361,12 @@ export class ScheduleService {
     let skipped = 0;
     const errors: string[] = [];
 
-    // Build task list: each (class, subject) pair repeated periodsPerWeek times
     const tasks: {
       schoolClass: (typeof allClasses)[0];
       subject: (typeof allSubjects)[0];
-      remaining: number; // how many more slots still needed for this subject
     }[] = [];
 
     for (const schoolClass of allClasses) {
-      // Count already scheduled slots per subject for this class
       const scheduledCountPerSubject: Record<number, number> = {};
       for (const s of existingSchedules.filter(
         (s) => s.schoolClass.id === schoolClass.id,
@@ -388,7 +375,6 @@ export class ScheduleService {
           (scheduledCountPerSubject[s.subject.id] || 0) + 1;
       }
 
-      // Grade-specific subjects only
       const gradeSubjects = allSubjects.filter((s) =>
         s.grades.map(Number).includes(schoolClass.grade),
       );
@@ -397,18 +383,13 @@ export class ScheduleService {
         const periodsNeeded = subject.periodsPerWeek ?? 5;
         const alreadyScheduled = scheduledCountPerSubject[subject.id] || 0;
         const remaining = periodsNeeded - alreadyScheduled;
-
-        if (remaining <= 0) continue; // already fully scheduled
-
-        // Add one task per remaining period needed
+        if (remaining <= 0) continue;
         for (let i = 0; i < remaining; i++) {
-          tasks.push({ schoolClass, subject, remaining });
+          tasks.push({ schoolClass, subject });
         }
       }
     }
 
-    // Validate: check if there are enough slots in the week
-    const slotsPerClass = totalSlotsPerWeek;
     for (const schoolClass of allClasses) {
       const gradeSubjects = allSubjects.filter((s) =>
         s.grades.map(Number).includes(schoolClass.grade),
@@ -417,23 +398,28 @@ export class ScheduleService {
         (sum, s) => sum + (s.periodsPerWeek ?? 5),
         0,
       );
-      if (totalPeriodsNeeded > slotsPerClass) {
+      if (totalPeriodsNeeded > totalSlotsPerWeek) {
         errors.push(
           `Grade ${schoolClass.grade}-${schoolClass.section} needs ${totalPeriodsNeeded} periods/week ` +
-            `but only ${slotsPerClass} slots exist. Reduce periods or extend school hours.`,
+            `but only ${totalSlotsPerWeek} slots exist.`,
         );
       }
     }
 
-    // Shuffle so no single class or subject dominates early slots
     for (let i = tasks.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [tasks[i], tasks[j]] = [tasks[j], tasks[i]];
     }
 
     for (const { schoolClass, subject } of tasks) {
+      // Filter by subjectGrades — must match subject AND grade
       const eligibleTeachers = allTeachers
-        .filter((t) => t.subjects.some((s) => s.id === subject.id))
+        .filter((t) =>
+          t.subjectGrades.some(
+            (tsg) =>
+              tsg.subject.id === subject.id && tsg.grade === schoolClass.grade,
+          ),
+        )
         .sort(
           (a, b) =>
             (teacherPeriodCount[a.id] || 0) - (teacherPeriodCount[b.id] || 0),
@@ -441,7 +427,7 @@ export class ScheduleService {
 
       if (eligibleTeachers.length === 0) {
         errors.push(
-          `No teacher for "${subject.name}" — skipping slot for ` +
+          `No teacher for "${subject.name}" at Grade ${schoolClass.grade} — skipping ` +
             `Grade ${schoolClass.grade}-${schoolClass.section}`,
         );
         skipped++;
@@ -450,8 +436,6 @@ export class ScheduleService {
 
       let placed = false;
 
-      // Sort days by how many periods this class already has on each day
-      // so we spread evenly across Mon-Fri
       const classPeriodsPerDay: Record<string, number> = {};
       for (const day of DAYS) {
         classPeriodsPerDay[day] = [...bookedClasses].filter(
@@ -462,8 +446,6 @@ export class ScheduleService {
         (a, b) => classPeriodsPerDay[a] - classPeriodsPerDay[b],
       );
 
-      // Also sort slots so same subject doesn't always land in first period
-      // Shuffle slot order slightly to distribute across the day too
       const slotOrder = [...Array(timeSlots.length).keys()];
       for (let i = slotOrder.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -472,10 +454,8 @@ export class ScheduleService {
 
       for (const day of sortedDays) {
         if (placed) break;
-
         for (const slotIdx of slotOrder) {
           if (placed) break;
-
           const classKey = `${day}-${slotIdx}-${schoolClass.id}`;
           if (bookedClasses.has(classKey)) continue;
 
@@ -510,7 +490,7 @@ export class ScheduleService {
               placed = true;
               break;
             } catch {
-              // DB conflict from race condition — try next slot
+              // DB conflict — try next slot
             }
           }
         }
@@ -528,19 +508,15 @@ export class ScheduleService {
     return { scheduled, skipped, errors };
   }
 
-  // ✅ New: clear all auto-generated schedules so admin can re-run
   async clearAndAutoSchedule(): Promise<{
     cleared: number;
     scheduled: number;
     skipped: number;
     errors: string[];
   }> {
-    console.log('here');
-    // Delete all existing schedules first
     const existing = await this.scheduleRepo.find();
     await this.scheduleRepo.remove(existing);
     const cleared = existing.length;
-
     const result = await this.autoSchedule();
     return { cleared, ...result };
   }

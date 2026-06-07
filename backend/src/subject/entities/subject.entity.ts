@@ -1,12 +1,6 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  ManyToMany,
-} from 'typeorm';
+// src/subject/entities/subject.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Schedule } from 'src/schedule/entities/schedule.entity';
-import { Teacher } from 'src/teachers/entities/teacher.entity';
 
 @Entity('subjects')
 export class Subject {
@@ -30,7 +24,4 @@ export class Subject {
 
   @OneToMany(() => Schedule, (schedule: Schedule) => schedule.subject)
   schedules!: Schedule[];
-
-  @ManyToMany(() => Teacher, (teacher) => teacher.subjects)
-  teachers!: Teacher[];
 }

@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { TeacherSubjectGrade } from './teacher-subject-grade.entity';
+import { Schedule } from 'src/schedule/entities/schedule.entity';
 
 @Entity()
 export class Teacher {
@@ -31,9 +32,9 @@ export class Teacher {
   @JoinColumn()
   user!: User;
 
-  // Replaces the old ManyToMany subjects relation
-  @OneToMany(() => TeacherSubjectGrade, (tsg) => tsg.teacher, {
-    cascade: true,
-  })
+  @OneToMany(() => TeacherSubjectGrade, (tsg) => tsg.teacher, { cascade: true })
   subjectGrades!: TeacherSubjectGrade[];
+
+  @OneToMany(() => Schedule, (schedule) => schedule.teacher)
+  schedules!: Schedule[];
 }
