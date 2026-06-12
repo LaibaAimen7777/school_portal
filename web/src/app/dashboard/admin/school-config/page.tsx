@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { showSuccess, showError } from "@/components/ui/toast";
+import * as S from "@/wrappers/schoolConfigStyles";
 
 interface SchoolConfig {
   id: number;
@@ -13,7 +14,6 @@ interface SchoolConfig {
   updatedAt: string;
 }
 
-//to prevent conflict in the schedules
 interface ConflictItem {
   id: number;
   class: string;
@@ -125,7 +125,6 @@ export default function SchoolConfigPage() {
     }
   };
 
-  // Compute preview of period slots
   const computePeriods = () => {
     if (!form.schoolStartTime || !form.schoolEndTime) return [];
     const periods: { label: string; start: string; end: string }[] = [];
@@ -162,74 +161,56 @@ export default function SchoolConfigPage() {
   const periods = computePeriods();
 
   if (fetching) {
-    return <div style={{ padding: "32px" }}>Loading...</div>;
+    return (
+      <S.LoadingContainer>Loading school configuration...</S.LoadingContainer>
+    );
   }
 
   return (
-    <div style={{ padding: "32px", maxWidth: "800px", margin: "0 auto" }}>
-      <h2 style={{ marginBottom: "4px" }}>School Configuration</h2>
-      {config && (
-        <p style={{ fontSize: "13px", color: "#6b7280", marginBottom: "32px" }}>
-          Last updated: {new Date(config.updatedAt).toLocaleString()}
-        </p>
-      )}
+    <S.Container>
+      <S.Header>
+        <S.Title>School Configuration</S.Title>
+        {config && (
+          <S.LastUpdated>
+            Last updated: {new Date(config.updatedAt).toLocaleString()}
+          </S.LastUpdated>
+        )}
+      </S.Header>
 
-      <form
-        onSubmit={handleSave}
-        style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-      >
-        {/* Timings */}
-        <section>
-          <h3 style={{ marginBottom: "12px", fontSize: "15px" }}>
-            School Hours
-          </h3>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "16px",
-            }}
-          >
-            <Field label="Start time">
-              <input
+      <S.Form onSubmit={handleSave}>
+        <S.Section>
+          <S.SectionTitle>School Hours</S.SectionTitle>
+          <S.Grid>
+            <S.Field>
+              <S.Label>Start time</S.Label>
+              <S.Input
                 type="time"
                 name="schoolStartTime"
                 value={form.schoolStartTime}
                 onChange={handleChange}
                 required
               />
-            </Field>
-            <Field label="End time">
-              <input
+            </S.Field>
+            <S.Field>
+              <S.Label>End time</S.Label>
+              <S.Input
                 type="time"
                 name="schoolEndTime"
                 value={form.schoolEndTime}
                 onChange={handleChange}
                 required
               />
-            </Field>
-          </div>
-          {timeError && (
-            <p style={{ color: "red", fontSize: "13px", marginTop: "6px" }}>
-              {timeError}
-            </p>
-          )}
-        </section>
+            </S.Field>
+          </S.Grid>
+          {timeError && <S.ErrorText>{timeError}</S.ErrorText>}
+        </S.Section>
 
-        {/* Period settings */}
-        <section>
-          <h3 style={{ marginBottom: "12px", fontSize: "15px" }}>
-            Period Settings
-          </h3>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "16px",
-            }}
-          >
-            <Field label="Period duration (minutes)">
-              <input
+        <S.Section>
+          <S.SectionTitle>Period Settings</S.SectionTitle>
+          <S.Grid>
+            <S.Field>
+              <S.Label>Period duration (minutes)</S.Label>
+              <S.Input
                 type="number"
                 name="periodDurationMinutes"
                 value={form.periodDurationMinutes}
@@ -238,9 +219,10 @@ export default function SchoolConfigPage() {
                 max={120}
                 required
               />
-            </Field>
-            <Field label="Break duration (minutes)">
-              <input
+            </S.Field>
+            <S.Field>
+              <S.Label>Break duration (minutes)</S.Label>
+              <S.Input
                 type="number"
                 name="breakDurationMinutes"
                 value={form.breakDurationMinutes}
@@ -249,154 +231,80 @@ export default function SchoolConfigPage() {
                 max={30}
                 required
               />
-            </Field>
-          </div>
-        </section>
+            </S.Field>
+          </S.Grid>
+        </S.Section>
 
-        {/* Period preview */}
         {periods.length > 0 && (
-          <section>
-            <h3 style={{ marginBottom: "12px", fontSize: "15px" }}>
+          <S.PeriodPreview>
+            <S.SectionTitle>
               Period Preview{" "}
-              <span
-                style={{ fontWeight: 400, color: "#6b7280", fontSize: "13px" }}
-              >
-                ({periods.length} periods fit in these hours)
+              <span style={{ fontWeight: 400, opacity: 0.6 }}>
+                ({periods.length} periods fit)
               </span>
-            </h3>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            </S.SectionTitle>
+            <S.BadgeContainer>
               {periods.map((p, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: "6px 12px",
-                    background: "#f1f5f9",
-                    borderRadius: "6px",
-                    fontSize: "13px",
-                    border: "1px solid #e2e8f0",
-                  }}
-                >
+                <S.PeriodBadge key={i}>
                   <strong>{p.label}</strong> {p.start} – {p.end}
-                </div>
+                </S.PeriodBadge>
               ))}
-            </div>
-            {periods.length === 0 && (
-              <p style={{ color: "#6b7280", fontSize: "13px" }}>
-                No full periods fit in the selected hours.
-              </p>
-            )}
-          </section>
+            </S.BadgeContainer>
+          </S.PeriodPreview>
         )}
 
-        <button
-          type="submit"
-          disabled={loading || !!timeError}
-          style={{ alignSelf: "flex-start", padding: "10px 24px" }}
-        >
-          {loading ? "Saving..." : "Save Configuration"}
-        </button>
-      </form>
+        {periods.length === 0 && (
+          <S.EmptyMessage>
+            No full periods fit in the selected hours.
+          </S.EmptyMessage>
+        )}
 
-      {/* Conflict panel */}
+        <S.SaveButton type="submit" disabled={loading || !!timeError}>
+          {loading ? "Saving..." : "Save Configuration"}
+        </S.SaveButton>
+      </S.Form>
+
       {showConflicts && conflicts.length > 0 && (
-        <div
-          style={{
-            marginTop: "40px",
-            border: "1px solid #fca5a5",
-            borderRadius: "8px",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              background: "#fef2f2",
-              padding: "12px 16px",
-              borderBottom: "1px solid #fca5a5",
-            }}
-          >
-            <strong style={{ color: "#b91c1c" }}>
+        <S.ConflictPanel>
+          <S.ConflictHeader>
+            <strong>
               ⚠️ {conflicts.length} schedule(s) now fall outside school hours
             </strong>
-            <p
-              style={{ fontSize: "13px", color: "#6b7280", margin: "4px 0 0" }}
-            >
-              These must be deleted or rescheduled to avoid conflicts.
-            </p>
-          </div>
+            <p>These must be deleted or rescheduled to avoid conflicts.</p>
+          </S.ConflictHeader>
 
-          <table
-            cellPadding={10}
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13px",
-            }}
-          >
+          <S.ConflictTable>
             <thead>
-              <tr
-                style={{
-                  background: "#fafafa",
-                  borderBottom: "1px solid #e5e7eb",
-                }}
-              >
-                <th style={{ textAlign: "left" }}>Class</th>
-                <th style={{ textAlign: "left" }}>Subject</th>
-                <th style={{ textAlign: "left" }}>Teacher</th>
-                <th style={{ textAlign: "left" }}>Day</th>
-                <th style={{ textAlign: "left" }}>Slot</th>
-                <th style={{ textAlign: "left" }}>Issue</th>
+              <tr>
+                <th>Class</th>
+                <th>Subject</th>
+                <th>Teacher</th>
+                <th>Day</th>
+                <th>Slot</th>
+                <th>Issue</th>
                 <th />
               </tr>
             </thead>
             <tbody>
               {conflicts.map((c) => (
-                <tr key={c.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                <tr key={c.id}>
                   <td>{c.class}</td>
                   <td>{c.subject}</td>
                   <td>{c.teacher}</td>
                   <td>{c.day}</td>
                   <td>{c.slot}</td>
-                  <td style={{ color: "#b91c1c", fontSize: "12px" }}>
-                    {c.issue}
-                  </td>
+                  <S.IssueText as="td">{c.issue}</S.IssueText>
                   <td>
-                    <button
-                      onClick={() => handleDeleteConflict(c.id)}
-                      style={{
-                        color: "#dc2626",
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        fontSize: "13px",
-                        padding: "2px 8px",
-                      }}
-                    >
+                    <S.DeleteButton onClick={() => handleDeleteConflict(c.id)}>
                       Delete
-                    </button>
+                    </S.DeleteButton>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </S.ConflictTable>
+        </S.ConflictPanel>
       )}
-    </div>
-  );
-}
-
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-      <label style={{ fontSize: "13px", fontWeight: 500, color: "#374151" }}>
-        {label}
-      </label>
-      {children}
-    </div>
+    </S.Container>
   );
 }
