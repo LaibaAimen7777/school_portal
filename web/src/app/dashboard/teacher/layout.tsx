@@ -96,7 +96,7 @@ export default function TeacherLayout({
               </S.NavLink>
             </S.NavItem>
 
-            <S.NavItem>
+            {/* <S.NavItem>
               <S.NavLink
                 as={Link}
                 href="/dashboard/teacher/analytics"
@@ -104,7 +104,7 @@ export default function TeacherLayout({
               >
                 Analytics
               </S.NavLink>
-            </S.NavItem>
+            </S.NavItem> */}
           </S.NavList>
         </S.NavContainer>
       </S.Nav>
