@@ -8,6 +8,7 @@ import {
   Delete,
   Param,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
@@ -43,5 +44,12 @@ export class TeachersController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.teachersService.remove(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Patch(':id')
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
+    return this.teachersService.update(id, dto);
   }
 }

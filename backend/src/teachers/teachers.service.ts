@@ -141,6 +141,49 @@ export class TeachersService {
     });
   }
 
+  async update(
+    id: number,
+    dto: {
+      fullName?: string;
+      qualification?: string;
+      subjectGrades?: { subjectId: number; grade: number }[];
+    },
+  ) {
+    const teacher = await this.teacherRepository.findOne({
+      where: { id },
+    });
+
+    if (!teacher) throw new NotFoundException('Teacher not found');
+
+    // Update basic fields
+    teacher.fullName = dto.fullName ?? teacher.fullName;
+    teacher.qualification = dto.qualification ?? teacher.qualification;
+
+    await this.teacherRepository.save(teacher);
+
+    // Update subjectGrades if provided
+    if (dto.subjectGrades) {
+      await this.tsgRepository.delete({ teacher: { id } });
+
+      if (dto.subjectGrades.length > 0) {
+        const entries = dto.subjectGrades.map((sg) =>
+          this.tsgRepository.create({
+            teacher: { id },
+            subject: { id: sg.subjectId },
+            grade: sg.grade,
+          }),
+        );
+
+        await this.tsgRepository.save(entries);
+      }
+    }
+
+    return this.teacherRepository.findOne({
+      where: { id },
+      relations: ['subjectGrades', 'subjectGrades.subject', 'user'],
+    });
+  }
+
   async remove(id: number) {
     const teacher = await this.teacherRepository.findOne({
       where: { id },

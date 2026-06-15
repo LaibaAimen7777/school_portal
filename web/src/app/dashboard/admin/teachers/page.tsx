@@ -16,7 +16,8 @@ import {
   DeleteButton,
   EmptyState,
 } from "@/wrappers/adminTeacher";
-import { FaChalkboardTeacher, FaPlus, FaTrash } from "react-icons/fa";
+import { FaChalkboardTeacher, FaPlus, FaTrash, FaEdit } from "react-icons/fa";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 
 interface SubjectGrade {
   id: number;
@@ -43,6 +44,11 @@ export default function TeachersPage() {
   const router = useRouter();
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [subjectGrades, setSubjectGrades] = useState<
+    { subjectId: number; grade: number }[]
+  >([]);
 
   useEffect(() => {
     api
@@ -63,7 +69,7 @@ export default function TeachersPage() {
     }
   };
 
-  if (loading) return <LoadingMessage>Loading teachers...</LoadingMessage>;
+  if (loading) return <LoadingOverlay></LoadingOverlay>;
 
   return (
     <TeachersContainer>
@@ -135,12 +141,27 @@ export default function TeachersPage() {
                       : "—"}
                   </td>
                   <td>
-                    <DeleteButton
-                      onClick={() => handleDelete(teacher.id, teacher.fullName)}
-                    >
-                      <FaTrash />
-                      Delete
-                    </DeleteButton>
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        className="edit-btn"
+                        onClick={() => {
+                          setEditingTeacher(teacher);
+                          setIsEditOpen(true);
+                        }}
+                      >
+                        <FaEdit />
+                        Edit
+                      </button>
+
+                      <DeleteButton
+                        onClick={() =>
+                          handleDelete(teacher.id, teacher.fullName)
+                        }
+                      >
+                        <FaTrash />
+                        Delete
+                      </DeleteButton>
+                    </div>
                   </td>
                 </tr>
               ))
