@@ -116,28 +116,19 @@ export class TeachersService {
     teacherId: number,
     subjectGrades: { subjectId: number; grade: number }[],
   ) {
-    const teacher = await this.teacherRepository.findOne({
-      where: { id: teacherId },
-    });
-    if (!teacher) throw new NotFoundException('Teacher not found');
+    return this.dataSource.transaction(async (manager) => {
+      const teacher = await manager.findOne(Teacher, {
+        where: { id: teacherId },
+      });
 
-    // Replace all existing combos
-    await this.tsgRepository.delete({ teacher: { id: teacherId } });
+      if (!teacher) throw new NotFoundException('Teacher not found');
 
-    if (subjectGrades.length > 0) {
-      const entries = subjectGrades.map((sg) =>
-        this.tsgRepository.create({
-          teacher: { id: teacherId },
-          subject: { id: sg.subjectId },
-          grade: sg.grade,
-        }),
-      );
-      await this.tsgRepository.save(entries);
-    }
+      await this.replaceSubjectGradesTx(manager, teacherId, subjectGrades);
 
-    return this.teacherRepository.findOne({
-      where: { id: teacherId },
-      relations: ['subjectGrades', 'subjectGrades.subject'],
+      return manager.findOne(Teacher, {
+        where: { id: teacherId },
+        relations: ['subjectGrades', 'subjectGrades.subject'],
+      });
     });
   }
 
@@ -149,39 +140,51 @@ export class TeachersService {
       subjectGrades?: { subjectId: number; grade: number }[];
     },
   ) {
-    const teacher = await this.teacherRepository.findOne({
-      where: { id },
-    });
+    return this.dataSource.transaction(async (manager) => {
+      const teacher = await manager.findOne(Teacher, {
+        where: { id },
+      });
 
-    if (!teacher) throw new NotFoundException('Teacher not found');
+      if (!teacher) throw new NotFoundException('Teacher not found');
 
-    // Update basic fields
-    teacher.fullName = dto.fullName ?? teacher.fullName;
-    teacher.qualification = dto.qualification ?? teacher.qualification;
+      // ✅ update basic fields
+      teacher.fullName = dto.fullName ?? teacher.fullName;
+      teacher.qualification = dto.qualification ?? teacher.qualification;
 
-    await this.teacherRepository.save(teacher);
+      await manager.save(teacher);
 
-    // Update subjectGrades if provided
-    if (dto.subjectGrades) {
-      await this.tsgRepository.delete({ teacher: { id } });
-
-      if (dto.subjectGrades.length > 0) {
-        const entries = dto.subjectGrades.map((sg) =>
-          this.tsgRepository.create({
-            teacher: { id },
-            subject: { id: sg.subjectId },
-            grade: sg.grade,
-          }),
-        );
-
-        await this.tsgRepository.save(entries);
+      // ✅ use helper inside transaction
+      if (dto.subjectGrades) {
+        await this.replaceSubjectGradesTx(manager, id, dto.subjectGrades);
       }
-    }
 
-    return this.teacherRepository.findOne({
-      where: { id },
-      relations: ['subjectGrades', 'subjectGrades.subject', 'user'],
+      return manager.findOne(Teacher, {
+        where: { id },
+        relations: ['subjectGrades', 'subjectGrades.subject', 'user'],
+      });
     });
+  }
+
+  private async replaceSubjectGradesTx(
+    manager: any,
+    teacherId: number,
+    subjectGrades: { subjectId: number; grade: number }[],
+  ) {
+    await manager.delete(TeacherSubjectGrade, {
+      teacher: { id: teacherId },
+    });
+
+    if (subjectGrades.length > 0) {
+      const entries = subjectGrades.map((sg) =>
+        manager.create(TeacherSubjectGrade, {
+          teacher: { id: teacherId },
+          subject: { id: sg.subjectId },
+          grade: sg.grade,
+        }),
+      );
+
+      await manager.save(entries);
+    }
   }
 
   async remove(id: number) {

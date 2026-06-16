@@ -40,7 +40,8 @@ export class TeachersController {
     return this.teachersService.getDashboard(userId);
   }
 
-  @Roles('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.teachersService.remove(id);

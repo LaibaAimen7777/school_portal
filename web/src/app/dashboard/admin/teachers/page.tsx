@@ -18,6 +18,7 @@ import {
 } from "@/wrappers/adminTeacher";
 import { FaChalkboardTeacher, FaPlus, FaTrash, FaEdit } from "react-icons/fa";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
+import EditTeacherModal from "@/components/ui/EditTeacherModal";
 
 interface SubjectGrade {
   id: number;
@@ -46,9 +47,6 @@ export default function TeachersPage() {
   const [loading, setLoading] = useState(true);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [subjectGrades, setSubjectGrades] = useState<
-    { subjectId: number; grade: number }[]
-  >([]);
 
   useEffect(() => {
     api
@@ -85,7 +83,6 @@ export default function TeachersPage() {
           Add Teacher
         </AddButton>
       </TeachersHeader>
-
       <TableWrapper>
         <StyledTable>
           <thead>
@@ -169,6 +166,14 @@ export default function TeachersPage() {
           </tbody>
         </StyledTable>
       </TableWrapper>
+      <EditTeacherModal
+        teacher={editingTeacher}
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onUpdated={() => {
+          api.get("/teachers").then((res) => setTeachers(res.data));
+        }}
+      />
     </TeachersContainer>
   );
 }
