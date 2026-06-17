@@ -36,7 +36,10 @@ export default function EditTeacherModal({
 
   // Load subjects
   useEffect(() => {
-    api.get("/subjects").then((res) => setSubjects(res.data));
+    api.get("/subject").then((res) => {
+      console.log("Subjects API:", res.data); // 👈 add this
+      setSubjects(res.data);
+    });
   }, []);
 
   // Prefill data

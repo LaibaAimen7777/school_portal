@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SchoolClass } from './entities/school-class.entity';
 import { privateDecrypt } from 'crypto';
@@ -62,5 +66,28 @@ export class SchoolClassService {
 
   findAll() {
     return this.classRepository.find();
+  }
+
+  // school-class.service.ts — add this method
+  async remove(id: number) {
+    const cls = await this.classRepository.findOne({
+      where: { id },
+      relations: ['students', 'schedules'],
+    });
+
+    if (!cls) throw new NotFoundException('Class not found');
+
+    if (cls.students?.length > 0)
+      throw new BadRequestException(
+        `Cannot delete class with ${cls.students.length} enrolled student(s)`,
+      );
+
+    if (cls.schedules?.length > 0)
+      throw new BadRequestException(
+        `Cannot delete class with ${cls.schedules.length} active schedule(s)`,
+      );
+
+    await this.classRepository.remove(cls);
+    return { message: 'Class deleted successfully' };
   }
 }

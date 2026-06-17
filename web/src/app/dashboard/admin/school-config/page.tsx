@@ -24,6 +24,14 @@ interface ConflictItem {
   issue: string;
 }
 
+interface ClassItem {
+  id: number;
+  grade: number;
+  section: string;
+  maxStrength: number;
+  currentStrength: number;
+}
+
 export default function SchoolConfigPage() {
   const [config, setConfig] = useState<SchoolConfig | null>(null);
   const [form, setForm] = useState({
@@ -37,9 +45,15 @@ export default function SchoolConfigPage() {
   const [fetching, setFetching] = useState(true);
   const [timeError, setTimeError] = useState("");
   const [showConflicts, setShowConflicts] = useState(false);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [newGrade, setNewGrade] = useState<number>(1);
+  const [newSection, setNewSection] = useState<string>("A");
+  const [newMaxStrength, setNewMaxStrength] = useState<number>(30);
+  const [addingClass, setAddingClass] = useState(false);
 
   useEffect(() => {
     fetchConfig();
+    fetchClasses();
   }, []);
 
   const fetchConfig = async () => {
@@ -57,6 +71,11 @@ export default function SchoolConfigPage() {
       showError("Failed to load school config");
     }
     setFetching(false);
+  };
+
+  const fetchClasses = async () => {
+    const res = await api.get("/school-class");
+    setClasses(res.data);
   };
 
   const validateTimes = (start: string, end: string) => {
@@ -305,6 +324,148 @@ export default function SchoolConfigPage() {
           </S.ConflictTable>
         </S.ConflictPanel>
       )}
+
+      <S.Section style={{ marginTop: "2rem" }}>
+        <S.SectionTitle>Classes &amp; Sections</S.SectionTitle>
+
+        {/* Add Section Form */}
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            alignItems: "flex-end",
+            marginBottom: "1.5rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <S.Field>
+            <S.Label>Grade</S.Label>
+            <S.Input
+              type="number"
+              min={1}
+              max={10}
+              value={newGrade}
+              onChange={(e) => setNewGrade(Number(e.target.value))}
+              style={{ width: "80px" }}
+            />
+          </S.Field>
+
+          <S.Field>
+            <S.Label>Section</S.Label>
+            <select
+              value={newSection}
+              onChange={(e) => setNewSection(e.target.value)}
+              style={{
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            >
+              {"ABCDEFGHIJ".split("").map((letter) => (
+                <option key={letter} value={letter}>
+                  {letter}
+                </option>
+              ))}
+            </select>
+          </S.Field>
+
+          <S.Field>
+            <S.Label>Max Strength</S.Label>
+            <S.Input
+              type="number"
+              min={1}
+              max={60}
+              value={newMaxStrength}
+              onChange={(e) => setNewMaxStrength(Number(e.target.value))}
+              style={{ width: "100px" }}
+            />
+          </S.Field>
+
+          <S.SaveButton
+            type="button"
+            disabled={addingClass}
+            onClick={async () => {
+              setAddingClass(true);
+              try {
+                await api.post("/school-class", {
+                  grade: newGrade,
+                  section: newSection,
+                  maxStrength: newMaxStrength,
+                });
+                showSuccess(`Grade ${newGrade}-${newSection} added`);
+                const res = await api.get("/school-class");
+                setClasses(res.data);
+              } catch (err: any) {
+                showError(err.response?.data?.message || "Failed to add class");
+              }
+              setAddingClass(false);
+            }}
+            style={{ width: "auto", padding: "8px 20px" }}
+          >
+            {addingClass ? "Adding..." : "+ Add Section"}
+          </S.SaveButton>
+        </div>
+
+        {/* Classes Table */}
+        {classes.length === 0 ? (
+          <S.EmptyMessage>No classes yet. Add one above.</S.EmptyMessage>
+        ) : (
+          <S.ConflictTable>
+            <thead>
+              <tr>
+                <th>Grade</th>
+                <th>Section</th>
+                <th>Max Strength</th>
+                <th>Enrolled</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {[...classes]
+                .sort(
+                  (a, b) =>
+                    a.grade - b.grade || a.section.localeCompare(b.section),
+                )
+                .map((cls) => (
+                  <tr key={cls.id}>
+                    <td>Grade {cls.grade}</td>
+                    <td>{cls.section}</td>
+                    <td>{cls.maxStrength}</td>
+                    <td>
+                      {cls.currentStrength} / {cls.maxStrength}
+                    </td>
+                    <td>
+                      <S.DeleteButton
+                        onClick={async () => {
+                          if (
+                            !confirm(
+                              `Delete Grade ${cls.grade}-${cls.section}?`,
+                            )
+                          )
+                            return;
+                          try {
+                            await api.delete(`/school-class/${cls.id}`);
+                            setClasses((prev) =>
+                              prev.filter((c) => c.id !== cls.id),
+                            );
+                            showSuccess("Class removed");
+                          } catch (err: any) {
+                            showError(
+                              err.response?.data?.message ||
+                                "Failed to delete class",
+                            );
+                          }
+                        }}
+                      >
+                        Delete
+                      </S.DeleteButton>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </S.ConflictTable>
+        )}
+      </S.Section>
     </S.Container>
   );
 }
