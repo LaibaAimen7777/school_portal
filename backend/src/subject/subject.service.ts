@@ -89,6 +89,16 @@ export class SubjectService {
     }));
   }
 
+  // subject.service.ts
+  async findByGrade(grade: number) {
+    const all = await this.subjectRepo.find({
+      where: { isActive: true },
+    });
+    return all.filter(
+      (s) => Array.isArray(s.grades) && s.grades.includes(grade),
+    );
+  }
+
   async findOne(id: number) {
     const subject = await this.subjectRepo.findOne({ where: { id } });
     if (!subject) throw new NotFoundException('Subject not found');

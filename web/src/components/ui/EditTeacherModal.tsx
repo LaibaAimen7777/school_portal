@@ -30,31 +30,36 @@ export default function EditTeacherModal({
   const [fullName, setFullName] = useState("");
   const [qualification, setQualification] = useState("");
   const [subjectGrades, setSubjectGrades] = useState<
-    { subjectId: number; grade: number }[]
+    { subjectId: number | null; grade: number | null }[]
   >([]);
   const [subjects, setSubjects] = useState<any[]>([]);
+  const [subjectsByGrade, setSubjectsByGrade] = useState<Record<number, any[]>>(
+    {},
+  );
 
-  // Load subjects
-  useEffect(() => {
-    api.get("/subject").then((res) => {
-      console.log("Subjects API:", res.data); // 👈 add this
-      setSubjects(res.data);
-    });
-  }, []);
+  const fetchSubjectsForGrade = async (grade: number) => {
+    if (!grade || subjectsByGrade[grade]) return; // cache it
+    const res = await api.get(`/subjects/by-grade?grade=${grade}`);
+    setSubjectsByGrade((prev) => ({ ...prev, [grade]: res.data }));
+  };
 
-  // Prefill data
+  // In your prefill useEffect, after setting subjectGrades:
   useEffect(() => {
     if (teacher && isOpen) {
       setFullName(teacher.fullName);
       setQualification(teacher.qualification || "");
-      setSubjectGrades(
-        (teacher.subjectGrades || []).map((sg: any) => ({
-          subjectId: sg.subject.id,
-          grade: sg.grade,
-        })),
-      );
+
+      const sgs = (teacher.subjectGrades || []).map((sg: any) => ({
+        subjectId: sg.subject.id,
+        grade: sg.grade,
+      }));
+      setSubjectGrades(sgs);
+
+      // Pre-fetch subjects for each grade already assigned
+      const uniqueGrades = [...new Set(sgs.map((sg) => sg.grade))];
+      uniqueGrades.forEach((g) => fetchSubjectsForGrade(g)); // 👈 add this
     }
-  }, [teacher, isOpen]); // 👈 add isOpen
+  }, [teacher, isOpen]);
 
   if (!isOpen || !teacher) return null;
 
@@ -69,7 +74,7 @@ export default function EditTeacherModal({
   };
 
   const addRow = () => {
-    setSubjectGrades([...subjectGrades, { subjectId: 0, grade: 0 }]);
+    setSubjectGrades([...subjectGrades, { subjectId: null, grade: null }]);
   };
 
   const removeRow = (index: number) => {
@@ -119,34 +124,45 @@ export default function EditTeacherModal({
 
         {/* Subjects */}
         <h4>Subjects & Grades</h4>
-
         {subjectGrades.map((sg, index) => (
-          <SubjectRow key={index}>
-            <ModalSelect
-              value={sg.subjectId}
+          <div key={index} style={{ display: "flex", gap: "8px" }}>
+            {/* Grade input — fetch subjects when grade changes */}
+            <input
+              type="number"
+              placeholder="Grade"
+              value={sg.grade ?? ""}
+              min={1}
+              max={12}
+              onChange={(e) => {
+                const grade = Number(e.target.value);
+                const updated = [...subjectGrades];
+                updated[index] = { grade, subjectId: null };
+                setSubjectGrades(updated);
+
+                fetchSubjectsForGrade(grade);
+              }}
+            />
+
+            {/* Subject dropdown — filtered by grade */}
+            <select
+              value={sg.subjectId ?? ""}
               onChange={(e) =>
                 handleChange(index, "subjectId", Number(e.target.value))
               }
             >
-              <option value={0}>Select Subject</option>
-              {subjects.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </ModalSelect>
+              <option value={0}>
+                {sg.grade ? "Select Subject" : "Enter grade first"}
+              </option>
+              {(sg.grade ? subjectsByGrade[sg.grade] : []) ??
+                [].map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+            </select>
 
-            <ModalInput
-              type="number"
-              placeholder="Grade"
-              value={sg.grade}
-              onChange={(e) =>
-                handleChange(index, "grade", Number(e.target.value))
-              }
-            />
-
-            <Button onClick={() => removeRow(index)}>❌</Button>
-          </SubjectRow>
+            <button onClick={() => removeRow(index)}>❌</button>
+          </div>
         ))}
 
         <Button onClick={addRow}>+ Add Subject</Button>

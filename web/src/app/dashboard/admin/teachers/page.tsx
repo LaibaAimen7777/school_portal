@@ -56,6 +56,13 @@ export default function TeachersPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    api
+      .get("/subject/by-grade")
+      .then((res) => console.log("subject by grade", res.data))
+      .catch(console.error);
+  }, []);
+
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(`Delete teacher "${name}"? This cannot be undone.`)) return;
     try {

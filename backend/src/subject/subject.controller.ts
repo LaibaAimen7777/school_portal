@@ -35,6 +35,12 @@ export class SubjectController {
     return this.subjectService.findGroupedByGrade();
   }
 
+  // subject.controller.ts
+  @Get('by-grade')
+  getByGrade(@Query('grade', ParseIntPipe) grade: number) {
+    return this.subjectService.findByGrade(grade);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.subjectService.findOne(id);
