@@ -188,34 +188,44 @@ export class TeachersService {
   }
 
   async remove(id: number) {
-    const teacher = await this.teacherRepository.findOne({
-      where: { id },
-      relations: ['user'],
+    return this.dataSource.transaction(async (manager) => {
+      const teacher = await manager.findOne(Teacher, {
+        where: { id },
+        relations: ['user'],
+      });
+
+      if (!teacher) throw new NotFoundException('Teacher not found');
+
+      const userId = teacher.user?.id;
+
+      // Delete attendance
+      const schedules = await manager.find(Schedule, {
+        where: { teacher: { id } },
+      });
+
+      const scheduleIds = schedules.map((s) => s.id);
+
+      if (scheduleIds.length > 0) {
+        await manager.query(
+          `DELETE FROM attendance WHERE scheduleId IN (${scheduleIds.join(',')})`,
+        );
+
+        await manager.delete(Schedule, { teacher: { id } });
+      }
+
+      // Delete subject-grade
+      await manager.delete(TeacherSubjectGrade, { teacher: { id } });
+
+      // ✅ DELETE teacher (not remove)
+      await manager.delete(Teacher, id);
+
+      // ✅ NOW safe to delete user
+      if (userId) {
+        await manager.delete(User, userId);
+      }
+
+      return { message: 'Teacher deleted successfully' };
     });
-    if (!teacher) throw new NotFoundException('Teacher not found');
-
-    const userId = teacher.user?.id;
-
-    const schedules = await this.scheduleRepository.find({
-      where: { teacher: { id } },
-    });
-    const scheduleIds = schedules.map((s) => s.id);
-
-    if (scheduleIds.length > 0) {
-      await this.dataSource.query(
-        `DELETE FROM attendance WHERE scheduleId IN (${scheduleIds.join(',')})`,
-      );
-      await this.scheduleRepository.delete({ teacher: { id } });
-    }
-
-    // Remove subject+grade combos
-    await this.tsgRepository.delete({ teacher: { id } });
-
-    await this.teacherRepository.remove(teacher);
-
-    if (userId) await this.userRepository.delete(userId);
-
-    return { message: 'Teacher deleted successfully' };
   }
 
   async getDashboard(userId: number) {

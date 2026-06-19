@@ -36,7 +36,7 @@ export class SubjectController {
   }
 
   // subject.controller.ts
-  @Get('by-grade')
+  @Get('by-grade-subject')
   getByGrade(@Query('grade', ParseIntPipe) grade: number) {
     return this.subjectService.findByGrade(grade);
   }

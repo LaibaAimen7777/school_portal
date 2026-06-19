@@ -32,14 +32,14 @@ export default function EditTeacherModal({
   const [subjectGrades, setSubjectGrades] = useState<
     { subjectId: number | null; grade: number | null }[]
   >([]);
-  const [subjects, setSubjects] = useState<any[]>([]);
   const [subjectsByGrade, setSubjectsByGrade] = useState<Record<number, any[]>>(
     {},
   );
 
   const fetchSubjectsForGrade = async (grade: number) => {
     if (!grade || subjectsByGrade[grade]) return; // cache it
-    const res = await api.get(`/subjects/by-grade?grade=${grade}`);
+    const res = await api.get(`/subject/by-grade-subject?grade=${grade}`);
+    console.log("fetch subjects", res.data);
     setSubjectsByGrade((prev) => ({ ...prev, [grade]: res.data }));
   };
 
@@ -129,12 +129,12 @@ export default function EditTeacherModal({
             {/* Grade input — fetch subjects when grade changes */}
             <input
               type="number"
-              placeholder="Grade"
               value={sg.grade ?? ""}
               min={1}
-              max={12}
+              max={10}
               onChange={(e) => {
                 const grade = Number(e.target.value);
+
                 const updated = [...subjectGrades];
                 updated[index] = { grade, subjectId: null };
                 setSubjectGrades(updated);
@@ -150,15 +150,14 @@ export default function EditTeacherModal({
                 handleChange(index, "subjectId", Number(e.target.value))
               }
             >
-              <option value={0}>
+              <option value="">
                 {sg.grade ? "Select Subject" : "Enter grade first"}
               </option>
-              {(sg.grade ? subjectsByGrade[sg.grade] : []) ??
-                [].map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
+              {(sg.grade ? subjectsByGrade[sg.grade] : [])?.map((s, i) => (
+                <option key={`${s.id}-${i}`} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
             </select>
 
             <button onClick={() => removeRow(index)}>❌</button>

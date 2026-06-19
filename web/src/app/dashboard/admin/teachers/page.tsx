@@ -47,6 +47,19 @@ export default function TeachersPage() {
   const [loading, setLoading] = useState(true);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const filteredTeachers = teachers.filter((teacher) => {
+    const searchLower = search.toLowerCase();
+
+    const matchesName = teacher.fullName?.toLowerCase().includes(searchLower);
+
+    const matchesSubject = (teacher.subjectGrades ?? []).some((tsg) =>
+      tsg.subject?.name?.toLowerCase().includes(searchLower),
+    );
+
+    return matchesName || matchesSubject;
+  });
 
   useEffect(() => {
     api
@@ -79,6 +92,21 @@ export default function TeachersPage() {
   return (
     <TeachersContainer>
       <TeachersHeader>
+        <div style={{ margin: "12px 0" }}>
+          <input
+            type="text"
+            placeholder="Search by teacher name or subject..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "10px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+              outline: "none",
+            }}
+          />
+        </div>
         <TeachersTitle>
           <FaChalkboardTeacher />
           All Teachers
@@ -114,7 +142,7 @@ export default function TeachersPage() {
                 </td>
               </tr>
             ) : (
-              teachers.map((teacher) => (
+              filteredTeachers.map((teacher) => (
                 <tr key={teacher.id}>
                   <td>
                     <span className="code-badge">{teacher.teacherCode}</span>

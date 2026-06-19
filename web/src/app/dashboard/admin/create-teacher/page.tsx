@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { api } from "@/services/api";
+import { showSuccess, showError } from "@/components/ui/toast";
 import {
   Container,
   Title,
@@ -156,11 +157,11 @@ const CreateTeacherPage = () => {
       );
 
       setResponseData(res.data);
-      alert("Teacher created successfully!");
+      showSuccess("Teacher created successfully!");
       setFormData({ fullName: "", qualification: "", hireDate: today });
       setRows([{ subjectId: "", grade: "" }]);
     } catch (err: any) {
-      alert(err.response?.data?.message || "Error creating teacher");
+      showError(err.response?.data?.message || "Error creating teacher");
     }
 
     setLoading(false);
