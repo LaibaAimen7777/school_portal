@@ -68,54 +68,109 @@ export default function TeacherOverview() {
     (s: any) => s.dayOfWeek === dayMap[today],
   );
 
-  const teachesSeniorGrades = schedules.some(
-    (s: any) => s.schoolClass?.grade === 9 || s.schoolClass?.grade === 10,
+  const now = new Date();
+
+  const nextClass = schedules
+    .filter((s: any) => {
+      if (s.dayOfWeek !== dayMap[today]) return false;
+      if (!s.startTime) return false;
+
+      const [h, m] = s.startTime.split(":");
+      const classTime = new Date();
+      classTime.setHours(Number(h), Number(m), 0);
+
+      return classTime > now;
+    })
+    .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))[0];
+
+  const uniqueGrades = new Set(
+    schedules.map((s: any) => s.schoolClass?.grade).filter(Boolean),
   );
+
+  const seniorClassesCount = schedules.filter(
+    (s: any) => s.schoolClass?.grade >= 9,
+  ).length;
+
+  // const teachesSeniorGrades = schedules.some(
+  //   (s: any) => s.schoolClass?.grade === 9 || s.schoolClass?.grade === 10,
+  // );
 
   return (
     <DashboardContainer>
       <Container>
+        {/* 👋 Header */}
+        <div style={{ marginBottom: "32px" }}>
+          <h1 style={{ fontSize: "28px", fontWeight: 600 }}>Good morning 👋</h1>
+          <p style={{ color: "#666", marginTop: "4px" }}>
+            Here's what's happening today
+          </p>
+        </div>
+
+        {/* 📊 Stats */}
         <StatsGrid>
           <StatCard>
-            <div className="label">Total Students</div>
+            <div className="label">Students</div>
             <div className="value">{students.length}</div>
           </StatCard>
+
           <StatCard>
-            <div className="label">Total Classes</div>
-            <div className="value">{schedules.length}</div>
-          </StatCard>
-          <StatCard>
-            <div className="label">Today's Classes</div>
+            <div className="label">Classes Today</div>
             <div className="value">{todaySchedules.length}</div>
           </StatCard>
+
+          <StatCard>
+            <div className="label">Next Class</div>
+            <div className="value">
+              {nextClass
+                ? `${nextClass.subject?.name} • ${nextClass.startTime}`
+                : "No more today"}
+            </div>
+          </StatCard>
+
           <StatCard>
             <div className="label">Subjects</div>
             <div className="value">{subjects.length}</div>
           </StatCard>
         </StatsGrid>
 
-        {teachesSeniorGrades && (
-          <SectionCard>
-            <SectionHeader>
-              <h3>Assignments</h3>
-              <button>Upload Assignment</button>
-            </SectionHeader>
-          </SectionCard>
-        )}
-
-        <SectionCard>
+        {/* ⚡ Quick Actions */}
+        <SectionCard style={{ marginTop: "24px" }}>
           <SectionHeader>
-            <h3>Marks Management</h3>
+            <h3>Quick Actions</h3>
+          </SectionHeader>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              marginTop: "12px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Link href="/dashboard/teacher/attendance">
+              <button>Take Attendance</button>
+            </Link>
+
             <Link href="/dashboard/teacher/marks">
               <button>Enter Marks</button>
             </Link>
-          </SectionHeader>
+
+            <Link href="/dashboard/teacher/students">
+              <button>Students</button>
+            </Link>
+
+            <Link href="/dashboard/teacher/schedule">
+              <button>Schedule</button>
+            </Link>
+          </div>
         </SectionCard>
 
-        <SectionCard>
+        {/* 📅 Today */}
+        <SectionCard style={{ marginTop: "24px" }}>
           <SectionHeader>
             <h3>Today's Schedule</h3>
           </SectionHeader>
+
           <TableWrapper>
             <table>
               <thead>
@@ -125,16 +180,26 @@ export default function TeacherOverview() {
                   <th>Room</th>
                 </tr>
               </thead>
+
               <tbody>
                 {todaySchedules.map((s: any) => (
-                  <tr key={s.id}>
-                    <td>{s.subject?.name || "Unknown Subject"}</td>
+                  <tr
+                    key={s.id}
+                    style={{
+                      background:
+                        nextClass?.id === s.id
+                          ? "rgba(0, 120, 255, 0.08)"
+                          : "transparent",
+                    }}
+                  >
+                    <td>{s.subject?.name || "Unknown"}</td>
                     <td>
-                      {s.startTime || "N/A"} - {s.endTime || "N/A"}
+                      {s.startTime} - {s.endTime}
                     </td>
-                    <td>{s.room?.name || "TBD"}</td>
+                    <td>{s.room?.name || "—"}</td>
                   </tr>
                 ))}
+
                 {todaySchedules.length === 0 && (
                   <tr>
                     <td colSpan={3}>No classes today</td>

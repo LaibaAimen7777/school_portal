@@ -37,6 +37,7 @@ export default function TeacherLayout({
     const fetchTeacherData = async () => {
       try {
         const res = await api.get("/teachers/dashboard");
+        console.log("teacher data", res.data);
         setTeacherData(res.data);
       } catch (error) {
         console.error("Failed:", error);
@@ -119,15 +120,17 @@ export default function TeacherLayout({
               <S.TeacherDetails>
                 <h2>{teacherData?.teacher?.fullName || "Teacher"}</h2>
                 <S.BadgeGroup>
-                  {teacherData?.teacher?.subjects?.map((subject: any) => (
-                    <S.Badge key={subject.id} $primary>
-                      {subject.name}
+                  {teacherData?.teacher?.subjectGrades?.map((sg: any) => (
+                    <S.Badge key={sg.id} $primary>
+                      {sg.subject.name} (Grade {sg.grade})
                     </S.Badge>
                   ))}
-                  {(!teacherData?.teacher?.subjects ||
-                    teacherData.teacher.subjects?.length === 0) && (
+
+                  {(!teacherData?.teacher?.subjectGrades ||
+                    teacherData.teacher.subjectGrades.length === 0) && (
                     <S.Badge>No Subjects</S.Badge>
                   )}
+
                   <S.Badge>
                     ID: {teacherData?.teacher?.teacherCode || "N/A"}
                   </S.Badge>
