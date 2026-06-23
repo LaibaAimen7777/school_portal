@@ -20,10 +20,16 @@ import {
   Button,
 } from "@/wrappers/adminCreateSchedule";
 
+interface TeacherSubjectGrade {
+  id: number;
+  grade: number;
+  subject: Subject;
+}
+
 interface Teacher {
   id: number;
   fullName: string;
-  subjects: Subject[];
+  subjectGrades: TeacherSubjectGrade[];
 }
 
 interface Subject {
@@ -209,13 +215,31 @@ const CreateSchedulePage = () => {
   };
 
   const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const subjectId = e.target.value;
-    setFormData((prev) => ({ ...prev, subjectId, teacherId: "" }));
-    setFilteredTeachers(
-      teachers.filter((t) =>
-        t.subjects?.some((s) => s.id === Number(subjectId)),
+    const subjectId = Number(e.target.value);
+
+    const selectedClass = classes.find(
+      (c) => c.id === Number(formData.classId),
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      subjectId: String(subjectId),
+      teacherId: "",
+    }));
+
+    if (!selectedClass) {
+      setFilteredTeachers([]);
+      return;
+    }
+
+    const filtered = teachers.filter((t) =>
+      t.subjectGrades?.some(
+        (sg) =>
+          sg.subject?.id === subjectId && sg.grade === selectedClass.grade,
       ),
     );
+
+    setFilteredTeachers(filtered);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -233,11 +233,19 @@ export class ScheduleService {
 
     // A subject is uncovered if no TeacherSubjectGrade row exists for it at any grade
     const coveredSubjectIds = new Set(
-      teachers.flatMap((t) => t.subjectGrades.map((tsg) => tsg.subject.id)),
+      teachers.flatMap((t) =>
+        t.subjectGrades
+          .filter((tsg) => tsg.subject.isActive)
+          .map((tsg) => tsg.subject.id),
+      ),
     );
+
+    console.log('covered sub', coveredSubjectIds);
     const uncoveredSubjects = allSubjects
-      .filter((s) => !coveredSubjectIds.has(s.id))
+      .filter((s) => s && s.id && !coveredSubjectIds.has(s.id) && s.isActive)
       .map((s) => s.name);
+
+    console.log('covered sub', uncoveredSubjects);
 
     return {
       overloadedTeachers: report.filter((r) => r.overloaded),
@@ -338,6 +346,7 @@ export class ScheduleService {
     const bookedTeachers = new Set<string>();
     const bookedRooms = new Set<string>();
     const bookedClasses = new Set<string>();
+    const classSubjectPerDay = new Set<string>();
 
     for (const s of existingSchedules) {
       const slotIdx = timeSlots.findIndex((slot) => {
@@ -349,6 +358,10 @@ export class ScheduleService {
       bookedTeachers.add(`${day}-${slotIdx}-${s.teacher.id}`);
       bookedRooms.add(`${day}-${slotIdx}-${s.room.id}`);
       bookedClasses.add(`${day}-${slotIdx}-${s.schoolClass.id}`);
+
+      classSubjectPerDay.add(
+        `${s.dayOfWeek}-${s.schoolClass.id}-${s.subject.id}`,
+      );
     }
 
     const teacherPeriodCount: Record<number, number> = {};
@@ -459,6 +472,9 @@ export class ScheduleService {
           const classKey = `${day}-${slotIdx}-${schoolClass.id}`;
           if (bookedClasses.has(classKey)) continue;
 
+          const subjectKey = `${day}-${schoolClass.id}-${subject.id}`;
+          if (classSubjectPerDay.has(subjectKey)) continue;
+
           for (const teacher of eligibleTeachers) {
             const teacherKey = `${day}-${slotIdx}-${teacher.id}`;
             if (bookedTeachers.has(teacherKey)) continue;
@@ -486,6 +502,7 @@ export class ScheduleService {
               bookedRooms.add(`${day}-${slotIdx}-${freeRoom.id}`);
               bookedClasses.add(classKey);
               teacherPeriodCount[teacher.id]++;
+              classSubjectPerDay.add(subjectKey);
               scheduled++;
               placed = true;
               break;

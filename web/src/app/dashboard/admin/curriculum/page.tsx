@@ -76,10 +76,15 @@ export default function CurriculumPage() {
     fetchCurriculum();
   }, []);
 
+  useEffect(() => {
+    if (editingId === null) setEditPeriods(5);
+  }, [editingId]);
+
   const fetchCurriculum = async () => {
     setLoading(true);
     try {
       const res = await api.get("/subject/by-grade");
+      console.log("c data", res.data);
       setGrouped(res.data);
     } catch {
       showError("Failed to load curriculum");
@@ -147,6 +152,7 @@ export default function CurriculumPage() {
       });
       showSuccess("Subject updated");
       setEditingId(null);
+      setEditPeriods(5);
       fetchCurriculum();
     } catch (err: any) {
       showError(err.response?.data?.message || "Failed to update");
@@ -283,8 +289,7 @@ export default function CurriculumPage() {
                       $isEditing={editingId === subject.id}
                     >
                       {editingId === subject.id ? (
-                        /* Edit mode */
-                        <S.EditForm>
+                        <S.EditForm key={subject.id}>
                           <S.Input
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
@@ -355,7 +360,7 @@ export default function CurriculumPage() {
                                 {subject.teacherCount !== 1 ? "s" : ""} assigned
                               </S.MetaText>
                               <S.MetaText>
-                                {subject.periodsPerWeek ?? 5} periods/week
+                                {subject.periodsPerWeek} periods/week
                               </S.MetaText>
                             </S.SubjectMeta>
                           </div>

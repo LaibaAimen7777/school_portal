@@ -78,8 +78,10 @@ export class SubjectService {
           return {
             id: s.id,
             name: s.name,
+            code: s.code,
             grades: s.grades.map(Number),
             teacherCount: gradeTeachers.length,
+            periodsPerWeek: s.periodsPerWeek,
             teachers: gradeTeachers.map((tsg) => ({
               id: tsg.teacher.id,
               fullName: tsg.teacher.fullName,
@@ -94,6 +96,7 @@ export class SubjectService {
     const all = await this.subjectRepo.find({
       where: { isActive: true },
     });
+    console.log('all', all[0]);
     return all.filter(
       (s) => Array.isArray(s.grades) && s.grades.includes(grade),
     );
@@ -106,10 +109,17 @@ export class SubjectService {
   }
 
   async update(id: number, dto: UpdateSubjectDto) {
+    console.log('dto', dto.periodsPerWeek);
+    console.log('id', id);
+    console.log(typeof dto.periodsPerWeek);
     const subject = await this.findOne(id);
+    console.log('before:', subject.periodsPerWeek);
     if (dto.name) subject.name = dto.name;
     if (dto.isActive !== undefined) subject.isActive = dto.isActive;
     if (dto.grades) subject.grades = [...new Set(dto.grades)];
+    if (dto.periodsPerWeek !== undefined) {
+      subject.periodsPerWeek = dto.periodsPerWeek;
+    }
     return this.subjectRepo.save(subject);
   }
 

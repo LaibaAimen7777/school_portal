@@ -99,6 +99,7 @@ export default function DashboardReminders() {
     setLoading(true);
     try {
       const res = await api.get("/schedule/reminders");
+      console.log("reminders", res.data);
       setData(res.data);
     } catch {
       console.error("Failed to fetch reminders");
