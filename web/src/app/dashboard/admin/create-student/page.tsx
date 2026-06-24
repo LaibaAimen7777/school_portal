@@ -25,6 +25,14 @@ type Grade = {
   id: number;
   grade: number;
 };
+type ExistingChild = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  grade?: number;
+  section?: string;
+};
+
 export default function CreateStudentPage() {
   // Class State
   const [grades, setGrades] = useState<Grade[]>([]);
@@ -51,6 +59,7 @@ export default function CreateStudentPage() {
   const [email, setEmail] = useState("jane@gmail.com");
   const [address, setAddress] = useState("123 Test Street");
   const [parentExists, setParentExists] = useState(false);
+  const [existingChildren, setExistingChildren] = useState<ExistingChild[]>([]);
 
   const [joiningYear, setJoiningYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(false);
@@ -142,7 +151,6 @@ export default function CreateStudentPage() {
     setSelectedGrade(grade);
     setSelectedClass(null);
     const res = await api.get(`/school-class/sections?gradeId=${grade}`);
-    console.log("res in cs in web:", res);
     setSections(res.data);
   };
 
@@ -157,24 +165,36 @@ export default function CreateStudentPage() {
   const isFull =
     selectedClass && selectedClass.currentStrength >= selectedClass.maxStrength;
 
-  // Parent auto-check
-  const handlePhoneBlur = async () => {
-    if (!phone) return;
+  // Look up parent by phone — runs as soon as 11 digits are entered
+  const handlePhoneLookup = async (value: string) => {
+    if (!value) return;
 
     try {
-      const res = await api.get(`/parent/by-phone?phone=${phone}`);
+      const res = await api.get(`/parent/by-phone?phone=${value}`);
 
       if (res.data) {
         setFatherName(res.data.fatherName);
         setMotherName(res.data.motherName);
         setEmail(res.data.email);
         setAddress(res.data.address);
+        setExistingChildren(res.data.children || []);
         setParentExists(true);
       } else {
         setParentExists(false);
+        setExistingChildren([]);
       }
     } catch (err) {
       console.error("Unexpected error:", err);
+    }
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+    setParentExists(false);
+    setExistingChildren([]);
+
+    if (value.length === 11) {
+      handlePhoneLookup(value);
     }
   };
 
@@ -206,8 +226,6 @@ export default function CreateStudentPage() {
           parentUsername: res.data.parentUsername,
           parentPassword: res.data.parentPassword,
         });
-
-        console.log("Api response", res.data);
 
         showSuccess("Student admitted & portal created!");
       } else {
@@ -253,7 +271,7 @@ export default function CreateStudentPage() {
       <div className="card">
         <h1>Student Admission</h1>
 
-        {/* ================= CLASS SELECTION ================= */}
+        {/* ================= STEP 1: CLASS SELECTION ================= */}
         <h3>Step 1: Select Class</h3>
 
         <label>Grade</label>
@@ -290,10 +308,92 @@ export default function CreateStudentPage() {
           </p>
         )}
 
-        {/* ================= STUDENT INFO ================= */}
+        {/* ================= STEP 2: PARENT LOOKUP ================= */}
         {selectedClass && !isFull && (
           <>
-            <h3>Step 2: Student Information</h3>
+            <h3>Step 2: Parent Information</h3>
+            <input
+              placeholder="Phone"
+              value={phone}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+            />
+            {errors.phone && (
+              <p style={{ color: "red", fontSize: "12px" }}>{errors.phone}</p>
+            )}
+
+            {parentExists && (
+              <>
+                <p style={{ color: "green" }}>
+                  Existing parent found. Student will be attached.
+                </p>
+                {existingChildren.length > 0 && (
+                  <div
+                    style={{
+                      background: "#f5f5f5",
+                      padding: "8px",
+                      borderRadius: "6px",
+                      marginBottom: "10px",
+                    }}
+                  >
+                    <strong>Already enrolled:</strong>
+                    <ul style={{ margin: "4px 0 0 18px" }}>
+                      {existingChildren.map((c) => (
+                        <li key={c.id}>
+                          {c.firstName} {c.lastName}
+                          {c.grade
+                            ? ` — Grade ${c.grade}${c.section ? ` ${c.section}` : ""}`
+                            : ""}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+
+            <input
+              placeholder="Father Name"
+              value={fatherName}
+              onChange={(e) => setFatherName(e.target.value)}
+              disabled={parentExists}
+            />
+            {errors.fatherName && (
+              <p style={{ color: "red", fontSize: "12px" }}>
+                {errors.fatherName}
+              </p>
+            )}
+            <input
+              placeholder="Mother Name"
+              value={motherName}
+              onChange={(e) => setMotherName(e.target.value)}
+              disabled={parentExists}
+            />
+            {errors.motherName && (
+              <p style={{ color: "red", fontSize: "12px" }}>
+                {errors.motherName}
+              </p>
+            )}
+            <input
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={parentExists}
+            />
+            {errors.email && (
+              <p style={{ color: "red", fontSize: "12px" }}>{errors.email}</p>
+            )}
+            <input
+              placeholder="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              disabled={parentExists}
+            />
+            {errors.address && (
+              <p style={{ color: "red", fontSize: "12px" }}>{errors.address}</p>
+            )}
+
+            {/* ================= STEP 3: STUDENT INFO ================= */}
+            <h3>Step 3: Student Information</h3>
             <input
               placeholder="First Name"
               onChange={(e) => setFirstName(e.target.value)}
@@ -330,65 +430,12 @@ export default function CreateStudentPage() {
               <p style={{ color: "red", fontSize: "12px" }}>{errors.gender}</p>
             )}
 
-            <h3>Step 3: Parent Information</h3>
-            <input
-              placeholder="Phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              onBlur={handlePhoneBlur}
-            />
-            {errors.phone && (
-              <p style={{ color: "red", fontSize: "12px" }}>{errors.phone}</p>
-            )}
-
-            {parentExists && (
-              <p style={{ color: "green" }}>
-                Existing parent found. Student will be attached.
-              </p>
-            )}
-
-            <input
-              placeholder="Father Name"
-              value={fatherName}
-              onChange={(e) => setFatherName(e.target.value)}
-            />
-            {errors.fatherName && (
-              <p style={{ color: "red", fontSize: "12px" }}>
-                {errors.fatherName}
-              </p>
-            )}
-            <input
-              placeholder="Mother Name"
-              value={motherName}
-              onChange={(e) => setMotherName(e.target.value)}
-            />
-            {errors.motherName && (
-              <p style={{ color: "red", fontSize: "12px" }}>
-                {errors.motherName}
-              </p>
-            )}
-            <input
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {errors.email && (
-              <p style={{ color: "red", fontSize: "12px" }}>{errors.email}</p>
-            )}
-            <input
-              placeholder="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-            {errors.address && (
-              <p style={{ color: "red", fontSize: "12px" }}>{errors.address}</p>
-            )}
-
             <button onClick={handleSubmit} disabled={loading}>
               {loading ? "Admitting..." : "Admit Student"}
             </button>
           </>
         )}
+
         {credentials && (
           <>
             <CredentialCard id="studentCredentialCard">

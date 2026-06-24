@@ -30,6 +30,14 @@ export class ParentService {
     return parent || null;
   }
 
+  // parent.service.ts — consolidating into existing service per your preference
+  async findByPhoneWithChildren(phone: string) {
+    return this.parentRepository.findOne({
+      where: { phone },
+      relations: ['students', 'students.schoolClass'],
+    });
+  }
+
   async getPortalData(parentUserId: number) {
     const parent = await this.parentRepository.findOne({
       where: { user: { id: parentUserId } },

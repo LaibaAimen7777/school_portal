@@ -9,8 +9,23 @@ export class ParentController {
   constructor(private readonly parentService: ParentService) {}
 
   @Get('by-phone')
-  getByPhone(@Query('phone') phone: string) {
-    return this.parentService.findByPhone(phone);
+  async getByPhone(@Query('phone') phone: string) {
+    const parent = await this.parentService.findByPhoneWithChildren(phone);
+    if (!parent) return null;
+
+    return {
+      fatherName: parent.fatherName,
+      motherName: parent.motherName,
+      email: parent.email,
+      address: parent.address,
+      children: parent.students.map((s) => ({
+        id: s.id,
+        firstName: s.firstName,
+        lastName: s.lastName,
+        grade: s.schoolClass?.grade,
+        section: s.schoolClass?.section,
+      })),
+    };
   }
   @Get('portal')
   @UseGuards(JwtAuthGuard, RolesGuard)
