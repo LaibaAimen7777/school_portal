@@ -3,21 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { useRouter } from "next/navigation";
-import {
-  Container,
-  Header,
-  Title,
-  AddButton,
-  FilterSection,
-  FilterGroup,
-  FilterLabel,
-  FilterSelect,
-  EmptyState,
-  LoadingState,
-  WeekView,
-  DayColumn,
-  DayTitle,
-} from "@/wrappers/adminSchedule";
+import * as S from "@/wrappers/adminSchedule";
 
 interface Schedule {
   id: number;
@@ -54,7 +40,21 @@ const formatDay = (day: string) => day.charAt(0) + day.slice(1).toLowerCase();
 
 const formatTime = (time: string) => time.substring(0, 5);
 
-// Generate time slots from school config
+const SUBJECT_COLORS = [
+  { bg: "#eff6ff", border: "#bfdbfe", text: "#1d4ed8" },
+  { bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d" },
+  { bg: "#fdf4ff", border: "#e9d5ff", text: "#7e22ce" },
+  { bg: "#fff7ed", border: "#fed7aa", text: "#c2410c" },
+  { bg: "#fef2f2", border: "#fecaca", text: "#b91c1c" },
+  { bg: "#f0fdfa", border: "#99f6e4", text: "#0f766e" },
+  { bg: "#fefce8", border: "#fde68a", text: "#b45309" },
+  { bg: "#f8fafc", border: "#cbd5e1", text: "#334155" },
+];
+
+function getSubjectColor(subjectId: number) {
+  return SUBJECT_COLORS[subjectId % SUBJECT_COLORS.length];
+}
+
 function generateTimeSlots(config: SchoolConfig): string[] {
   const [sh, sm] = config.schoolStartTime.split(":").map(Number);
   const [eh, em] = config.schoolEndTime.split(":").map(Number);
@@ -75,21 +75,6 @@ function generateTimeSlots(config: SchoolConfig): string[] {
     cursor += PERIOD_MINS + BREAK_MINS;
   }
   return slots;
-}
-
-const SUBJECT_COLORS = [
-  { bg: "#eff6ff", border: "#bfdbfe", text: "#1d4ed8" },
-  { bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d" },
-  { bg: "#fdf4ff", border: "#e9d5ff", text: "#7e22ce" },
-  { bg: "#fff7ed", border: "#fed7aa", text: "#c2410c" },
-  { bg: "#fef2f2", border: "#fecaca", text: "#b91c1c" },
-  { bg: "#f0fdfa", border: "#99f6e4", text: "#0f766e" },
-  { bg: "#fefce8", border: "#fde68a", text: "#b45309" },
-  { bg: "#f8fafc", border: "#cbd5e1", text: "#334155" },
-];
-
-function getSubjectColor(subjectId: number) {
-  return SUBJECT_COLORS[subjectId % SUBJECT_COLORS.length];
 }
 
 export default function ScheduleDisplayPage() {
@@ -194,96 +179,65 @@ export default function ScheduleDisplayPage() {
 
   if (loading) {
     return (
-      <Container>
-        <LoadingState>
+      <S.Container>
+        <S.LoadingState>
           <div className="loading-dots">
             <span />
             <span />
             <span />
           </div>
           <p>Loading schedules...</p>
-        </LoadingState>
-      </Container>
+        </S.LoadingState>
+      </S.Container>
     );
   }
 
   return (
-    <Container>
-      <Header>
-        <Title>Schedule Management</Title>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <AddButton
-            onClick={() => router.push("/dashboard/admin/schedule/create")}
-          >
-            + Create Schedule
-          </AddButton>
-        </div>
-      </Header>
+    <S.Container>
+      <S.Header>
+        <S.Title>Schedule Management</S.Title>
+        <S.AddButton
+          onClick={() => router.push("/dashboard/admin/schedule/create")}
+        >
+          + Create Schedule
+        </S.AddButton>
+      </S.Header>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "12px",
-          marginBottom: "24px",
-          flexWrap: "wrap",
-        }}
-      >
-        {[
-          { label: "Total slots", value: schedules.length },
-          {
-            label: "Classes covered",
-            value: new Set(schedules.map((s) => s.schoolClass.id)).size,
-          },
-          {
-            label: "Teachers assigned",
-            value: new Set(schedules.map((s) => s.teacher.id)).size,
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            style={{
-              padding: "14px 20px",
-              borderRadius: "12px",
-              background: "#ffffff",
-              border: "1px solid #e5e7eb",
-              minWidth: "140px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 700,
-                fontSize: "20px",
-                display: "block",
-                color: "#0f172a",
-              }}
-            >
-              {stat.value}
-            </span>
-            <span style={{ fontSize: "12px", color: "#64748b" }}>
-              {stat.label}
-            </span>
-          </div>
-        ))}
-      </div>
+      <S.StatsContainer>
+        <S.StatCard>
+          <span className="value">{schedules.length}</span>
+          <span className="label">Total slots</span>
+        </S.StatCard>
+        <S.StatCard>
+          <span className="value">
+            {new Set(schedules.map((s) => s.schoolClass.id)).size}
+          </span>
+          <span className="label">Classes covered</span>
+        </S.StatCard>
+        <S.StatCard>
+          <span className="value">
+            {new Set(schedules.map((s) => s.teacher.id)).size}
+          </span>
+          <span className="label">Teachers assigned</span>
+        </S.StatCard>
+      </S.StatsContainer>
 
-      {/* Filters */}
-      <FilterSection>
-        <FilterGroup>
-          <FilterLabel>View:</FilterLabel>
-          <FilterSelect
+      <S.FilterSection>
+        <S.FilterGroup>
+          <S.FilterLabel>View:</S.FilterLabel>
+          <S.FilterSelect
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as "grid" | "week")}
             style={{ width: "130px" }}
           >
             <option value="grid">Grid View</option>
             <option value="week">Week View</option>
-          </FilterSelect>
-        </FilterGroup>
+          </S.FilterSelect>
+        </S.FilterGroup>
 
-        <FilterGroup>
-          <FilterLabel>Day:</FilterLabel>
-          <FilterSelect
+        <S.FilterGroup>
+          <S.FilterLabel>Day:</S.FilterLabel>
+          <S.FilterSelect
             value={selectedDay}
             onChange={(e) => setSelectedDay(e.target.value)}
           >
@@ -293,12 +247,12 @@ export default function ScheduleDisplayPage() {
                 {formatDay(d)}
               </option>
             ))}
-          </FilterSelect>
-        </FilterGroup>
+          </S.FilterSelect>
+        </S.FilterGroup>
 
-        <FilterGroup>
-          <FilterLabel>Class:</FilterLabel>
-          <FilterSelect
+        <S.FilterGroup>
+          <S.FilterLabel>Class:</S.FilterLabel>
+          <S.FilterSelect
             value={selectedClass}
             onChange={(e) => setSelectedClass(e.target.value)}
           >
@@ -308,12 +262,12 @@ export default function ScheduleDisplayPage() {
                 Grade {c.grade}-{c.section}
               </option>
             ))}
-          </FilterSelect>
-        </FilterGroup>
+          </S.FilterSelect>
+        </S.FilterGroup>
 
-        <FilterGroup>
-          <FilterLabel>Teacher:</FilterLabel>
-          <FilterSelect
+        <S.FilterGroup>
+          <S.FilterLabel>Teacher:</S.FilterLabel>
+          <S.FilterSelect
             value={selectedTeacher}
             onChange={(e) => setSelectedTeacher(e.target.value)}
           >
@@ -323,30 +277,16 @@ export default function ScheduleDisplayPage() {
                 {t.fullName}
               </option>
             ))}
-          </FilterSelect>
-        </FilterGroup>
+          </S.FilterSelect>
+        </S.FilterGroup>
 
         {(selectedDay || selectedClass || selectedTeacher) && (
-          <FilterGroup>
-            <button
-              onClick={clearFilters}
-              style={{
-                padding: "0.5rem 1rem",
-                border: "1px solid var(--border-color, #e2e8f0)",
-                borderRadius: "6px",
-                background: "white",
-                cursor: "pointer",
-                fontSize: "13px",
-              }}
-            >
-              Clear filters ✕
-            </button>
-          </FilterGroup>
+          <S.ClearButton onClick={clearFilters}>Clear filters ✕</S.ClearButton>
         )}
-      </FilterSection>
+      </S.FilterSection>
 
       {filteredSchedules.length === 0 ? (
-        <EmptyState>
+        <S.EmptyState>
           <p>No schedules found</p>
           <button
             onClick={() =>
@@ -357,288 +297,115 @@ export default function ScheduleDisplayPage() {
           >
             Create your first schedule
           </button>
-        </EmptyState>
+        </S.EmptyState>
       ) : viewMode === "grid" ? (
-        /* ── GRID VIEW ── */
-        <div style={{ overflowX: "auto" }}>
-          {config === null && (
-            <p
-              style={{
-                color: "#b45309",
-                fontSize: "13px",
-                marginBottom: "8px",
-              }}
-            >
+        <S.GridView>
+          {!config && (
+            <S.WarningText>
               ⚠️ School config not found — time slots may not match. Set it up
-              in <a href="/dashboard/admin/config">School Config</a>.
-            </p>
+              in School Config.
+            </S.WarningText>
           )}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: `80px repeat(5, minmax(140px, 1fr))`,
-              border: "1px solid #e5e7eb",
-              borderRadius: "12px",
-              overflow: "hidden",
-              minWidth: "780px",
-              background: "#ffffff",
-            }}
-          >
-            {/* Header row */}
-            <div style={{ background: "#f8fafc", padding: "12px 8px" }} />
+          <S.ScheduleGrid>
+            <div />
             {DAYS.map((day) => (
-              <div
-                key={day}
-                style={{
-                  padding: "12px 8px",
-                  fontWeight: 600,
-                  textAlign: "center",
-                  background: "#f8fafc",
-                  borderLeft: "1px solid var(--border-color, #e2e8f0)",
-                  fontSize: "13px",
-                  letterSpacing: "0.03em",
-                }}
-              >
-                {formatDay(day)}
-              </div>
+              <S.GridHeader key={day}>{formatDay(day)}</S.GridHeader>
             ))}
 
-            {/* Time rows — driven by school config */}
-            {timeSlots.map((slotStart, rowIdx) => (
+            {timeSlots.map((slotStart) => (
               <React.Fragment key={slotStart}>
-                {/* Time label */}
-                <div
-                  style={{
-                    padding: "10px 8px",
-                    fontSize: "11px",
-                    color: "#64748b",
-                    fontWeight: 500,
-                    borderTop: "1px solid var(--border-color, #e2e8f0)",
-                    background: "#f8fafc",
-                    textAlign: "center",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "center",
-                    paddingTop: "14px",
-                  }}
-                >
-                  {slotStart}
-                </div>
-
-                {/* Day cells */}
+                <S.TimeLabel>{slotStart}</S.TimeLabel>
                 {DAYS.map((day) => {
                   const slots = findSchedulesInSlot(day, slotStart);
                   return (
-                    <div
-                      key={day + slotStart}
-                      style={{
-                        borderTop: "1px solid var(--border-color, #e2e8f0)",
-                        borderLeft: "1px solid var(--border-color, #e2e8f0)",
-                        minHeight: "90px",
-                        padding: "6px",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "4px",
-                      }}
-                    >
+                    <S.Cell key={day + slotStart}>
                       {slots.length > 0 ? (
                         slots.map((slot) => {
                           const color = getSubjectColor(slot.subject.id);
                           return (
-                            <div
-                              key={slot.id}
-                              style={{
-                                background: "#ffffff",
-                                borderRadius: "10px",
-                                padding: "8px 10px",
-                                fontSize: "12px",
-                                position: "relative",
-                                borderLeft: `4px solid ${color.text}`,
-                                boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                                transition: "0.2s",
-                                marginTop: "10px",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  fontWeight: 700,
-                                  color: "#0f172a",
-                                  marginBottom: "2px",
-                                  paddingRight: "14px",
-                                  fontSize: "12px",
-                                  height: "40px",
-                                  // marginTop: "10px",
-                                }}
-                              >
-                                {slot.subject.name}
-                              </div>
-                              <div
-                                style={{ color: "#475569", fontSize: "11px" }}
-                              >
+                            <S.SlotCard key={slot.id} $color={color.text}>
+                              <div className="subject">{slot.subject.name}</div>
+                              <div className="class">
                                 Gr {slot.schoolClass.grade}-
                                 {slot.schoolClass.section}
                               </div>
-                              <div
-                                style={{ color: "#64748b", fontSize: "11px" }}
-                              >
+                              <div className="teacher">
                                 {slot.teacher.fullName.split(" ").slice(-1)[0]}
                               </div>
-                              <div
-                                style={{ color: "#94a3b8", fontSize: "10px" }}
-                              >
-                                {slot.room.name}
-                              </div>
-                              {/* Delete button */}
-                              <button
+                              <div className="room">{slot.room.name}</div>
+                              <S.DeleteButton
                                 onClick={() => handleDelete(slot.id)}
                                 disabled={deletingId === slot.id}
-                                title="Delete"
-                                style={{
-                                  // position: "absolute",
-                                  // top: "4px",
-                                  // right: "4px",
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  fontSize: "10px",
-                                  color: "#f8f8f8",
-                                  backgroundColor: "#bc412e",
-                                  lineHeight: 1,
-                                  padding: "2px",
-                                }}
                               >
                                 ✕
-                              </button>
-                              <div></div>
-                            </div>
+                              </S.DeleteButton>
+                            </S.SlotCard>
                           );
                         })
                       ) : (
-                        <button
+                        <S.AddSlotButton
                           onClick={() =>
                             router.push(
                               `/dashboard/admin/schedule/create?classId=${selectedClass}&day=${day}&time=${slotStart}`,
                             )
                           }
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            minHeight: "78px",
-                            border: "1px dashed #cbd5e1",
-                            borderRadius: "6px",
-                            background: "none",
-                            color: "#cbd5e1",
-                            cursor: "pointer",
-                            fontSize: "18px",
-                            transition: "all 0.15s",
-                          }}
-                          onMouseOver={(e) => {
-                            (
-                              e.currentTarget as HTMLButtonElement
-                            ).style.borderColor = "#94a3b8";
-                            (e.currentTarget as HTMLButtonElement).style.color =
-                              "#94a3b8";
-                          }}
-                          onMouseOut={(e) => {
-                            (
-                              e.currentTarget as HTMLButtonElement
-                            ).style.borderColor = "#cbd5e1";
-                            (e.currentTarget as HTMLButtonElement).style.color =
-                              "#cbd5e1";
-                          }}
                         >
                           +
-                        </button>
+                        </S.AddSlotButton>
                       )}
-                    </div>
+                    </S.Cell>
                   );
                 })}
               </React.Fragment>
             ))}
-          </div>
-        </div>
+          </S.ScheduleGrid>
+        </S.GridView>
       ) : (
-        /* ── WEEK VIEW ── */
-        <WeekView>
+        <S.WeekView>
           {DAYS.map((day) => (
-            <DayColumn key={day}>
-              <DayTitle>{formatDay(day)}</DayTitle>
-              {schedulesByDay[day].length > 0 ? (
-                schedulesByDay[day].map((schedule) => {
-                  const color = getSubjectColor(schedule.subject.id);
-                  return (
-                    <div
-                      key={schedule.id}
-                      style={{
-                        background: color.bg,
-                        border: `1px solid ${color.border}`,
-                        borderRadius: "8px",
-                        padding: "10px 12px",
-                        marginBottom: "8px",
-                        position: "relative",
-                        fontSize: "13px",
-                        width: "10px",
-                      }}
-                    >
-                      <button
-                        onClick={() => handleDelete(schedule.id)}
-                        disabled={deletingId === schedule.id}
-                        title="Delete"
+            <S.DayColumn key={day}>
+              <S.DayTitle>{formatDay(day)}</S.DayTitle>
+              <S.DayContent>
+                {schedulesByDay[day].length > 0 ? (
+                  schedulesByDay[day].map((schedule) => {
+                    const color = getSubjectColor(schedule.subject.id);
+                    return (
+                      <S.WeekSlotCard
+                        key={schedule.id}
+                        $bg={color.bg}
+                        $border={color.border}
+                        $text={color.text}
                       >
-                        ✕
-                      </button>
-
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#64748b",
-                          marginBottom: "4px",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {formatTime(schedule.startTime)} –{" "}
-                        {formatTime(schedule.endTime)}
-                      </div>
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          color: color.text,
-                          marginBottom: "2px",
-                        }}
-                      >
-                        {schedule.subject.name}
-                      </div>
-                      <div style={{ color: "#475569", fontSize: "12px" }}>
-                        Grade {schedule.schoolClass.grade}-
-                        {schedule.schoolClass.section}
-                      </div>
-                      <div style={{ color: "#64748b", fontSize: "12px" }}>
-                        {schedule.teacher.fullName}
-                      </div>
-                      <div style={{ color: "#94a3b8", fontSize: "11px" }}>
-                        {schedule.room.name}
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div
-                  style={{
-                    padding: "1rem",
-                    textAlign: "center",
-                    color: "#cbd5e1",
-                    border: "1px dashed #e2e8f0",
-                    borderRadius: "8px",
-                    fontSize: "13px",
-                  }}
-                >
-                  No classes
-                </div>
-              )}
-            </DayColumn>
+                        <div className="time">
+                          {formatTime(schedule.startTime)} –{" "}
+                          {formatTime(schedule.endTime)}
+                        </div>
+                        <div className="subject">{schedule.subject.name}</div>
+                        <div className="class">
+                          Gr {schedule.schoolClass.grade}-
+                          {schedule.schoolClass.section}
+                        </div>
+                        <div className="teacher">
+                          {schedule.teacher.fullName}
+                        </div>
+                        <div className="room">{schedule.room.name}</div>
+                        <S.WeekDeleteButton
+                          onClick={() => handleDelete(schedule.id)}
+                          disabled={deletingId === schedule.id}
+                        >
+                          ✕
+                        </S.WeekDeleteButton>
+                      </S.WeekSlotCard>
+                    );
+                  })
+                ) : (
+                  <S.EmptyDay>No classes</S.EmptyDay>
+                )}
+              </S.DayContent>
+            </S.DayColumn>
           ))}
-        </WeekView>
+        </S.WeekView>
       )}
-    </Container>
+    </S.Container>
   );
 }
