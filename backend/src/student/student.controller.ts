@@ -27,12 +27,12 @@ export class StudentController {
     return this.studentService.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
-  @Patch(':id/reset-password')
-  resetPassword(@Param('id') id: number) {
-    return this.studentService.resetPassword(Number(id));
-  }
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(UserRole.ADMIN)
+  // @Patch(':id/reset-password')
+  // resetPassword(@Param('id') id: number) {
+  //   return this.studentService.resetPassword(Number(id));
+  // }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -52,17 +52,17 @@ export class StudentController {
     return this.studentService.updateClass(Number(id), classId);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('results')
-  getResults(@Req() req) {
-    const studentId = req.user.id;
-    return this.studentService.getResults(studentId);
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Get('results')
+  // getResults(@Req() req) {
+  //   const studentId = req.user.id;
+  //   return this.studentService.getResults(studentId);
+  // }
 
-  @UseGuards(JwtAuthGuard)
-  @Roles(UserRole.STUDENT)
-  @Get('me')
-  getMyProfile(@Req() req) {
-    return this.studentService.getMyProfile(req.user.id);
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Roles(UserRole.STUDENT)
+  // @Get('me')
+  // getMyProfile(@Req() req) {
+  //   return this.studentService.getMyProfile(req.user.id);
+  // }
 }

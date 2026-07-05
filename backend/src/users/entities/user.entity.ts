@@ -6,11 +6,11 @@ import {
   OneToOne,
 } from 'typeorm';
 import { Parent } from 'src/parent/entities/parent.entity';
-import { Student } from 'src/student/entities/student.entity';
+// import { Student } from 'src/student/entities/student.entity';
 import { Teacher } from 'src/teachers/entities/teacher.entity';
 
 export enum UserRole {
-  STUDENT = 'student',
+  // STUDENT = 'student',
   PARENT = 'parent',
   TEACHER = 'teacher',
   ADMIN = 'admin',
@@ -54,8 +54,8 @@ export class User {
   @OneToOne(() => Parent, (parent) => parent.user)
   parent!: Parent;
 
-  @OneToOne(() => Student, (student) => student.user)
-  student!: Student;
+  // @OneToOne(() => Student, (student) => student.user)
+  // student!: Student;
 
   @OneToOne(() => Teacher, (teacher) => teacher.user)
   teacher!: Teacher;

@@ -117,7 +117,6 @@ export default function AdminLayout({
           icon: FaCalendarAlt,
           label: "Schedule",
         },
-        { path: "/dashboard/admin/exams", icon: FaBook, label: "Exams" },
       ],
     },
     {

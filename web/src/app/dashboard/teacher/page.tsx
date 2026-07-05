@@ -151,10 +151,6 @@ export default function TeacherOverview() {
               <button>Take Attendance</button>
             </Link>
 
-            <Link href="/dashboard/teacher/marks">
-              <button>Enter Marks</button>
-            </Link>
-
             <Link href="/dashboard/teacher/students">
               <button>Students</button>
             </Link>

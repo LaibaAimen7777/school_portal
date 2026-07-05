@@ -13,7 +13,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 
 @Entity()
-@Unique(['schoolClass', 'rollNumber']) // roll unique inside class
+@Unique(['schoolClass', 'rollNumber'])
 export class Student {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -43,13 +43,6 @@ export class Student {
   })
   @JoinColumn({ name: 'schoolClassId' })
   schoolClass!: SchoolClass;
-
-  //   @RelationId((student: Student) => student.schoolClass)
-  //   schoolClassId: number;
-
-  @OneToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn()
-  user!: User | null;
 
   @ManyToOne(() => Parent, (parent) => parent.students, {
     eager: true,

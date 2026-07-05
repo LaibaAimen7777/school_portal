@@ -40,8 +40,6 @@ export default function CreateStudentPage() {
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedClass, setSelectedClass] = useState<SchoolClass | null>(null);
   const [credentials, setCredentials] = useState<{
-    studentUsername?: string;
-    studentPassword?: string;
     parentUsername?: string;
     parentPassword?: string;
   } | null>(null);
@@ -221,13 +219,13 @@ export default function CreateStudentPage() {
 
       if (res.data) {
         setCredentials({
-          studentUsername: res.data.username,
-          studentPassword: res.data.temporaryPassword,
+          // studentUsername: res.data.username,
+          // studentPassword: res.data.temporaryPassword,
           parentUsername: res.data.parentUsername,
           parentPassword: res.data.parentPassword,
         });
 
-        showSuccess("Student admitted & portal created!");
+        showSuccess("Student admitted successfully!");
       } else {
         showSuccess("Student admitted successfully!");
       }
@@ -263,7 +261,7 @@ export default function CreateStudentPage() {
 
     pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
 
-    pdf.save(`Student-${credentials?.studentUsername}-Credentials.pdf`);
+    pdf.save(`Parent-${credentials?.parentUsername}-Credentials.pdf`);
   };
 
   return (
@@ -445,20 +443,6 @@ export default function CreateStudentPage() {
                   🖨️ Print
                 </PrintButton>
               </CredentialHeader>
-
-              {/* 🎓 Student Section */}
-              <ResponseTitle style={{ marginTop: "10px" }}>
-                Student Credentials
-              </ResponseTitle>
-
-              <ResponseItem>
-                <strong>Username:</strong> {credentials.studentUsername}
-              </ResponseItem>
-
-              <ResponseItem>
-                <strong>Password:</strong>
-                <PasswordValue>{credentials.studentPassword}</PasswordValue>
-              </ResponseItem>
 
               {/* 👨‍👩‍👧 Parent Section (only if exists) */}
               {credentials.parentUsername && (

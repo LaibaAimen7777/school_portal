@@ -12,7 +12,7 @@ import { User, UserRole } from 'src/users/entities/user.entity';
 import { CreateStudentDto } from './dto/create-student.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { Mark } from 'src/marks/entities/marks.entity';
+// import { Mark } from 'src/marks/entities/marks.entity';
 
 function generatePassword() {
   return crypto.randomBytes(8).toString('hex');
@@ -27,11 +27,8 @@ export class StudentService {
     @InjectRepository(SchoolClass)
     private classRepository: Repository<SchoolClass>,
 
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-
-    @InjectRepository(Mark)
-    private marksRepo: Repository<Mark>,
+    // @InjectRepository(User)
+    // private userRepository: Repository<User>,
 
     private dataSource: DataSource,
   ) {}
@@ -39,8 +36,8 @@ export class StudentService {
   async findAll(grade?: number, section?: string) {
     const query = this.studentRepository
       .createQueryBuilder('student')
-      .leftJoinAndSelect('student.user', 'user')
-      .leftJoinAndSelect('student.schoolClass', 'schoolClass');
+      .leftJoinAndSelect('student.schoolClass', 'schoolClass')
+      .leftJoinAndSelect('student.parent', 'parent');
 
     if (grade) query.andWhere('schoolClass.grade = :grade', { grade });
     if (section) query.andWhere('schoolClass.section = :section', { section });
@@ -73,36 +70,34 @@ export class StudentService {
       });
       const rollNumber = lastStudent ? lastStudent.rollNumber + 1 : 1;
 
-      let savedUser: User | null = null;
-      let username: string | null = null;
-      let plainPassword: string | null = null;
-      let canLogin = false;
+      // let savedUser: User | null = null;
+      // let username: string | null = null;
+      // let plainPassword: string | null = null;
+      // let canLogin = false;
 
-      if (schoolClass.grade >= 9) {
-        // 3️⃣ Prepare username/password
-        const yearShort = dto.joiningYear.toString().slice(2);
-        username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
-          .toString()
-          .padStart(2, '0')}`;
+      // if (schoolClass.grade >= 9) {
+      //   // 3️⃣ Prepare username/password
+      //   const yearShort = dto.joiningYear.toString().slice(2);
+      //   username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
+      //     .toString()
+      //     .padStart(2, '0')}`;
 
-        plainPassword = generatePassword();
-        const hashedPassword = await bcrypt.hash(plainPassword, 10);
-        canLogin = true;
+      //   plainPassword = generatePassword();
+      //   const hashedPassword = await bcrypt.hash(plainPassword, 10);
+      //   canLogin = true;
 
-        const user = manager.create(User, {
-          username,
-          password: hashedPassword,
-          role: UserRole.STUDENT,
-          canLogin: 1,
-          mustChangePassword: 1,
-          isActive: 1,
-        });
+      //   const user = manager.create(User, {
+      //     username,
+      //     password: hashedPassword,
+      //     role: UserRole.STUDENT,
+      //     canLogin: 1,
+      //     mustChangePassword: 1,
+      //     isActive: 1,
+      //   });
 
-        savedUser = await manager.save(user);
-      }
+      //   savedUser = await manager.save(user);
+      // }
 
-      // 5️⃣ Find or create parent
-      // 5️⃣ Find or create parent
       let parent = await manager.findOne(Parent, {
         where: { phone: dto.phone },
         relations: ['user'],
@@ -163,7 +158,6 @@ export class StudentService {
           await manager.save(parent);
         }
       }
-      console.log('dto', dto);
       // 6️⃣ Create student using classId directly
       const student = manager.create(Student, {
         firstName: dto.firstName,
@@ -172,8 +166,7 @@ export class StudentService {
         gender: dto.gender,
         rollNumber,
         joiningYear: dto.joiningYear,
-        schoolClass, // ✅ Pass only the ID to avoid null issue
-        user: savedUser ?? null,
+        schoolClass,
         parent,
       });
 
@@ -189,48 +182,45 @@ export class StudentService {
         grade: schoolClass.grade,
         section: schoolClass.section,
         rollNumber,
-        username,
-        temporaryPassword: canLogin ? plainPassword : null,
-        canLogin,
 
         parentUsername: parent?.user?.username || null,
-        parentPassword: parentPlainPassword, // only exists if new
+        parentPassword: parentPlainPassword,
       };
     });
   }
-  async resetPassword(studentId: number) {
-    return this.dataSource.transaction(async (manager) => {
-      const student = await manager.findOne(Student, {
-        where: { id: studentId },
-        relations: ['user'],
-      });
+  // async resetPassword(studentId: number) {
+  //   return this.dataSource.transaction(async (manager) => {
+  //     const student = await manager.findOne(Student, {
+  //       where: { id: studentId },
+  //       relations: ['user'],
+  //     });
 
-      if (!student) {
-        throw new NotFoundException('Student not found');
-      }
+  //     if (!student) {
+  //       throw new NotFoundException('Student not found');
+  //     }
 
-      const newPassword = crypto.randomBytes(8).toString('hex');
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
+  //     const newPassword = crypto.randomBytes(8).toString('hex');
+  //     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-      if (student.user) {
-        student.user.password = hashedPassword;
-        student.user.must_change_password = true;
-      }
+  //     if (student.user) {
+  //       student.user.password = hashedPassword;
+  //       student.user.must_change_password = true;
+  //     }
 
-      await manager.save(student.user);
+  //     await manager.save(student.user);
 
-      return {
-        message: 'Password reset successfully',
-        temporaryPassword: newPassword,
-      };
-    });
-  }
+  //     return {
+  //       message: 'Password reset successfully',
+  //       temporaryPassword: newPassword,
+  //     };
+  //   });
+  // }
 
   async updateClass(studentId: number, newClassId: number) {
     return this.dataSource.transaction(async (manager) => {
       const student = await manager.findOne(Student, {
         where: { id: studentId },
-        relations: ['schoolClass', 'user'],
+        relations: ['schoolClass'],
       });
 
       if (!student) throw new NotFoundException('Student not found');
@@ -243,14 +233,15 @@ export class StudentService {
 
       if (!newClass) throw new NotFoundException('Class not found');
 
-      if (newClass.currentStrength >= newClass.maxStrength)
+      if (newClass.currentStrength >= newClass.maxStrength) {
         throw new BadRequestException('Class is full');
+      }
 
       // 🔁 Decrease old class strength
       oldClass.currentStrength -= 1;
       await manager.save(oldClass);
 
-      // 🔢 Generate new roll number safely
+      // 🔢 Generate new roll number
       const lastStudent = await manager.findOne(Student, {
         where: { schoolClass: { id: newClass.id } },
         order: { rollNumber: 'DESC' },
@@ -258,39 +249,9 @@ export class StudentService {
 
       const newRollNumber = lastStudent ? lastStudent.rollNumber + 1 : 1;
 
-      // Update student
+      // ✅ Update student
       student.rollNumber = newRollNumber;
       student.schoolClass = newClass;
-
-      // 🧠 Handle portal logic
-      const yearShort = student.joiningYear.toString().slice(2);
-
-      // Case 1: Student moves into Grade 9 or 10 and has NO account
-      if (newClass.grade >= 9 && !student.user) {
-        const plainPassword = generatePassword();
-        const hashedPassword = await bcrypt.hash(plainPassword, 10);
-
-        const username = `${yearShort}${newClass.grade}${newClass.section}${newRollNumber
-          .toString()
-          .padStart(2, '0')}`;
-
-        const user = manager.create(User, {
-          username,
-          password: hashedPassword,
-          role: UserRole.STUDENT,
-        });
-
-        student.user = await manager.save(user);
-      }
-
-      // Case 2: Student already has portal → just update username
-      if (student.user) {
-        student.user.username = `${yearShort}${newClass.grade}${newClass.section}${newRollNumber
-          .toString()
-          .padStart(2, '0')}`;
-
-        await manager.save(student.user);
-      }
 
       // 🔁 Increase new class strength
       newClass.currentStrength += 1;
@@ -300,48 +261,48 @@ export class StudentService {
     });
   }
 
-  async getResults(studentId: number) {
-    const marks = await this.marksRepo.find({
-      where: {
-        student: { id: studentId },
-      },
-      relations: ['exam', 'exam.subject', 'exam.schoolClass'],
-    });
+  // async getResults(studentId: number) {
+  //   const marks = await this.marksRepo.find({
+  //     where: {
+  //       student: { id: studentId },
+  //     },
+  //     relations: ['exam', 'exam.subject', 'exam.schoolClass'],
+  //   });
 
-    return marks.map((m) => ({
-      subject: m.exam.subject.name,
-      examType: m.exam.examType,
-      score: m.score,
-      date: m.exam.date,
-    }));
-  }
+  //   return marks.map((m) => ({
+  //     subject: m.exam.subject.name,
+  //     examType: m.exam.examType,
+  //     score: m.score,
+  //     date: m.exam.date,
+  //   }));
+  // }
 
-  async getMyProfile(userId: number) {
-    const student = await this.studentRepository.findOne({
-      where: {
-        user: { id: userId },
-      },
-      relations: ['schoolClass', 'parent'],
-    });
+  // async getMyProfile(userId: number) {
+  //   const student = await this.studentRepository.findOne({
+  //     where: {
+  //       user: { id: userId },
+  //     },
+  //     relations: ['schoolClass', 'parent'],
+  //   });
 
-    if (!student) {
-      throw new NotFoundException('Student not found');
-    }
+  //   if (!student) {
+  //     throw new NotFoundException('Student not found');
+  //   }
 
-    return {
-      id: student.id,
-      firstName: student.firstName,
-      lastName: student.lastName,
-      rollNumber: student.rollNumber,
-      grade: student.schoolClass.grade,
-      section: student.schoolClass.section,
-      joiningYear: student.joiningYear,
+  //   return {
+  //     id: student.id,
+  //     firstName: student.firstName,
+  //     lastName: student.lastName,
+  //     rollNumber: student.rollNumber,
+  //     grade: student.schoolClass.grade,
+  //     section: student.schoolClass.section,
+  //     joiningYear: student.joiningYear,
 
-      parent: {
-        fatherName: student.parent?.fatherName,
-        motherName: student.parent?.motherName,
-        phone: student.parent?.phone,
-      },
-    };
-  }
+  //     parent: {
+  //       fatherName: student.parent?.fatherName,
+  //       motherName: student.parent?.motherName,
+  //       phone: student.parent?.phone,
+  //     },
+  //   };
+  // }
 }

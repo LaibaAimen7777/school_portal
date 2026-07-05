@@ -13,7 +13,6 @@ import {
   FaCalendarAlt,
   FaUsers,
   FaUserPlus,
-  FaKey,
   FaExchangeAlt,
   FaSchool,
   FaCheckCircle,
@@ -21,7 +20,6 @@ import {
 
 type Student = {
   id: number;
-  username: string;
   rollNumber: number;
   joiningYear: number;
   schoolClass: {
@@ -57,17 +55,6 @@ export default function AdminStudents() {
     setToastMessage(message);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 4500);
-  };
-
-  const resetPassword = async (id: number) => {
-    try {
-      const res = await api.patch(`/student/${id}/reset-password`);
-      triggerToast(
-        `Password reset successfully! Temp key: ${res.data.temporaryPassword}`,
-      );
-    } catch (err) {
-      triggerToast("Error resetting student password.");
-    }
   };
 
   const openClassModal = (id: number) => {
@@ -115,7 +102,9 @@ export default function AdminStudents() {
               <FaUserGraduate />
             </div>
 
-            <h3>{student.username}</h3>
+            {/* <h3>
+              {student.firstName} {student.lastName}
+            </h3> */}
 
             <div className="info-row">
               <FaIdCard />
@@ -145,16 +134,6 @@ export default function AdminStudents() {
 
             {/* ACTION FOOTER ROW */}
             <div className="actions">
-              {(student.schoolClass.grade === 9 ||
-                student.schoolClass.grade === 10) && (
-                <button
-                  className="reset"
-                  onClick={() => resetPassword(student.id)}
-                >
-                  <FaKey />
-                  Reset
-                </button>
-              )}
               <button
                 className="change"
                 onClick={() => openClassModal(student.id)}

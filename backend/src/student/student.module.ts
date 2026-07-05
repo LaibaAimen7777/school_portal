@@ -7,11 +7,10 @@ import { SchoolClass } from 'src/school-class/entities/school-class.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Parent } from 'src/parent/entities/parent.entity';
 import { ParentModule } from 'src/parent/parent.module';
-import { Mark } from 'src/marks/entities/marks.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Student, SchoolClass, User, Parent, Mark]),
+    TypeOrmModule.forFeature([Student, SchoolClass, User, Parent]),
     ParentModule,
   ],
   controllers: [StudentController],

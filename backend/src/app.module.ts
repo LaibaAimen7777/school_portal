@@ -14,16 +14,8 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { AttendanceController } from './attendance/attendance.controller';
 import { AttendanceModule } from './attendance/attendance.module';
-import { AssignmentsController } from './assignments/assignments.controller';
-import { AssignmentsService } from './assignments/assignments.service';
-import { AssignmentsModule } from './assignments/assignments.module';
-import { SubmissionsModule } from './submissions/submissions.module';
-import { ExamsController } from './exams/exams.controller';
-import { ExamsService } from './exams/exams.service';
-import { ExamsModule } from './exams/exams.module';
-import { MarksModule } from './marks/marks.module';
+
 import { SchoolConfigModule } from './school-config/school-config.module';
-import { ExamPeriodsModule } from './exam-periods/exam-periods.module';
 
 @Module({
   imports: [
@@ -52,12 +44,7 @@ import { ExamPeriodsModule } from './exam-periods/exam-periods.module';
     ScheduleModule,
     RoomsModule,
     AttendanceModule,
-    AssignmentsModule,
-    SubmissionsModule,
-    ExamsModule,
-    MarksModule,
     SchoolConfigModule,
-    ExamPeriodsModule,
   ],
   // controllers: [AttendanceController, AssignmentsController, ExamsController],
   // providers: [AssignmentsService, ExamsService],

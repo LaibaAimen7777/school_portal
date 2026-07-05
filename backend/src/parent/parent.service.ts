@@ -4,7 +4,6 @@ import { Parent } from './entities/parent.entity';
 import { Repository } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
 import { Attendance } from 'src/attendance/entities/attendance.entity';
-import { Mark } from 'src/marks/entities/marks.entity';
 
 @Injectable()
 export class ParentService {
@@ -17,9 +16,6 @@ export class ParentService {
 
     @InjectRepository(Attendance)
     private attendanceRepository: Repository<Attendance>,
-
-    @InjectRepository(Mark)
-    private markRepository: Repository<Mark>,
   ) {}
 
   async findByPhone(phone: string): Promise<Parent | null> {
@@ -71,12 +67,6 @@ export class ParentService {
         const absent = attendanceRecords.filter(
           (a) => a.status === 'ABSENT',
         ).length;
-
-        const marks = await this.markRepository.find({
-          where: { student: { id: student.id } },
-          relations: ['exam', 'exam.subject', 'exam.examPeriod'],
-          order: { id: 'DESC' },
-        });
 
         const teacherMap = new Map<
           number,
@@ -136,15 +126,6 @@ export class ParentService {
               subject: a.schedule?.subject?.name ?? null,
             })),
           },
-
-          marks: marks.map((m) => ({
-            id: m.id,
-            subject: m.exam?.subject?.name ?? null,
-            examType: m.exam?.examType ?? null,
-            examPeriod: m.exam?.examPeriod?.name ?? null,
-            date: m.exam?.date ?? null,
-            score: m.score,
-          })),
         };
       }),
     );
