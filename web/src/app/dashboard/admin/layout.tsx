@@ -107,6 +107,11 @@ export default function AdminLayout({
           icon: FaUserPlus,
           label: "Add Teacher",
         },
+        {
+          path: "/dashboard/admin/parents",
+          icon: FaHome,
+          label: "Parents",
+        },
       ],
     },
     {

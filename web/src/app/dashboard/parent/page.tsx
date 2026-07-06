@@ -27,15 +27,6 @@ interface AttendanceRecord {
   subject: string | null;
 }
 
-interface Mark {
-  id: number;
-  subject: string | null;
-  examType: string | null;
-  examPeriod: string | null;
-  date: string | null;
-  score: number;
-}
-
 interface Child {
   id: number;
   firstName: string;
@@ -51,17 +42,17 @@ interface Child {
     percentage: number | null;
     recent: AttendanceRecord[];
   };
-  marks: Mark[];
 }
 
 interface PortalData {
-  parent: { fatherName: string; motherName: string };
+  parent: { id: number; fatherName: string; motherName: string };
   children: Child[];
+  mustChangePassword: boolean;
 }
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
-const TABS = ["Schedule", "Teachers", "Attendance", "Marks"] as const;
+const TABS = ["Schedule", "Teachers", "Attendance"] as const;
 type Tab = (typeof TABS)[number];
 
 // ── Helper functions ──────────────────────────────────────────────────────────
@@ -72,12 +63,6 @@ const getPercentColor = (pct: number | null): string => {
   return "#ef4444";
 };
 
-const getScoreColor = (score: number): string => {
-  if (score >= 80) return "#22c55e";
-  if (score >= 60) return "#f59e0b";
-  return "#ef4444";
-};
-
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function ParentPortalPage() {
   const [data, setData] = useState<PortalData | null>(null);
@@ -85,6 +70,10 @@ export default function ParentPortalPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeChild, setActiveChild] = useState(0);
   const [activeTab, setActiveTab] = useState<Tab>("Schedule");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     api
@@ -108,10 +97,64 @@ export default function ParentPortalPage() {
     );
   }
 
+  const handleChangePassword = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await api.post(
+        `/parent/change-password`,
+        {
+          password: newPassword, // 👈 send password in body
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      console.log("Password changed:", res.data);
+    } catch (err: any) {
+      console.error(err.response?.data || err.message);
+    }
+  };
+
   const child = data.children[activeChild];
 
   return (
     <S.Container>
+      {data.mustChangePassword && (
+        <div
+          style={{
+            background: "#fef3c7",
+            border: "1px solid #f59e0b",
+            padding: "12px",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span style={{ color: "#92400e", fontWeight: 500 }}>
+            ⚠️ Please change your password for security
+          </span>
+
+          <button
+            onClick={() => setShowPasswordModal(true)}
+            style={{
+              padding: "6px 12px",
+              background: "#2563eb",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+          >
+            Change Password
+          </button>
+        </div>
+      )}
       <S.Header>
         <S.HeaderContent>
           <S.HeaderLabel>Parent Portal</S.HeaderLabel>
@@ -208,9 +251,78 @@ export default function ParentPortalPage() {
           {activeTab === "Attendance" && (
             <AttendanceTab attendance={child.attendance} />
           )}
-          {activeTab === "Marks" && <MarksTab marks={child.marks} />}
         </S.TabPanel>
       </S.MainContent>
+      {showPasswordModal && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              width: "400px",
+              background: "white",
+              padding: "20px",
+              borderRadius: "10px",
+            }}
+          >
+            <h3>Change Password</h3>
+
+            <input
+              type="password"
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              style={{ width: "100%", marginBottom: "10px" }}
+            />
+
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              style={{ width: "100%", marginBottom: "10px" }}
+            />
+
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={handleChangePassword}
+                disabled={changingPassword}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  background: "#2563eb",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                }}
+              >
+                {changingPassword ? "Updating..." : "Update"}
+              </button>
+
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                style={{
+                  flex: 1,
+                  padding: "10px",
+                  background: "#e5e7eb",
+                  border: "none",
+                  borderRadius: "6px",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </S.Container>
   );
 }
@@ -327,41 +439,5 @@ function AttendanceTab({ attendance }: { attendance: Child["attendance"] }) {
         ))
       )}
     </S.AttendanceSection>
-  );
-}
-
-// ── Marks Tab ─────────────────────────────────────────────────────────────────
-function MarksTab({ marks }: { marks: Mark[] }) {
-  if (!marks.length) {
-    return <S.EmptyState>No exam results yet.</S.EmptyState>;
-  }
-
-  return (
-    <S.MarksTable>
-      <S.StyledTable>
-        <thead>
-          <tr>
-            <th>Subject</th>
-            <th>Type</th>
-            <th>Period</th>
-            <th>Date</th>
-            <th>Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          {marks.map((m) => (
-            <tr key={m.id}>
-              <td>{m.subject ?? "—"}</td>
-              <td>{m.examType ?? "—"}</td>
-              <td>{m.examPeriod ?? "—"}</td>
-              <td>{m.date ?? "—"}</td>
-              <td>
-                <S.ScoreCell $score={m.score}>{m.score}</S.ScoreCell>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </S.StyledTable>
-    </S.MarksTable>
   );
 }

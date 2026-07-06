@@ -1,9 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Parent } from './entities/parent.entity';
 import { Repository } from 'typeorm';
 import { Student } from 'src/student/entities/student.entity';
 import { Attendance } from 'src/attendance/entities/attendance.entity';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class ParentService {
@@ -37,7 +43,7 @@ export class ParentService {
   async getPortalData(parentUserId: number) {
     const parent = await this.parentRepository.findOne({
       where: { user: { id: parentUserId } },
-      relations: ['students'],
+      relations: ['students', 'user'],
     });
     if (!parent) throw new NotFoundException('Parent not found');
 
@@ -139,6 +145,76 @@ export class ParentService {
         email: parent.email,
       },
       children: childrenData,
+      mustChangePassword: parent.user?.must_change_password ?? false,
+    };
+  }
+
+  async resetParentPassword(parentId: number) {
+    const parent = await this.parentRepository.findOne({
+      where: { id: parentId },
+      relations: ['user'],
+    });
+
+    console.log('here in reset');
+
+    if (!parent) {
+      throw new NotFoundException('Parent not found');
+    }
+
+    if (!parent.user) {
+      throw new BadRequestException('Parent does not have login access');
+    }
+
+    // 🔐 Generate password
+    const newPassword = crypto.randomBytes(8).toString('hex');
+
+    // 🔒 Hash it
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    parent.user.password = hashedPassword;
+    parent.user.must_change_password = true;
+    parent.user.can_login = true;
+    parent.user.is_active = true;
+
+    await this.parentRepository.save(parent);
+
+    return {
+      message: 'Password reset successfully',
+      username: parent.user.username,
+      temporaryPassword: newPassword,
+    };
+  }
+
+  async findAll() {
+    return this.parentRepository.find({
+      relations: ['students', 'students.schoolClass'],
+    });
+  }
+
+  async changePassword(userId: number, password: string) {
+    const parent = await this.parentRepository.findOne({
+      where: { id: userId },
+      relations: ['user'],
+    });
+
+    if (!parent) {
+      throw new NotFoundException('Parent not found');
+    }
+
+    if (!parent.user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    parent.user.password = hashedPassword;
+    parent.user.must_change_password = false;
+
+    await this.parentRepository.save(parent);
+
+    return {
+      success: true,
+      message: 'Password changed successfully',
     };
   }
 }
