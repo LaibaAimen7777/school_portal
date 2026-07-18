@@ -10,6 +10,7 @@ import { Student } from 'src/student/entities/student.entity';
 import { Attendance } from 'src/attendance/entities/attendance.entity';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class ParentService {
@@ -22,6 +23,9 @@ export class ParentService {
 
     @InjectRepository(Attendance)
     private attendanceRepository: Repository<Attendance>,
+
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async findByPhone(phone: string): Promise<Parent | null> {
@@ -150,67 +154,66 @@ export class ParentService {
   }
 
   async resetParentPassword(parentId: number) {
-    const parent = await this.parentRepository.findOne({
+    const parent = await this.userRepository.findOne({
       where: { id: parentId },
-      relations: ['user'],
+      relations: ['parent'],
     });
 
-    console.log('here in reset');
+    console.log(parentId);
+    console.log('parent', parent);
 
     if (!parent) {
-      throw new NotFoundException('Parent not found');
+      throw new NotFoundException('User not found');
     }
 
-    if (!parent.user) {
-      throw new BadRequestException('Parent does not have login access');
+    if (!parent.parent) {
+      throw new BadRequestException('Parent not found');
     }
 
-    // 🔐 Generate password
     const newPassword = crypto.randomBytes(8).toString('hex');
 
-    // 🔒 Hash it
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    parent.user.password = hashedPassword;
-    parent.user.must_change_password = true;
-    parent.user.can_login = true;
-    parent.user.is_active = true;
+    parent.password = hashedPassword;
+    parent.must_change_password = true;
+    parent.can_login = true;
+    parent.is_active = true;
 
-    await this.parentRepository.save(parent);
+    await this.userRepository.save(parent);
 
     return {
       message: 'Password reset successfully',
-      username: parent.user.username,
+      username: parent.username,
       temporaryPassword: newPassword,
     };
   }
 
   async findAll() {
     return this.parentRepository.find({
-      relations: ['students', 'students.schoolClass'],
+      relations: ['students', 'students.schoolClass', 'user'],
     });
   }
 
   async changePassword(userId: number, password: string) {
-    const parent = await this.parentRepository.findOne({
+    const parent = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['user'],
+      relations: ['parent'],
     });
 
     if (!parent) {
       throw new NotFoundException('Parent not found');
     }
 
-    if (!parent.user) {
-      throw new NotFoundException('User not found');
+    if (!parent.parent) {
+      throw new NotFoundException('parent not found');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    parent.user.password = hashedPassword;
-    parent.user.must_change_password = false;
+    parent.password = hashedPassword;
+    parent.must_change_password = false;
 
-    await this.parentRepository.save(parent);
+    await this.userRepository.save(parent);
 
     return {
       success: true,

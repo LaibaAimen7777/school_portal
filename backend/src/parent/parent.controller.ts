@@ -49,6 +49,7 @@ export class ParentController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   async resetPassword(@Param('id') id: number) {
+    console.log('parent id', id);
     return this.parentService.resetParentPassword(Number(id));
   }
 

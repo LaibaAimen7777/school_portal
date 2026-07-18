@@ -3,6 +3,17 @@
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 
+interface User {
+  id: number;
+  username: string;
+  role: string;
+  password: string;
+  can_login: boolean;
+  is_active: boolean;
+  must_change_password: boolean;
+  created_at: string;
+}
+
 interface Parent {
   id: number;
   fatherName: string;
@@ -14,6 +25,7 @@ interface Parent {
     firstName: string;
     lastName: string;
   }[];
+  user: User;
 }
 
 export default function ParentsPage() {
@@ -59,8 +71,6 @@ export default function ParentsPage() {
         username,
         password: temporaryPassword,
       });
-
-      console.log("temp pass", temporaryPassword);
     } catch {
       alert("Failed to reset password");
     }
@@ -125,7 +135,7 @@ export default function ParentsPage() {
           </div>
 
           <button
-            onClick={() => resetPassword(p.id)}
+            onClick={() => resetPassword(p.user.id)}
             disabled={resettingId === p.id}
             style={{
               marginTop: "10px",
