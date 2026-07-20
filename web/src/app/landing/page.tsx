@@ -2,220 +2,427 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { motion } from "framer-motion";
 import {
   Container,
+  PortalInner,
   Nav,
-  Logo,
+  LogoWrapper,
+  LogoImageWrapper,
+  LogoText,
+  // Crest,
   NavMenu,
-  NavLink,
+  NavPillButton,
   Hero,
-  HeroContent,
   HeroTitle,
-  HeroIllustration,
+  HeroSubtitle,
   ButtonGroup,
   Button,
-  FeatureSection,
-  SectionMeta,
-  SectionTitle,
-  FeatureGrid,
-  FeatureCard,
-  CardImageWrapper,
-  CardBody,
-  CircleSection,
-  CircleGrid,
-  CircleCard,
-  CircleImageFrame,
+  ScallopedShape,
+  TeamworkSection,
+  TeamworkGrid,
+  TeamworkCard,
   EditorialSection,
-  EditorialContent,
-  EditorialTitle,
-  EditorialText,
-  EditorialIllustration,
+  EditorialImage,
+  EditorialCardWrapper,
+  EditorialFooterNote,
+  EditorialHeading,
+  EditorialTextContainer,
+  Footer,
+  FooterBrand,
+  SocialIcons,
+  FooterLinks,
 } from "@/wrappers/landingStyles";
+
+// Framer Motion Choreography Variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+  },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12 },
+  },
+};
+
+const floatAnimation = {
+  animate: {
+    y: [0, -8, 0],
+    transition: {
+      duration: 5,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  },
+};
+
+const bubbleFloat1 = {
+  animate: {
+    y: [0, -15, 0],
+    rotate: [45, 55, 45],
+    scale: [1, 1.05, 1],
+    transition: {
+      duration: 7,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  },
+};
+
+const bubbleFloat2 = {
+  animate: {
+    y: [0, 15, 0],
+    x: [0, -10, 0],
+    rotate: [45, 35, 45],
+    scale: [1, 0.95, 1],
+    transition: {
+      duration: 9,
+      repeat: Infinity,
+      ease: "easeInOut",
+      delay: 1,
+    },
+  },
+};
 
 export default function LandingPage() {
   const router = useRouter();
 
   return (
     <Container>
-      {/* HEADER NAVIGATION */}
-      <Nav>
-        <Logo>ÉLAN ACADEMY</Logo>
-        <NavMenu>
-          <NavLink href="#">Home</NavLink>
-          <NavLink href="#">Programs</NavLink>
-          <NavLink href="#">Admissions</NavLink>
-          <NavLink href="#">Campus</NavLink>
-          <NavLink href="#">Contact</NavLink>
-        </NavMenu>
-      </Nav>
+      <PortalInner
+        as={motion.div}
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
+        {/* HEADER NAVIGATION */}
+        <Nav>
+          <LogoWrapper>
+            <LogoImageWrapper>
+              <Image
+                src="/images/logo.png" // <-- Put your logo image path here
+                alt="Learning Academy Logo"
+                width={48}
+                height={48}
+                priority
+              />
+            </LogoImageWrapper>
+            <LogoText>LEARNING ACADEMY</LogoText>
+          </LogoWrapper>
 
-      {/* SECTION 1: TOP HERO */}
-      <Hero>
-        <HeroContent>
-          <HeroTitle>
-            Shape Your Future <span>at Élan Academy</span>
-          </HeroTitle>
-          <ButtonGroup>
-            <Button $primary onClick={() => router.push("/login")}>
-              Apply Now
-            </Button>
-            <Button>Explore Programs</Button>
-          </ButtonGroup>
-        </HeroContent>
+          <NavMenu>
+            <NavPillButton href="#about">DISCOVER</NavPillButton>
+            <NavPillButton href="#about">ABOUT US</NavPillButton>
+            <NavPillButton href="#explore">EXPLORE</NavPillButton>
+          </NavMenu>
+        </Nav>
 
-        <HeroIllustration>
-          <Image
-            src="/images/hero-architecture.jpg"
-            alt="Élan Academy Campus"
-            fill
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
+        {/* HERO SECTION - Desktop 10 */}
+        <Hero
+          as={motion.section}
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+        >
+          {/* Animated Scalloped Shapes */}
+          <ScallopedShape
+            as={motion.div}
+            className="shape-top-left"
+            variants={bubbleFloat1}
+            animate="animate"
           />
-        </HeroIllustration>
-      </Hero>
+          <ScallopedShape
+            as={motion.div}
+            className="shape-top-center"
+            variants={bubbleFloat2}
+            animate="animate"
+          />
+          <ScallopedShape
+            as={motion.div}
+            className="shape-bottom-center"
+            variants={bubbleFloat1}
+            animate="animate"
+          />
+          <ScallopedShape
+            as={motion.div}
+            className="shape-right-middle"
+            variants={bubbleFloat2}
+            animate="animate"
+          />
 
-      {/* SECTION 2: FEATURE BLOCK */}
-      <FeatureSection>
-        <SectionMeta>Excellence in Education Since 1985</SectionMeta>
-        <SectionTitle>Our Signature Programs</SectionTitle>
+          <div className="hero-text-block">
+            <HeroTitle as={motion.h1} variants={fadeInUp}>
+              LEARNING ACADEMY
+            </HeroTitle>
+            <HeroSubtitle as={motion.p} variants={fadeInUp}>
+              WHERE DREAMS COME TRUE
+            </HeroSubtitle>
+            <ButtonGroup as={motion.div} variants={fadeInUp}>
+              <Button
+                $primary
+                as={motion.button}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push("/login")}
+              >
+                LOGIN
+              </Button>
+            </ButtonGroup>
+          </div>
 
-        <FeatureGrid>
-          <FeatureCard>
-            <CardImageWrapper $variant="mint">
+          <div className="hero-illustration-block">
+            <motion.div variants={fadeInUp} {...floatAnimation}>
               <Image
-                src="/images/feat-academics.jfif"
-                alt="Academics"
-                width={140}
-                height={140}
+                src="/images/hero-students-group.png"
+                alt="Learning Academy Students Group"
+                width={650}
+                height={450}
+                priority
+                style={{
+                  objectFit: "contain",
+                  zIndex: 2,
+                  position: "relative",
+                }}
               />
-            </CardImageWrapper>
-            <CardBody>
-              <h4>Academic Excellence</h4>
-              <p>
-                Rigorous curriculum designed to challenge young minds and
-                prepare them for top universities worldwide.
-              </p>
-            </CardBody>
-          </FeatureCard>
+            </motion.div>
+          </div>
+        </Hero>
 
-          <FeatureCard>
-            <CardImageWrapper $variant="sage">
-              <Image
-                src="/images/feat-arts.jfif"
-                alt="Arts"
-                width={140}
-                height={140}
-              />
-            </CardImageWrapper>
-            <CardBody>
-              <h4>Creative Arts</h4>
-              <p>
-                Nurturing individual creativity through visual arts, music,
-                theater, and digital design programs.
-              </p>
-            </CardBody>
-          </FeatureCard>
+        {/* TEAMWORK SECTION - Desktop 11 */}
+        <TeamworkSection>
+          <TeamworkGrid
+            as={motion.div}
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+          >
+            <TeamworkCard variants={fadeInUp}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="card-image-wrapper"
+              >
+                <Image
+                  src="/images/teamwork-activity-1.jfif"
+                  alt="Teamwork Activity 1"
+                  width={280}
+                  height={280}
+                />
+              </motion.div>
+              <h4>TEAMWORK</h4>
+            </TeamworkCard>
 
-          <FeatureCard>
-            <CardImageWrapper $variant="terracotta">
-              <Image
-                src="/images/feat-athletics_2.jpg"
-                alt="Athletics"
-                width={140}
-                height={140}
-              />
-            </CardImageWrapper>
-            <CardBody>
-              <h4>Athletics & Wellness</h4>
-              <p>
-                Building character, teamwork, and resilience through competitive
-                sports and fitness programs.
-              </p>
-            </CardBody>
-          </FeatureCard>
-        </FeatureGrid>
-      </FeatureSection>
+            <TeamworkCard variants={fadeInUp}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="card-image-wrapper"
+              >
+                <Image
+                  src="/images/teamwork-activity-2.jfif"
+                  alt="Teamwork Activity 2"
+                  width={280}
+                  height={280}
+                />
+              </motion.div>
+              <h4>TEAMWORK</h4>
+            </TeamworkCard>
 
-      {/* SECTION 3: CIRCLE GALLERY & EDITORIAL */}
-      <CircleSection>
-        <CircleGrid>
-          <CircleCard>
-            <CircleImageFrame>
-              <Image
-                src="/images/circle-13.png"
-                alt="Science Lab"
-                width={90}
-                height={90}
-              />
-            </CircleImageFrame>
-            <h5>STEM Innovation</h5>
-          </CircleCard>
+            <TeamworkCard variants={fadeInUp}>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="card-image-wrapper"
+              >
+                <Image
+                  src="/images/teamwork-activity-3.jfif"
+                  alt="Teamwork Activity 3"
+                  width={280}
+                  height={280}
+                />
+              </motion.div>
+              <h4>TEAMWORK</h4>
+            </TeamworkCard>
+          </TeamworkGrid>
+        </TeamworkSection>
 
-          <CircleCard>
-            <CircleImageFrame>
-              <Image
-                src="/images/circle-22.png"
-                alt="Global Studies"
-                width={90}
-                height={90}
-              />
-            </CircleImageFrame>
-            <h5>Global Citizenship</h5>
-          </CircleCard>
-
-          <CircleCard>
-            <CircleImageFrame>
-              <Image
-                src="/images/circle-3.png"
-                alt="Community Service"
-                width={90}
-                height={90}
-              />
-            </CircleImageFrame>
-            <h5>Community Impact</h5>
-          </CircleCard>
-
-          <CircleCard>
-            <CircleImageFrame $highlighted>
-              <Image
-                src="/images/circle-4.png"
-                alt="Leadership"
-                width={90}
-                height={90}
-              />
-            </CircleImageFrame>
-            <h5>Leadership Academy</h5>
-          </CircleCard>
-        </CircleGrid>
-
-        {/* EDITORIAL SECTION */}
+        {/* EDITORIAL SECTION - Desktop 12 */}
         <EditorialSection>
-          <EditorialContent>
-            <EditorialTitle>Join Our Learning Community</EditorialTitle>
-            <EditorialText>
-              At Élan Academy, every student discovers their unique path to
-              success. With dedicated faculty, state-of-the-art facilities, and
-              a nurturing environment, we prepare students not just for college,
-              but for life.
-            </EditorialText>
-            <Button onClick={() => router.push("/login")}>
-              Visit Admissions
-            </Button>
-          </EditorialContent>
+          <EditorialImage
+            as={motion.div}
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="image-card-wrapper">
+              <Image
+                src="/images/editorial-professionals.png"
+                alt="Academy Pillars and Careers Showcase"
+                width={520}
+                height={400}
+                priority
+                style={{ objectFit: "contain", width: "100%", height: "auto" }}
+              />
+            </div>
+          </EditorialImage>
 
-          <EditorialIllustration>
-            <Image
-              src="/images/bottom-editorial.jfif"
-              alt="Élan Academy Community"
-              width={320}
-              height={180}
-            />
-          </EditorialIllustration>
+          <EditorialCardWrapper
+            as={motion.div}
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+          >
+            <div className="badge">OUR MISSION</div>
+            <span className="quote-mark">“</span>
+
+            <EditorialHeading>
+              The place where you can become anything you wish for and reach
+              anywhere you want.
+            </EditorialHeading>
+
+            <EditorialTextContainer>
+              <p>
+                Whether you fly, run, or crawl—this is a magical place built for
+                anyone and everyone. We welcome and support every learner,
+                leaving no one behind.
+              </p>
+              <p>
+                Come along with us on this extraordinary journey where together,
+                we will achieve our highest goals and so much more.
+              </p>
+            </EditorialTextContainer>
+
+            <EditorialFooterNote>
+              ✨ <span>No one left behind on the path to success.</span>
+            </EditorialFooterNote>
+          </EditorialCardWrapper>
         </EditorialSection>
-      </CircleSection>
 
-      <ThemeToggle />
+        {/* FOOTER */}
+        <Footer>
+          <FooterBrand>
+            <div className="brand-header">
+              <LogoImageWrapper small>
+                <Image
+                  src="/images/logo.png" // <-- Put your logo image path here
+                  alt="Learning Academy Logo"
+                  width={36}
+                  height={36}
+                />
+              </LogoImageWrapper>
+              <div>
+                <h3>Learning Academy</h3>
+                <p className="tagline">Where dreams come true</p>
+              </div>
+            </div>
+            <p className="description">
+              Making life wonderful for everyone. Join us today and become part
+              of the wonderful experience.
+            </p>
+            <SocialIcons>
+              <a href="#" aria-label="X (Twitter)">
+                ✕
+              </a>
+              <a href="#" aria-label="Instagram">
+                📷
+              </a>
+              <a href="#" aria-label="YouTube">
+                ▶
+              </a>
+              <a href="#" aria-label="LinkedIn">
+                in
+              </a>
+            </SocialIcons>
+          </FooterBrand>
+
+          <FooterLinks>
+            <h5>Use cases</h5>
+            <ul>
+              <li>
+                <a href="#">UI design</a>
+              </li>
+              <li>
+                <a href="#">UX design</a>
+              </li>
+              <li>
+                <a href="#">Wireframing</a>
+              </li>
+              <li>
+                <a href="#">Diagramming</a>
+              </li>
+              <li>
+                <a href="#">Brainstorming</a>
+              </li>
+              <li>
+                <a href="#">Online whiteboard</a>
+              </li>
+              <li>
+                <a href="#">Team collaboration</a>
+              </li>
+            </ul>
+          </FooterLinks>
+
+          <FooterLinks>
+            <h5>Explore</h5>
+            <ul>
+              <li>
+                <a href="#">Design</a>
+              </li>
+              <li>
+                <a href="#">Prototyping</a>
+              </li>
+              <li>
+                <a href="#">Development features</a>
+              </li>
+              <li>
+                <a href="#">Design systems</a>
+              </li>
+              <li>
+                <a href="#">Collaboration features</a>
+              </li>
+              <li>
+                <a href="#">Design process</a>
+              </li>
+              <li>
+                <a href="#">FigJam</a>
+              </li>
+            </ul>
+          </FooterLinks>
+
+          <FooterLinks>
+            <h5>Resources</h5>
+            <ul>
+              <li>
+                <a href="#">Blog</a>
+              </li>
+              <li>
+                <a href="#">Best practices</a>
+              </li>
+              <li>
+                <a href="#">Colors</a>
+              </li>
+              <li>
+                <a href="#">Color wheel</a>
+              </li>
+              <li>
+                <a href="#">Support</a>
+              </li>
+              <li>
+                <a href="#">Developers</a>
+              </li>
+              <li>
+                <a href="#">Resource library</a>
+              </li>
+            </ul>
+          </FooterLinks>
+        </Footer>
+      </PortalInner>
     </Container>
   );
 }

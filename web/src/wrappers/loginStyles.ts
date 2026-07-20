@@ -50,32 +50,23 @@ export const Container = styled.div`
 `;
 
 export const Card = styled.div`
-  padding: 3rem 2.5rem;
-  border-radius: 32px;
-  background: rgba(var(--bg-color-rgb), 0.45);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-  width: 420px;
+  padding: 2.5rem 2.25rem;
+  border-radius: 28px;
+  background-color: var(--bg-portal);
+  border: 2px solid var(--border-color);
+  box-shadow: 0 8px 0 var(--border-color);
+  width: 100%;
+  max-width: 420px;
   position: relative;
-  z-index: 1;
-  border: 1px solid rgba(var(--border-color-rgb), 0.5);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   transition: all 0.3s ease;
 
-  /* Dark mode glass effect */
-  [data-theme="dark"] & {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-  }
-
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
-    background: rgba(255, 255, 255, 0.8);
-
-    [data-theme="dark"] & {
-      background: rgba(15, 23, 42, 0.8);
-    }
+    transform: translateY(-4px);
+    box-shadow: 0 12px 0 var(--border-color);
   }
 
   @media (max-width: 480px) {
@@ -336,4 +327,48 @@ export const SocialButton = styled.button`
       background: rgba(30, 41, 59, 0.8);
     }
   }
+`;
+
+export const LogoContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 3rem;
+  text-align: center;
+`;
+
+export const LogoImageWrapper = styled.div`
+  width: 60px;
+  height: 60px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+
+  img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    border: solid black 1px;
+    border-radius: 40px;
+  }
+`;
+
+export const LogoTitle = styled.h1`
+  font-family: var(--font-main);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--heading-color);
+  text-transform: uppercase;
+  margin: 0;
+`;
+
+export const LogoSubtitle = styled.p`
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: var(--text-color);
+  opacity: 0.75;
+  margin-top: 0.15rem;
 `;

@@ -2,11 +2,13 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   LayoutWrapper,
   Sidebar,
   SidebarHeader,
-  Logo,
+  LogoWrapper,
+  LogoImageWrapper,
   LogoText,
   NavSection,
   NavItem,
@@ -27,7 +29,6 @@ import {
   FaUserPlus,
   FaSignOutAlt,
   FaTachometerAlt,
-  FaBook,
   FaCog,
   FaCalendarAlt,
   FaHome,
@@ -61,7 +62,7 @@ export default function AdminLayout({
       return;
     }
 
-    const userEmail = "admin@school.com";
+    const userEmail = localStorage.getItem("email") || "admin@school.com";
     setUserData({
       initial: userEmail.charAt(0).toUpperCase(),
       name: "Admin User",
@@ -141,17 +142,34 @@ export default function AdminLayout({
     },
   ];
 
+  // Title calculation for TopBar
+  const rawTitle = pathname.split("/").pop() || "dashboard";
+  const formattedTitle =
+    rawTitle === "admin"
+      ? "DASHBOARD"
+      : rawTitle.replace(/-/g, " ").toUpperCase();
+
   return (
     <LayoutWrapper>
       <Sidebar>
         <SidebarHeader>
-          <Logo>EA</Logo>
-          <LogoText>Élan Admin</LogoText>
+          <LogoWrapper>
+            <LogoImageWrapper>
+              <Image
+                src="/images/logo.png"
+                alt="Learning Academy Logo"
+                width={36}
+                height={36}
+                priority
+              />
+            </LogoImageWrapper>
+            <LogoText>LEARNING ACADEMY</LogoText>
+          </LogoWrapper>
         </SidebarHeader>
 
         <NavSection>
           {navItems.map((section, idx) => (
-            <div key={idx}>
+            <div key={idx} className="nav-group">
               <div className="section-label">{section.section}</div>
               {section.items.map((item) => {
                 const Icon = item.icon;
@@ -162,7 +180,7 @@ export default function AdminLayout({
                     onClick={() => router.push(item.path)}
                     $active={active}
                   >
-                    <Icon />
+                    <Icon className="nav-icon" />
                     <span>{item.label}</span>
                     {active && <div className="active-indicator" />}
                   </NavItem>
@@ -190,15 +208,12 @@ export default function AdminLayout({
 
       <ContentArea>
         <TopBar>
-          <PageTitle>
-            {pathname.split("/").pop()?.replace(/-/g, " ").toUpperCase() ||
-              "DASHBOARD"}
-          </PageTitle>
+          <PageTitle>{formattedTitle}</PageTitle>
           <TopBarRight>
             <ThemeToggle />
           </TopBarRight>
         </TopBar>
-        {children}
+        <div className="main-content-padding">{children}</div>
       </ContentArea>
     </LayoutWrapper>
   );

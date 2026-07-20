@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/services/authService";
 import { LoginPayload } from "@/types/auth";
+import Image from "next/image";
 import {
   Container,
   Card,
@@ -13,6 +14,10 @@ import {
   Input,
   LoginButton,
   ForgotPassword,
+  LogoContainer,
+  LogoSubtitle,
+  LogoImageWrapper,
+  LogoTitle,
   ErrorMessage,
   BackToHome,
   TogglePassword,
@@ -87,7 +92,22 @@ export default function LoginPage() {
   return (
     <Container>
       <Card>
-        <Title>Welcome Back</Title>
+        {/* LOGO & BRANDING HEADER */}
+        <LogoContainer>
+          <LogoImageWrapper>
+            <Image
+              src="/images/logo.png"
+              alt="Learning Academy Logo"
+              width={60}
+              height={60}
+              priority
+            />
+          </LogoImageWrapper>
+          <LogoTitle>LEARNING ACADEMY</LogoTitle>
+          <LogoSubtitle>Where dreams come true</LogoSubtitle>
+        </LogoContainer>
+
+        {/* <Title>Welcome Back</Title> */}
 
         <InputGroup>
           <IconWrapper>

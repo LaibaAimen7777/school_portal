@@ -1,458 +1,555 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
-export const Container = styled.div`
-  min-height: 100vh;
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: var(--font-main);
-  transition: background-color 0.3s ease;
-  position: relative;
+// Dynamic CSS Theme Variables: Light mode (Mockup colors) vs Dark mode (Green palette)
+const themeVariables = css`
+  :root {
+    /* LIGHT MODE (Mockup accurate: Yellow/Cream) */
+    --bg-container: #eae6df;
+    --bg-portal: #f4ede2;
+    --accent-color: #e0a21b;
+    --text-dark: #1e1e1e;
+    --text-color: #2b2b2b;
+    --heading-color: #1a1a1a;
+    --border-color: #1a1a1a;
+    --button-bg: #e0a21b;
+    --button-text: #1a1a1a;
+    --pill-bg: #ffffff;
+    --pill-text: #1a1a1a;
+    --card-bg: #ffffff;
+    --scallop-color: #e0a21b;
+  }
+
+  [data-theme="dark"],
+  .dark {
+    /* DARK MODE (Deep Emerald Green palette) */
+    --bg-container: #0a140f;
+    --bg-portal: #0f1f18;
+    --accent-color: #1e4d38;
+    --text-dark: #e1efe6;
+    --text-color: #c5ded0;
+    --heading-color: #ffffff;
+    --border-color: #2a6148;
+    --button-bg: #287a55;
+    --button-text: #ffffff;
+    --pill-bg: #183829;
+    --pill-text: #e1efe6;
+    --card-bg: #142a20;
+    --scallop-color: #1b4532;
+  }
 `;
 
-// Navigation with visible glass effect
+// ========== CONTAINER STYLES ==========
+
+export const Container = styled.div`
+  ${themeVariables}
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  /* padding: 1.5rem; */
+  background-color: var(--bg-container);
+  transition: background-color 0.3s ease;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
+`;
+
+export const PortalInner = styled.div`
+  background-color: var(--bg-portal);
+  width: 100%;
+  min-height: 100vh; /* Ensures it stretches to the bottom */
+  border-radius: 0; /* Remove rounded corners if you want edge-to-edge */
+  border: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Takes up full vertical height available */
+`;
+// ========== NAVIGATION STYLES ==========
+
 export const Nav = styled.nav`
+  background-color: var(--accent-color);
+  padding: 1.25rem 2.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 3rem;
-  background: rgba(var(--bg-color-rgb), 0.45);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(var(--border-color-rgb), 0.5);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-
-  [data-theme="dark"] & {
-    background: rgba(var(--bg-color-rgb), 0.45);
-    border-bottom: 1px solid rgba(var(--border-color-rgb), 0.5);
-  }
+  position: relative;
+  z-index: 10;
+  border-bottom: 2px solid var(--border-color);
 
   @media (max-width: 768px) {
-    padding: 1rem 1.5rem;
     flex-direction: column;
     gap: 1rem;
+    padding: 1rem;
   }
-`;
-
-export const Logo = styled.div`
-  font-size: 1.4rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--accent-color);
-  /* No gradient - solid color */
 `;
 
 export const NavMenu = styled.div`
   display: flex;
-  gap: 2rem;
+  align-items: center;
+  gap: 1rem;
 
-  @media (max-width: 768px) {
-    gap: 1.2rem;
+  @media (max-width: 580px) {
     flex-wrap: wrap;
     justify-content: center;
   }
 `;
 
-export const NavLink = styled.a`
-  color: var(--text-color);
+export const NavPillButton = styled.a`
+  color: var(--pill-text);
   text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: var(--transition);
-  position: relative;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--accent-color);
-    transition: var(--transition);
-  }
-
-  &:hover {
-    color: var(--accent-color);
-
-    &::after {
-      width: 100%;
-    }
-  }
-`;
-
-/* HERO SECTION with visible glass overlay */
-export const Hero = styled.section`
-  padding: 4rem 4rem 6rem 4rem;
-  display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  align-items: center;
-  gap: 3rem;
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 2rem;
-    left: 2rem;
-    right: 2rem;
-    bottom: 2rem;
-    background: rgba(var(--bg-color-rgb), 0.45);
-    backdrop-filter: blur(20px);
-    border-radius: 48px;
-    border: 1px solid rgba(var(--border-color-rgb), 0.5);
-    z-index: 0;
-
-    [data-theme="dark"] & {
-      background: rgba(var(--bg-color-rgb), 0.45);
-      border: 1px solid rgba(var(--border-color-rgb), 0.5);
-    }
-  }
-
-  @media (max-width: 968px) {
-    grid-template-columns: 1fr;
-    padding: 2rem 1.5rem;
-
-    &::before {
-      top: 1rem;
-      left: 1rem;
-      right: 1rem;
-      bottom: 1rem;
-    }
-  }
-`;
-
-export const HeroContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  z-index: 2;
-  padding: 1rem;
-`;
-
-export const HeroTitle = styled.h1`
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--heading-color);
-  line-height: 1.2;
-  margin-bottom: 2rem;
-
-  span {
-    display: block;
-    font-size: 0.6em;
-    color: var(--accent-color);
-    font-weight: 500;
-    margin-top: 0.5rem;
-  }
-`;
-
-export const HeroIllustration = styled.div`
-  position: relative;
-  width: 100%;
-  height: 400px;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-  z-index: 2;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
-
-  @media (max-width: 768px) {
-    height: 280px;
-  }
-
-  img {
-    object-fit: cover;
-  }
-`;
-
-/* FEATURE SECTION with glass cards */
-export const FeatureSection = styled.section`
-  padding: 5rem 4rem;
-  text-align: center;
-  position: relative;
-  background: transparent;
-
-  @media (max-width: 768px) {
-    padding: 3rem 1.5rem;
-  }
-`;
-
-export const SectionMeta = styled.p`
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent-color);
-  margin-bottom: 0.75rem;
-  font-weight: 500;
-`;
-
-export const SectionTitle = styled.h2`
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin-bottom: 3rem;
-  color: var(--heading-color);
-`;
-
-export const FeatureGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-`;
-
-export const FeatureCard = styled.div`
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  transition: var(--transition);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-
-  [data-theme="dark"] & {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.85);
-
-    [data-theme="dark"] & {
-      background: rgba(30, 41, 59, 0.9);
-    }
-  }
-`;
-
-interface ImageWrapperProps {
-  $variant: "mint" | "sage" | "terracotta";
-}
-
-export const CardImageWrapper = styled.div<ImageWrapperProps>`
-  padding: 2rem 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: ${(props) =>
-    props.$variant === "mint"
-      ? "rgba(55, 67, 117, 0.15)"
-      : props.$variant === "sage"
-        ? "rgba(137, 81, 89, 0.15)"
-        : "rgba(223, 174, 161, 0.15)"};
-
-  img {
-    object-fit: contain;
-  }
-`;
-
-export const CardBody = styled.div`
-  padding: 1.5rem;
-  text-align: left;
-
-  h4 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    color: var(--heading-color);
-  }
-
-  p {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: var(--text-color);
-    opacity: 0.85;
-  }
-`;
-
-/* CIRCLE GALLERY SECTION */
-export const CircleSection = styled.section`
-  padding: 5rem 4rem;
-  position: relative;
-
-  @media (max-width: 768px) {
-    padding: 3rem 1.5rem;
-  }
-`;
-
-export const CircleGrid = styled.div`
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 2rem;
-  max-width: 1000px;
-  margin: 0 auto 4rem auto;
-`;
-
-export const CircleCard = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-
-  h5 {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--heading-color);
-  }
-`;
-
-interface FrameProps {
-  $highlighted?: boolean;
-}
-
-export const CircleImageFrame = styled.div<FrameProps>`
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  border: 2px solid
-    ${(props) =>
-      props.$highlighted ? "var(--accent-color)" : "rgba(255, 255, 255, 0.5)"};
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  transition: var(--transition);
-
-  [data-theme="dark"] & {
-    background: rgba(30, 41, 59, 0.6);
-    border: 2px solid
-      ${(props) =>
-        props.$highlighted
-          ? "var(--accent-color)"
-          : "rgba(255, 255, 255, 0.2)"};
-  }
-
-  &:hover {
-    transform: scale(1.08);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.8);
-
-    [data-theme="dark"] & {
-      background: rgba(30, 41, 59, 0.9);
-    }
-  }
-
-  img {
-    object-fit: cover;
-  }
-`;
-
-/* EDITORIAL SECTION with visible glass panel */
-export const EditorialSection = styled.div`
-  max-width: 1100px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  align-items: center;
-  gap: 4rem;
-  padding: 3rem;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(16px);
-  border-radius: 48px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-
-  [data-theme="dark"] & {
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  @media (max-width: 850px) {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    padding: 2rem;
-  }
-`;
-
-export const EditorialContent = styled.div`
-  text-align: left;
-`;
-
-export const EditorialTitle = styled.h3`
-  font-size: clamp(1.8rem, 4vw, 2.5rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--heading-color);
-  margin-bottom: 1.25rem;
-`;
-
-export const EditorialText = styled.p`
-  font-size: 1rem;
-  line-height: 1.7;
-  color: var(--text-color);
-  margin-bottom: 2rem;
-  opacity: 0.9;
-`;
-
-export const EditorialIllustration = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(8px);
-  padding: 1.5rem;
-  border-radius: 32px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-
-  [data-theme="dark"] & {
-    background: rgba(30, 41, 59, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  img {
-    object-fit: contain;
-    border-radius: 20px;
-  }
-`;
-
-/* BUTTONS */
-export const ButtonGroup = styled.div`
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-`;
-
-interface ButtonProps {
-  $primary?: boolean;
-}
-
-export const Button = styled.button<ButtonProps>`
-  padding: 0.85rem 2rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 40px;
-  transition: var(--transition);
-
-  border: ${(props) =>
-    props.$primary ? "none" : `1.5px solid var(--accent-color)`};
-  background: ${(props) =>
-    props.$primary ? "var(--accent-color)" : "rgba(255, 255, 255, 0.7)"};
-  color: ${(props) =>
-    props.$primary ? "var(--button-text)" : "var(--accent-color)"};
-
-  [data-theme="dark"] & {
-    background: ${(props) =>
-      props.$primary ? "var(--accent-color)" : "rgba(30, 41, 59, 0.7)"};
-  }
+  letter-spacing: 0.05em;
+  background-color: var(--pill-bg);
+  padding: 0.55rem 1.75rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--border-color);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 0 var(--border-color);
 
   &:hover {
     transform: translateY(-2px);
-    ${(props) =>
-      props.$primary
-        ? "filter: brightness(1.05); box-shadow: var(--shadow);"
-        : `background: var(--accent-color); color: var(--button-text); box-shadow: var(--shadow);`}
+    box-shadow: 0 4px 0 var(--border-color);
   }
+`;
+
+// ========== HERO STYLES ==========
+
+export const Hero = styled.section`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 2rem;
+  padding: 4rem 3rem 5rem;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-portal);
+
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 3rem 1.5rem;
+  }
+
+  .hero-text-block {
+    z-index: 3;
+  }
+
+  .hero-illustration-block {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+`;
+
+// Decorative Scalloped Shapes matching the Figma mockup frame
+export const ScallopedShape = styled.div`
+  position: absolute;
+  background-color: var(--scallop-color);
+  width: 140px;
+  height: 140px;
+  border-radius: 40px;
+  transform: rotate(45deg);
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform; /* Boosts smooth rendering performance */
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    background-color: var(--scallop-color);
+    border-radius: 40px;
+  }
+
+  &::before {
+    transform: rotate(30deg);
+  }
+
+  &::after {
+    transform: rotate(60deg);
+  }
+
+  /* Positioning classes */
+  &.shape-top-left {
+    top: -40px;
+    left: -30px;
+  }
+
+  &.shape-top-center {
+    top: -50px;
+    left: 45%;
+  }
+
+  &.shape-bottom-center {
+    bottom: -60px;
+    left: 25%;
+  }
+
+  &.shape-right-middle {
+    bottom: -30px;
+    right: -40px;
+  }
+`;
+
+export const HeroTitle = styled.h1`
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+  color: var(--heading-color);
+`;
+
+export const HeroSubtitle = styled.p`
+  color: var(--text-dark);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+`;
+
+export const ButtonGroup = styled.div`
+  display: flex;
+  gap: 1rem;
+
+  @media (max-width: 968px) {
+    justify-content: center;
+  }
+`;
+
+export const Button = styled.button<{ $primary?: boolean }>`
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: 2px solid var(--border-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.65rem 2rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 0 var(--border-color);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--border-color);
+  }
+`;
+
+// ========== TEAMWORK SECTION STYLES ==========
+
+export const TeamworkSection = styled.section`
+  background-color: var(--accent-color);
+  padding: 4rem 2rem;
+  border-top: 2px solid var(--border-color);
+  border-bottom: 2px solid var(--border-color);
+  transition: background-color 0.3s ease;
+`;
+
+export const TeamworkGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  @media (max-width: 868px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+`;
+
+export const TeamworkCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+
+  .card-image-wrapper {
+    background: var(--card-bg);
+    border-radius: 28px;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 6px 0 var(--border-color);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 1;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+  }
+
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--heading-color);
+  }
+`;
+
+// ========== EDITORIAL SECTION STYLES ==========
+
+export const EditorialSection = styled.section`
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 3.5rem;
+  padding: 5rem 3rem;
+  align-items: center;
+  background-color: var(--bg-portal);
+  position: relative;
+
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding: 3rem 1.5rem;
+  }
+`;
+
+export const EditorialImage = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .image-card-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    padding: 1.5rem;
+    /* background: var(--card-bg); */
+  }
+`;
+
+export const EditorialCardWrapper = styled.div`
+  background: var(--card-bg);
+  padding: 2.5rem;
+  border-radius: var(--border-radius-lg, 28px);
+  border: 2px solid var(--border-color);
+  box-shadow: 0 8px 0 var(--border-color);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  .badge {
+    align-self: flex-start;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 0.35rem 1rem;
+    border-radius: 9999px;
+    background-color: var(--accent-color);
+    color: var(--heading-color);
+    border: 1.5px solid var(--border-color);
+    margin-bottom: 1.25rem;
+  }
+
+  .quote-mark {
+    position: absolute;
+    top: 1rem;
+    right: 2rem;
+    font-family: var(--font-heading);
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--accent-color);
+    opacity: 0.3;
+    pointer-events: none;
+  }
+`;
+
+export const EditorialHeading = styled.h3`
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 2.5vw, 2.1rem);
+  line-height: 1.3;
+  color: var(--heading-color);
+  margin-bottom: 1.25rem;
+  font-weight: 400;
+`;
+
+export const EditorialTextContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-color);
+    opacity: 0.9;
+  }
+`;
+
+export const EditorialFooterNote = styled.div`
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1.5px dashed var(--border-color);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--heading-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+// ========== FOOTER STYLES ==========
+
+export const Footer = styled.footer`
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  padding: 4rem 3rem 3rem;
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 2.5rem;
+  border-top: 2px solid var(--border-color);
+
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding: 3rem 1.5rem;
+  }
+`;
+
+export const FooterBrand = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  .brand-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--heading-color);
+      margin-left: 5px;
+    }
+
+    .tagline {
+      font-size: 0.75rem;
+      opacity: 0.85;
+      margin: 0;
+      margin-left: 5px;
+    }
+  }
+
+  .description {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    max-width: 320px;
+  }
+`;
+
+export const SocialIcons = styled.div`
+  display: flex;
+  gap: 0.75rem;
+
+  a {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-color);
+    color: var(--heading-color);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: bold;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--border-color);
+      color: var(--accent-color);
+    }
+  }
+`;
+
+export const FooterLinks = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  h5 {
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    font-weight: 800;
+    color: var(--heading-color);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    transition: all 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+  }
+`;
+
+// Replace Crest with LogoImageWrapper in landingStyles.ts
+
+export const LogoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+export const LogoImageWrapper = styled.div<{ $small?: boolean }>`
+  width: ${(props) => (props.$small ? "36px" : "48px")};
+  height: ${(props) => (props.$small ? "36px" : "48px")};
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  img {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+    border: solid black 1px;
+    border-radius: 30px;
+  }
+`;
+
+export const LogoText = styled.span`
+  font-family: var(--font-main);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.05em;
+  color: var(--heading-color);
+  text-transform: uppercase;
 `;
