@@ -21,6 +21,9 @@ import {
   TopBar,
   PageTitle,
   TopBarRight,
+  HeroBackgroundWrapper,
+  DashboardHeaderCard,
+  UserIconWrapper,
 } from "@/wrappers/adminLayoutStyles";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import {
@@ -32,6 +35,7 @@ import {
   FaCog,
   FaCalendarAlt,
   FaHome,
+  FaUser,
 } from "react-icons/fa";
 
 export default function AdminLayout({
@@ -142,11 +146,10 @@ export default function AdminLayout({
     },
   ];
 
-  // Title calculation for TopBar
   const rawTitle = pathname.split("/").pop() || "dashboard";
   const formattedTitle =
     rawTitle === "admin"
-      ? "DASHBOARD"
+      ? "ADMIN DASHBOARD"
       : rawTitle.replace(/-/g, " ").toUpperCase();
 
   return (
@@ -182,7 +185,6 @@ export default function AdminLayout({
                   >
                     <Icon className="nav-icon" />
                     <span>{item.label}</span>
-                    {active && <div className="active-indicator" />}
                   </NavItem>
                 );
               })}
@@ -207,13 +209,39 @@ export default function AdminLayout({
       </Sidebar>
 
       <ContentArea>
-        <TopBar>
-          <PageTitle>{formattedTitle}</PageTitle>
-          <TopBarRight>
-            <ThemeToggle />
-          </TopBarRight>
-        </TopBar>
-        <div className="main-content-padding">{children}</div>
+        {/* FULL-BACKGROUND GIF/IMAGE */}
+        <Image
+          src="/images/campus-bg.gif" // Or campus-bg.jpg
+          alt="Campus Background"
+          fill
+          priority
+          unoptimized
+          className="full-bg-image"
+        />
+
+        <div className="main-content-padding">
+          {/* FLOATING PILL HEADER CARD */}
+          <DashboardHeaderCard>
+            <div className="header-left">
+              <UserIconWrapper>
+                <FaUser />
+              </UserIconWrapper>
+              <h1>{formattedTitle}</h1>
+            </div>
+            <div className="header-right">
+              <Image
+                src="/images/admin-illustration.png"
+                alt="Admin Illustration"
+                width={110}
+                height={75}
+                style={{ objectFit: "contain", height: "auto" }}
+              />
+            </div>
+          </DashboardHeaderCard>
+
+          {/* DASHBOARD WIDGETS & PAGE CONTENT */}
+          {children}
+        </div>
       </ContentArea>
     </LayoutWrapper>
   );

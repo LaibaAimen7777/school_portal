@@ -37,6 +37,7 @@
   --button-text: #ffffff;
   --button-text-hover: #111111;
   --scallop-color: #eeb22d;
+  --bg-container: #f9f5eb;
 
   --border-color: #111111;
   --border-width: 1.5px;
@@ -53,6 +54,13 @@
   --spacing-3xl: 80px;
 
   --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --bg-image-tint: rgba(
+    238,
+    178,
+    45,
+    0.25
+  ); /* Or rgba(180, 140, 60, 0.3) for vintage sepia */
+  --bg-image-blend: multiply;
 }
 
 /* DARK MODE - Deep Emerald Green Palette */
@@ -81,10 +89,14 @@
   --button-text: #ffffff;
   --button-text-hover: #e8f3ed;
   --scallop-color: #1e4d38;
+  --bg-container: #0b1410;
 
   --border-color: #2d6b4f;
   --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
   --shadow-hover: 0 20px 40px -12px rgba(0, 0, 0, 0.7);
+
+  --bg-image-tint: rgba(11, 20, 16, 0.75);
+  --bg-image-blend: normal;
 }
 
 /* Base resets & typography optimization */

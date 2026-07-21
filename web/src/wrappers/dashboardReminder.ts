@@ -1,98 +1,119 @@
-// src/wrappers/dashboardReminder.ts
 import styled from "styled-components";
 
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  width: 100%;
 `;
 
+/* Base Card Styling - Modern, clean, and subtle */
 export const Card = styled.div`
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 1.25rem;
-  background-color: var(--bg-color);
-  transition: var(--transition);
-
-  &:hover {
-    box-shadow: var(--shadow);
-  }
+  background: var(--bg-portal, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease-in-out;
 `;
 
+/* Button Layouts */
 export const ButtonGroup = styled.div`
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
   align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
 `;
 
 export const PrimaryButton = styled.button<{ $disabled?: boolean }>`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  white-space: nowrap;
-  padding: 0.5rem 1.125rem;
-  border-radius: 8px;
-  border: none;
+  padding: 0.65rem 1.25rem;
   background-color: ${(props) =>
-    props.$disabled ? "var(--border-color)" : "var(--accent-color)"};
-  color: ${(props) =>
-    props.$disabled ? "var(--text-color)" : "var(--button-text)"};
+    props.$disabled ? "#e5e7eb" : "var(--accent-color, #2563eb)"};
+  color: ${(props) => (props.$disabled ? "#9ca3af" : "#ffffff")};
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: ${(props) => (props.$disabled ? "not-allowed" : "pointer")};
-  font-size: 0.8rem;
-  font-weight: 500;
-  transition: var(--transition);
-  opacity: ${(props) => (props.$disabled ? 0.6 : 1)};
+  box-shadow: ${(props) =>
+    props.$disabled ? "none" : "0 1px 2px rgba(0, 0, 0, 0.05)"};
+  transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
+    opacity: 0.92;
     transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    filter: brightness(1.05);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
   }
 `;
 
 export const SecondaryButton = styled.button`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  white-space: nowrap;
-  padding: 0.5rem 1.125rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-color);
-  color: var(--text-color);
+  padding: 0.65rem 1.25rem;
+  background-color: var(--bg-portal, #ffffff);
+  color: var(--text-color, #374151);
+  border: 1px solid var(--border-color, #d1d5db);
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.8rem;
-  transition: var(--transition);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    background-color: var(--bg-secondary);
+    background-color: var(--bg-secondary, #f9fafb);
+    border-color: #9ca3af;
   }
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  &:active {
+    background-color: #f3f4f6;
   }
+`;
+
+/* Confirmation Bar */
+export const ConfirmContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: #fef2f2;
+  padding: 0.4rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+  flex-wrap: wrap;
+`;
+
+export const ConfirmText = styled.span`
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #dc2626;
 `;
 
 export const DangerButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 8px;
-  border: none;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
   background-color: #dc2626;
-  color: white;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 0.8rem;
-  transition: var(--transition);
+  transition: background-color 0.2s ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
     background-color: #b91c1c;
   }
 `;
@@ -100,278 +121,285 @@ export const DangerButton = styled.button`
 export const CancelButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.875rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-color);
+  gap: 0.3rem;
+  padding: 0.4rem 0.6rem;
+  background-color: transparent;
+  color: #4b5563;
+  border: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
-  font-size: 0.8rem;
-  transition: var(--transition);
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    background-color: var(--bg-secondary);
+    color: #111827;
   }
 `;
 
-export const ConfirmContainer = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-`;
-
-export const ConfirmText = styled.span`
-  font-size: 0.75rem;
-  color: #dc2626;
-`;
-
+/* Result Box */
 export const ResultBox = styled.div<{ $hasError?: boolean }>`
   margin-top: 1rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  background-color: ${(props) =>
-    props.$hasError ? "rgba(245, 158, 11, 0.1)" : "rgba(34, 197, 94, 0.1)"};
-  border: 1px solid ${(props) => (props.$hasError ? "#f59e0b" : "#22c55e")};
-  font-size: 0.8rem;
+  padding: 0.875rem 1rem;
+  border-radius: 10px;
+  background-color: ${(props) => (props.$hasError ? "#fef2f2" : "#f0fdf4")};
+  border: 1px solid ${(props) => (props.$hasError ? "#fecaca" : "#bbf7d0")};
 `;
 
-export const ResultTitle = styled.p`
-  margin: 0 0 0.25rem;
-  font-weight: 500;
+export const ResultTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--heading-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color, #1f2937);
 `;
 
 export const ErrorItem = styled.p`
-  margin: 0.125rem 0;
+  font-size: 0.8125rem;
   color: #dc2626;
+  margin-top: 0.35rem;
+  font-weight: 500;
 `;
 
+/* Reminders Section */
 export const RemindersCard = styled(Card)`
-  overflow: hidden;
-  padding: 0;
+  background: #fffbeb;
+  border-color: #fde68a;
+  box-shadow: none;
 `;
 
-export const RemindersHeader = styled.div`
-  padding: 0.875rem 1.25rem;
-  border-bottom: 1px solid var(--border-color);
-  font-weight: 600;
-  font-size: 0.875rem;
+export const RemindersHeader = styled.h3`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--heading-color);
-  background-color: var(--bg-secondary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #b45309;
+  margin-bottom: 0.85rem;
 `;
 
 export const ReminderItem = styled.div<{ $type: "warning" | "error" }>`
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--border-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  background-color: ${(props) =>
-    props.$type === "error"
-      ? "rgba(239, 68, 68, 0.05)"
-      : "rgba(245, 158, 11, 0.05)"};
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 10px;
+  background-color: #ffffff;
+  border: 1px solid
+    ${(props) => (props.$type === "error" ? "#fecaca" : "#fde68a")};
 
   &:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 580px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
   }
 `;
 
 export const ReminderMessage = styled.span<{ $type: "warning" | "error" }>`
-  font-size: 0.8rem;
-  color: ${(props) => (props.$type === "error" ? "#dc2626" : "#f59e0b")};
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
 `;
 
 export const ReminderButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background-color: var(--bg-color);
-  cursor: pointer;
-  transition: var(--transition);
-  color: var(--text-color);
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    background-color: var(--bg-secondary);
-  }
-`;
-
-export const ExpandableCard = styled(Card)`
-  overflow: hidden;
-  padding: 0;
-`;
-
-export const ExpandButton = styled.button<{ $expanded: boolean }>`
-  width: 100%;
-  padding: 0.875rem 1.25rem;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background-color: #1f2937;
+  color: #ffffff;
   border: none;
-  border-bottom: ${(props) =>
-    props.$expanded ? `1px solid var(--border-color)` : "none"};
-  background: none;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border-radius: 8px;
+  font-size: 0.75rem;
   font-weight: 600;
-  font-size: 0.875rem;
-  transition: var(--transition);
-  color: var(--heading-color);
-  background-color: var(--bg-secondary);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 
   &:hover {
-    background-color: var(--bg-secondary);
+    opacity: 0.9;
   }
 `;
 
-export const ExpandIcon = styled.span<{ $expanded: boolean }>`
-  transition: transform 0.2s;
-  transform: ${(props) => (props.$expanded ? "rotate(180deg)" : "rotate(0)")};
-  display: inline-flex;
-  align-items: center;
+/* Expandable Card Details */
+export const ExpandableCard = styled(Card)`
+  padding: 0;
+  overflow: hidden;
 `;
 
-export const ExpandContent = styled.div``;
-
-export const IncompleteClassItem = styled.div`
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--border-color);
+export const ExpandButton = styled.button<{ $expanded?: boolean }>`
+  width: 100%;
+  padding: 1.15rem 1.25rem;
+  background: transparent;
+  border: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.8rem;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--heading-color, #111827);
 
-  &:last-child {
-    border-bottom: none;
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &:hover {
+    background-color: var(--bg-secondary, #f9fafb);
+  }
+`;
+
+export const ExpandIcon = styled.div<{ $expanded?: boolean }>`
+  transition: transform 0.2s ease;
+  transform: ${(props) =>
+    props.$expanded ? "rotate(180deg)" : "rotate(0deg)"};
+  color: #6b7280;
+`;
+
+export const ExpandContent = styled.div`
+  padding: 1rem 1.25rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  border-top: 1px solid var(--border-color, #e5e7eb);
+`;
+
+/* Incomplete Class Items */
+export const IncompleteClassItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary, #f9fafb);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 10px;
+
+  @media (max-width: 580px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
   }
 `;
 
 export const ClassInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
 
   strong {
-    font-weight: 600;
-    color: var(--heading-color);
+    font-size: 0.875rem;
+    color: #111827;
   }
 `;
 
 export const MissingSubjects = styled.span`
-  color: var(--text-color);
-  opacity: 0.7;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
+  color: #dc2626;
+  font-weight: 500;
 `;
 
 export const SmallButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-size: 0.75rem;
-  padding: 0.375rem 0.75rem;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background-color: var(--bg-color);
+  font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
-  color: var(--text-color);
+  transition: all 0.2s ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    background-color: var(--bg-secondary);
-    color: var(--accent-color);
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
   }
 `;
 
+/* Teacher Workload Items */
 export const WarningBox = styled.div`
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--border-color);
-  background-color: rgba(239, 68, 68, 0.05);
-  font-size: 0.8rem;
-  color: #dc2626;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 500;
 `;
 
 export const TeacherItem = styled.div`
-  padding: 0.75rem 1.25rem;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 0.8rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  &:last-child {
-    border-bottom: none;
-  }
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary, #f9fafb);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 10px;
 `;
 
 export const TeacherName = styled.span`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--heading-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
 `;
 
 export const TeacherPeriods = styled.span`
-  color: #f59e0b;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 6px;
 `;
 
 export const AddButtonContainer = styled.div`
-  padding: 0.875rem 1.25rem;
-  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.35rem;
 `;
 
 export const AddTeacherButton = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.8rem;
+  gap: 0.4rem;
   padding: 0.5rem 1rem;
-  border: 1px solid var(--accent-color);
+  background-color: #111827;
+  color: #ffffff;
+  border: none;
   border-radius: 8px;
-  background-color: transparent;
-  color: var(--accent-color);
+  font-size: 0.8125rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
+  transition: opacity 0.2s ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-    background-color: var(--accent-color);
-    color: var(--button-text);
+    opacity: 0.9;
   }
 `;
 
+/* Success Banner */
 export const SuccessMessage = styled.div`
-  padding: 1rem 1.25rem;
-  border-radius: 12px;
-  background-color: rgba(34, 197, 94, 0.1);
-  border: 1px solid #22c55e;
-  font-size: 0.8rem;
-  color: #22c55e;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
+  padding: 1rem 1.25rem;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  color: #166534;
+  font-size: 0.875rem;
+  font-weight: 600;
 `;
