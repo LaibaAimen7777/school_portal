@@ -18,14 +18,7 @@ import {
   UserDetails,
   LogoutButton,
   ContentArea,
-  TopBar,
-  PageTitle,
-  TopBarRight,
-  HeroBackgroundWrapper,
-  DashboardHeaderCard,
-  UserIconWrapper,
 } from "@/wrappers/adminLayoutStyles";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import {
   FaUsers,
   FaChalkboardTeacher,
@@ -35,7 +28,6 @@ import {
   FaCog,
   FaCalendarAlt,
   FaHome,
-  FaUser,
 } from "react-icons/fa";
 
 export default function AdminLayout({
@@ -146,12 +138,6 @@ export default function AdminLayout({
     },
   ];
 
-  const rawTitle = pathname.split("/").pop() || "dashboard";
-  const formattedTitle =
-    rawTitle === "admin"
-      ? "ADMIN DASHBOARD"
-      : rawTitle.replace(/-/g, " ").toUpperCase();
-
   return (
     <LayoutWrapper>
       <Sidebar>
@@ -211,7 +197,7 @@ export default function AdminLayout({
       <ContentArea>
         {/* FULL-BACKGROUND GIF/IMAGE */}
         <Image
-          src="/images/campus-bg.gif" // Or campus-bg.jpg
+          src="/images/campus-bg.gif"
           alt="Campus Background"
           fill
           priority
@@ -220,26 +206,7 @@ export default function AdminLayout({
         />
 
         <div className="main-content-padding">
-          {/* FLOATING PILL HEADER CARD */}
-          <DashboardHeaderCard>
-            <div className="header-left">
-              <UserIconWrapper>
-                <FaUser />
-              </UserIconWrapper>
-              <h1>{formattedTitle}</h1>
-            </div>
-            <div className="header-right">
-              <Image
-                src="/images/admin-illustration.png"
-                alt="Admin Illustration"
-                width={110}
-                height={75}
-                style={{ objectFit: "contain", height: "auto" }}
-              />
-            </div>
-          </DashboardHeaderCard>
-
-          {/* DASHBOARD WIDGETS & PAGE CONTENT */}
+          {/* PAGE CONTENT */}
           {children}
         </div>
       </ContentArea>

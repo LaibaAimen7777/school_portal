@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import {
@@ -6,6 +7,10 @@ import {
   ToastContainer,
   ModalOverlay,
 } from "@/wrappers/adminStudents";
+import {
+  DashboardHeaderCard,
+  UserIconWrapper,
+} from "@/wrappers/adminLayoutStyles";
 import { useRouter } from "next/navigation";
 import {
   FaUserGraduate,
@@ -32,11 +37,11 @@ export default function AdminStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const router = useRouter();
 
-  // Premium Alert Toast States
+  // Alert Toast States
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
 
-  // Premium Dynamic prompt Modal States
+  // Dynamic Class Prompt Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(
     null,
@@ -45,8 +50,12 @@ export default function AdminStudents() {
 
   useEffect(() => {
     const fetchStudents = async () => {
-      const res = await api.get("/student");
-      setStudents(res.data);
+      try {
+        const res = await api.get("/student");
+        setStudents(res.data);
+      } catch {
+        triggerToast("Failed to fetch student records.");
+      }
     };
     fetchStudents();
   }, []);
@@ -76,83 +85,96 @@ export default function AdminStudents() {
       // Refresh list seamlessly
       const res = await api.get("/student");
       setStudents(res.data);
-    } catch (err) {
+    } catch {
       triggerToast("Failed to update class. Please check ID.");
     }
   };
 
   return (
     <Wrapper>
-      {/* HEADER NAVIGATION PANEL */}
-      <div className="header">
-        <h1>
-          <FaUserGraduate /> Student Management
-        </h1>
-        <button onClick={() => router.push("/dashboard/admin/create-student")}>
-          <FaUserPlus />
-          Create Student
-        </button>
-      </div>
+      {/* MODERN GLASS/PUNCHY HEADER PILL */}
+      <DashboardHeaderCard style={{ marginBottom: "2rem" }}>
+        <div className="header-left">
+          <UserIconWrapper>
+            <FaUserGraduate />
+          </UserIconWrapper>
+          <h1>STUDENT MANAGEMENT</h1>
+        </div>
+        <div className="header-right">
+          <button
+            className="create-btn"
+            onClick={() => router.push("/dashboard/admin/create-student")}
+          >
+            <FaUserPlus />
+            <span>Create Student</span>
+          </button>
+        </div>
+      </DashboardHeaderCard>
 
-      {/* STYLISH MASONRY/AUTO GRID */}
+      {/* CLEAN GRID LAYOUT */}
       <div className="grid">
         {students.map((student) => (
           <div className="card" key={student.id}>
-            <div className="card-icon">
-              <FaUserGraduate />
+            <div className="card-header">
+              <div className="card-icon">
+                <FaUserGraduate />
+              </div>
+              <span className="student-badge">ID #{student.id}</span>
             </div>
 
-            {/* <h3>
-              {student.firstName} {student.lastName}
-            </h3> */}
+            <div className="card-body">
+              <div className="info-row">
+                <FaIdCard className="info-icon" />
+                <span className="label">Roll No</span>
+                <span className="value">{student.rollNumber}</span>
+              </div>
 
-            <div className="info-row">
-              <FaIdCard />
-              <strong>Roll:</strong>
-              <span className="value">{student.rollNumber}</span>
+              <div className="info-row">
+                <FaSchool className="info-icon" />
+                <span className="label">Grade</span>
+                <span className="value">
+                  {student.schoolClass?.grade ?? "N/A"}th Grade
+                </span>
+              </div>
+
+              <div className="info-row">
+                <FaUsers className="info-icon" />
+                <span className="label">Section</span>
+                <span className="value">
+                  Section {student.schoolClass?.section ?? "N/A"}
+                </span>
+              </div>
+
+              <div className="info-row">
+                <FaCalendarAlt className="info-icon" />
+                <span className="label">Joined</span>
+                <span className="value">{student.joiningYear}</span>
+              </div>
             </div>
 
-            <div className="info-row">
-              <FaSchool />
-              <strong>Grade:</strong>
-              <span className="value">{student.schoolClass.grade}th Grade</span>
-            </div>
-
-            <div className="info-row">
-              <FaUsers />
-              <strong>Section:</strong>
-              <span className="value">
-                Section {student.schoolClass.section}
-              </span>
-            </div>
-
-            <div className="info-row">
-              <FaCalendarAlt />
-              <strong>Year:</strong>
-              <span className="value">{student.joiningYear}</span>
-            </div>
-
-            {/* ACTION FOOTER ROW */}
             <div className="actions">
               <button
-                className="change"
+                className="change-btn"
                 onClick={() => openClassModal(student.id)}
               >
                 <FaExchangeAlt />
-                Change Class
+                <span>Change Class</span>
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* LUXURY INTERACTIVE SLIDE MODAL (Replaces window.prompt) */}
+      {/* MODERN MODAL */}
       <ModalOverlay $isOpen={isModalOpen}>
         <div className="modal-box">
           <h4>Assign New Class</h4>
+          <p className="modal-subtitle">
+            Enter the target Class ID to reassign this student.
+          </p>
           <input
             type="number"
-            placeholder="Enter Class ID (e.g., 402)"
+            placeholder="e.g., 402"
             value={inputClassId}
             onChange={(e) => setInputClassId(e.target.value)}
           />
@@ -170,7 +192,7 @@ export default function AdminStudents() {
         </div>
       </ModalOverlay>
 
-      {/* FLOATING HUD TOAST NOTIFICATION (Replaces window.alert) */}
+      {/* FLOATING HUD TOAST */}
       <ToastContainer $visible={showToast}>
         <FaCheckCircle className="toast-icon" />
         <span>{toastMessage}</span>

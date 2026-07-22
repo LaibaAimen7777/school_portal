@@ -309,11 +309,12 @@ export const DashboardHeaderCard = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--bg-portal, #ffffff);
-  border: 2.5px solid var(--border-color, #111111);
-  border-radius: 30px;
-  padding: 0.75rem 2rem;
-  box-shadow: 0 4px 0 var(--border-color, #111111);
+  background: var(--bg-portal, rgba(255, 255, 255, 0.85));
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color, rgba(229, 231, 235, 0.8));
+  border-radius: 16px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   margin-bottom: 2rem;
 
   .header-left {
@@ -322,11 +323,10 @@ export const DashboardHeaderCard = styled.div`
     gap: 1rem;
 
     h1 {
-      font-family: var(--font-heading, sans-serif);
-      font-size: 1.4rem;
-      font-weight: 800;
-      color: var(--heading-color, #111111);
-      letter-spacing: 0.04em;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--heading-color, #111827);
+      letter-spacing: -0.01em;
       margin: 0;
     }
   }
@@ -337,33 +337,29 @@ export const DashboardHeaderCard = styled.div`
   }
 
   @media (max-width: 640px) {
-    border-radius: 20px;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
-    text-align: center;
+    align-items: flex-start;
+    gap: 1rem;
 
-    .header-left {
-      flex-direction: column;
-      gap: 0.5rem;
-
-      h1 {
-        font-size: 1.1rem;
+    .header-right {
+      width: 100%;
+      button {
+        width: 100%;
+        justify-content: center;
       }
     }
   }
 `;
 
 export const UserIconWrapper = styled.div`
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 2px solid var(--border-color, #111111);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.15rem;
-  color: var(--heading-color, #111111);
-  background-color: var(--bg-secondary, #f4f3ed);
+  font-size: 1.1rem;
+  color: var(--accent-color, #2563eb);
+  background-color: var(--bg-secondary, #eff6ff);
   flex-shrink: 0;
 `;

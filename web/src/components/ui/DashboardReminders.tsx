@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { api } from "@/services/api";
 import * as S from "@/wrappers/dashboardReminder";
+import {
+  DashboardHeaderCard,
+  UserIconWrapper,
+} from "@/wrappers/adminLayoutStyles";
 import {
   FaExclamationTriangle,
   FaCheckCircle,
@@ -16,6 +21,7 @@ import {
   FaArrowRight,
   FaChevronDown,
   FaClock,
+  FaUser,
 } from "react-icons/fa";
 
 interface Reminder {
@@ -100,7 +106,24 @@ export default function DashboardReminders() {
 
   return (
     <S.Container>
-      {/* ── Timetable auto-schedule ───────────────── */}
+      {/* ── Floating Hero Header Pill (Dashboard Only) ── */}
+      <DashboardHeaderCard>
+        <div className="header-left">
+          <UserIconWrapper>
+            <FaUser />
+          </UserIconWrapper>
+          <h1>ADMIN DASHBOARD</h1>
+        </div>
+        <div className="header-right">
+          <Image
+            src="/images/admin-illustration.png"
+            alt="Admin Illustration"
+            width={110}
+            height={75}
+            style={{ objectFit: "contain", height: "auto" }}
+          />
+        </div>
+      </DashboardHeaderCard>
       <S.Card>
         <S.ButtonGroup>
           <S.PrimaryButton
