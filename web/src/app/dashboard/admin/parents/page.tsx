@@ -2,6 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
+import { showSuccess, showError } from "@/components/ui/toast";
+import {
+  ParentsContainer,
+  ParentsHeader,
+  ParentsTitle,
+  SearchWrapper,
+  SearchInput,
+  TableWrapper,
+  StyledTable,
+  StudentBadge,
+  ResetButton,
+  EmptyState,
+  CredentialCardContainer,
+  CredentialCard,
+  PrimaryButton,
+  SecondaryButton,
+} from "@/wrappers/adminParents";
+import {
+  FaUserFriends,
+  FaSearch,
+  FaKey,
+  FaPhone,
+  FaEnvelope,
+  FaUserGraduate,
+  FaDownload,
+  FaPrint,
+  FaTimes,
+} from "react-icons/fa";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 
 interface User {
   id: number;
@@ -32,6 +61,7 @@ export default function ParentsPage() {
   const [parents, setParents] = useState<Parent[]>([]);
   const [loading, setLoading] = useState(true);
   const [resettingId, setResettingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
   const [credentials, setCredentials] = useState<{
     username: string;
     password: string;
@@ -43,9 +73,10 @@ export default function ParentsPage() {
 
   useEffect(() => {
     if (credentials) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         handleDownloadPDF();
       }, 500);
+      return () => clearTimeout(timer);
     }
   }, [credentials]);
 
@@ -53,153 +84,256 @@ export default function ParentsPage() {
     try {
       const res = await api.get("/parent");
       setParents(res.data);
-    } catch {
-      console.error("Failed to load parents");
+    } catch (err) {
+      console.error("Failed to load parents", err);
+      showError("Failed to load parents list");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const resetPassword = async (parentId: number) => {
+  const resetPassword = async (parentId: number, parentName: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to reset password for ${parentName}? A new temporary password will be generated.`,
+      )
+    ) {
+      return;
+    }
+
     setResettingId(parentId);
 
     try {
       const res = await api.post(`/parent/${parentId}/reset-password`);
-
       const { username, temporaryPassword } = res.data;
 
       setCredentials({
         username,
         password: temporaryPassword,
       });
-    } catch {
-      alert("Failed to reset password");
+      showSuccess("Password reset successfully!");
+    } catch (err: any) {
+      showError(
+        err.response?.data?.message || "Failed to reset parent password",
+      );
+    } finally {
+      setResettingId(null);
     }
-
-    setResettingId(null);
   };
 
   const handleDownloadPDF = async () => {
     const element = document.getElementById("parentCredentialCard");
     if (!element) return;
 
-    const html2canvas = (await import("html2canvas")).default;
-    const jsPDF = (await import("jspdf")).default;
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const jsPDF = (await import("jspdf")).default;
 
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      backgroundColor: "#ffffff",
-    });
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+      });
 
-    const imgData = canvas.toDataURL("image/png");
+      const imgData = canvas.toDataURL("image/png");
 
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    });
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
 
-    const imgWidth = 190;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const imgWidth = 190;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-
-    pdf.save(`Parent-${credentials?.username}-Credentials.pdf`);
+      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+      pdf.save(`Parent-${credentials?.username}-Credentials.pdf`);
+    } catch (err) {
+      console.error("Failed to generate PDF", err);
+    }
   };
 
-  if (loading) return <div>Loading...</div>;
+  const filteredParents = parents.filter((p) => {
+    const query = search.toLowerCase();
+    const father = p.fatherName?.toLowerCase() || "";
+    const mother = p.motherName?.toLowerCase() || "";
+    const phone = p.phone?.toLowerCase() || "";
+    const email = p.email?.toLowerCase() || "";
+    const username = p.user?.username?.toLowerCase() || "";
+
+    const matchesChildren = p.students?.some((s) =>
+      `${s.firstName} ${s.lastName}`.toLowerCase().includes(query),
+    );
+
+    return (
+      father.includes(query) ||
+      mother.includes(query) ||
+      phone.includes(query) ||
+      email.includes(query) ||
+      username.includes(query) ||
+      matchesChildren
+    );
+  });
+
+  if (loading) return <LoadingOverlay />;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Parents</h2>
+    <ParentsContainer>
+      <ParentsHeader>
+        <ParentsTitle>
+          <FaUserFriends />
+          Parents Directory
+        </ParentsTitle>
 
-      {parents.map((p) => (
-        <div
-          key={p.id}
-          style={{
-            border: "1px solid #ddd",
-            padding: "12px",
-            marginBottom: "10px",
-            borderRadius: "8px",
-          }}
-        >
-          <div>
-            <strong>{p.fatherName}</strong> & {p.motherName}
-          </div>
+        <SearchWrapper>
+          <FaSearch />
+          <SearchInput
+            type="text"
+            placeholder="Search by parent, phone, or student name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </SearchWrapper>
+      </ParentsHeader>
 
-          <div>📞 {p.phone}</div>
-          <div>📧 {p.email}</div>
+      <TableWrapper>
+        <StyledTable>
+          <thead>
+            <tr>
+              <th>Parents</th>
+              <th>Username</th>
+              <th>Contact Details</th>
+              <th>Registered Children</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredParents.length === 0 ? (
+              <tr>
+                <td colSpan={5}>
+                  <EmptyState>
+                    <FaUserFriends />
+                    <p>
+                      {search
+                        ? "No parents match your search criteria"
+                        : "No parent records found"}
+                    </p>
+                  </EmptyState>
+                </td>
+              </tr>
+            ) : (
+              filteredParents.map((parent) => (
+                <tr key={parent.id}>
+                  <td>
+                    <strong>
+                      {parent.fatherName || "—"}
+                      {parent.fatherName && parent.motherName ? " & " : ""}
+                      {parent.motherName || ""}
+                    </strong>
+                  </td>
+                  <td>
+                    <span className="username">
+                      @{parent.user?.username || "N/A"}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="contact-info">
+                      {parent.phone && (
+                        <span>
+                          <FaPhone /> {parent.phone}
+                        </span>
+                      )}
+                      {parent.email && (
+                        <span>
+                          <FaEnvelope /> {parent.email}
+                        </span>
+                      )}
+                      {!parent.phone && !parent.email && <span>—</span>}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="children-list">
+                      {(parent.students ?? []).length === 0 ? (
+                        <span>—</span>
+                      ) : (
+                        parent.students.map((student) => (
+                          <StudentBadge key={student.id}>
+                            <FaUserGraduate />
+                            {student.firstName} {student.lastName}
+                          </StudentBadge>
+                        ))
+                      )}
+                    </div>
+                  </td>
+                  <td>
+                    <ResetButton
+                      onClick={() =>
+                        resetPassword(
+                          parent.id,
+                          parent.fatherName || parent.motherName || "Parent",
+                        )
+                      }
+                      disabled={resettingId === parent.id}
+                    >
+                      <FaKey />
+                      {resettingId === parent.id
+                        ? "Resetting..."
+                        : "Reset Password"}
+                    </ResetButton>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </StyledTable>
+      </TableWrapper>
 
-          <div style={{ marginTop: "8px" }}>
-            <strong>Children:</strong>{" "}
-            {p.students.map((s) => `${s.firstName} ${s.lastName}`).join(", ")}
-          </div>
-
-          <button
-            onClick={() => resetPassword(p.user.id)}
-            disabled={resettingId === p.id}
-            style={{
-              marginTop: "10px",
-              padding: "6px 10px",
-              background: "#ef4444",
-              color: "white",
-              borderRadius: "6px",
-              border: "none",
-            }}
-          >
-            {resettingId === p.id ? "Resetting..." : "Reset Password"}
-          </button>
-        </div>
-      ))}
+      {/* Generated Credentials Download/Print Modal */}
       {credentials && (
-        <>
-          <div
-            id="parentCredentialCard"
-            style={{
-              border: "1px solid #ddd",
-              borderRadius: "10px",
-              padding: "16px",
-              marginTop: "20px",
-              background: "#fff",
-              maxWidth: "400px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "10px",
-              }}
-            >
-              <h3 style={{ margin: 0 }}>Parent Credentials</h3>
-              <button onClick={() => window.print()}>🖨️ Print</button>
+        <CredentialCardContainer onClick={() => setCredentials(null)}>
+          <CredentialCard onClick={(e) => e.stopPropagation()}>
+            <div id="parentCredentialCard">
+              <div className="card-header">
+                <h3>Parent Access Credentials</h3>
+                <SecondaryButton
+                  style={{ padding: "0.4rem 0.6rem", border: "none" }}
+                  onClick={() => setCredentials(null)}
+                >
+                  <FaTimes />
+                </SecondaryButton>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                  marginTop: "1rem",
+                }}
+              >
+                <div className="field-group">
+                  <label>Username</label>
+                  <span>{credentials.username}</span>
+                </div>
+
+                <div className="field-group">
+                  <label>Temporary Password</label>
+                  <span>{credentials.password}</span>
+                </div>
+              </div>
             </div>
 
-            <div style={{ marginBottom: "8px" }}>
-              <strong>Username:</strong> {credentials.username}
-            </div>
+            <div className="card-actions">
+              <SecondaryButton onClick={() => window.print()}>
+                <FaPrint /> Print
+              </SecondaryButton>
 
-            <div>
-              <strong>Password:</strong>{" "}
-              <span style={{ fontWeight: "bold" }}>{credentials.password}</span>
+              <PrimaryButton onClick={handleDownloadPDF}>
+                <FaDownload /> Download PDF
+              </PrimaryButton>
             </div>
-          </div>
-
-          <button
-            onClick={handleDownloadPDF}
-            style={{
-              marginTop: "10px",
-              padding: "8px 12px",
-              background: "#2563eb",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-            }}
-          >
-            📥 Download PDF
-          </button>
-        </>
+          </CredentialCard>
+        </CredentialCardContainer>
       )}
-    </div>
+    </ParentsContainer>
   );
 }

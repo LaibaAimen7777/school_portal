@@ -1,7 +1,12 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { Wrapper } from "@/wrappers/adminCreateStudent";
+import {
+  DashboardHeaderCard,
+  UserIconWrapper,
+} from "@/wrappers/adminLayoutStyles";
 import { showSuccess, showError } from "@/components/ui/toast";
 import {
   CredentialCard,
@@ -13,6 +18,21 @@ import {
   ButtonGroup,
   PDFButton,
 } from "@/wrappers/adminCreateTeacher";
+import {
+  FaUserPlus,
+  FaSchool,
+  FaPhone,
+  FaUser,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaVenusMars,
+  FaCheckCircle,
+  FaExclamationCircle,
+  FaPrint,
+  FaDownload,
+  FaUsers,
+} from "react-icons/fa";
 
 type SchoolClass = {
   id: number;
@@ -21,10 +41,12 @@ type SchoolClass = {
   currentStrength: number;
   maxStrength: number;
 };
+
 type Grade = {
   id: number;
   grade: number;
 };
+
 type ExistingChild = {
   id: number;
   firstName: string;
@@ -59,22 +81,25 @@ export default function CreateStudentPage() {
   const [parentExists, setParentExists] = useState(false);
   const [existingChildren, setExistingChildren] = useState<ExistingChild[]>([]);
 
-  const [joiningYear, setJoiningYear] = useState(new Date().getFullYear());
+  const [joiningYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   // Fetch grades
   useEffect(() => {
     const fetchGrades = async () => {
-      const res = await api.get("/school-class/grades");
-      setGrades(res.data);
+      try {
+        const res = await api.get("/school-class/grades");
+        setGrades(res.data);
+      } catch {
+        showError("Failed to load grades.");
+      }
     };
     fetchGrades();
   }, []);
 
   useEffect(() => {
     if (credentials) {
-      // wait a bit so UI renders fully
       setTimeout(() => {
         handleDownloadPDF();
       }, 500);
@@ -84,72 +109,65 @@ export default function CreateStudentPage() {
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
 
-    // First Name
     if (!firstName.trim()) {
       newErrors.firstName = "First name is required";
     } else if (!/^[A-Za-z]+$/.test(firstName)) {
       newErrors.firstName = "First name must contain only letters";
     }
 
-    // Last Name
     if (!lastName.trim()) {
       newErrors.lastName = "Last name is required";
     } else if (!/^[A-Za-z]+$/.test(lastName)) {
       newErrors.lastName = "Last name must contain only letters";
     }
 
-    // Date of Birth
     if (!dateOfBirth) {
       newErrors.dateOfBirth = "Date of birth is required";
     } else if (new Date(dateOfBirth) > new Date()) {
       newErrors.dateOfBirth = "Date of birth cannot be in the future";
     }
 
-    // Gender
     if (!gender) {
       newErrors.gender = "Please select gender";
     }
 
-    // Phone
     if (!phone) {
       newErrors.phone = "Phone number is required";
     } else if (!/^03\d{9}$/.test(phone)) {
       newErrors.phone = "Phone must be 11 digits and start with 03";
     }
 
-    // Email
     if (!email) {
       newErrors.email = "Email is required";
     } else if (!/^\S+@\S+\.\S+$/.test(email)) {
       newErrors.email = "Invalid email format";
     }
 
-    // Father Name
     if (!fatherName.trim()) {
       newErrors.fatherName = "Father name is required";
     }
 
-    // Mother Name
     if (!motherName.trim()) {
       newErrors.motherName = "Mother name is required";
     }
 
-    // Address
     if (!address.trim()) {
       newErrors.address = "Address is required";
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
-  // When grade selected → fetch sections
   const handleGradeChange = async (grade: number) => {
     setSelectedGrade(grade);
     setSelectedClass(null);
-    const res = await api.get(`/school-class/sections?gradeId=${grade}`);
-    setSections(res.data);
+    try {
+      const res = await api.get(`/school-class/sections?gradeId=${grade}`);
+      setSections(res.data);
+    } catch {
+      showError("Failed to fetch class sections.");
+    }
   };
 
   const handleSectionChange = (classId: number) => {
@@ -163,7 +181,6 @@ export default function CreateStudentPage() {
   const isFull =
     selectedClass && selectedClass.currentStrength >= selectedClass.maxStrength;
 
-  // Look up parent by phone — runs as soon as 11 digits are entered
   const handlePhoneLookup = async (value: string) => {
     if (!value) return;
 
@@ -200,6 +217,7 @@ export default function CreateStudentPage() {
     if (!selectedClass) return showError("Please select class first");
     if (isFull) return showError("Selected section is full");
     if (!validateForm()) return;
+
     try {
       setLoading(true);
 
@@ -219,17 +237,13 @@ export default function CreateStudentPage() {
 
       if (res.data) {
         setCredentials({
-          // studentUsername: res.data.username,
-          // studentPassword: res.data.temporaryPassword,
           parentUsername: res.data.parentUsername,
           parentPassword: res.data.parentPassword,
         });
 
         showSuccess("Student admitted successfully!");
-      } else {
-        showSuccess("Student admitted successfully!");
       }
-    } catch (err) {
+    } catch {
       showError("Failed to create student");
     } finally {
       setLoading(false);
@@ -260,197 +274,290 @@ export default function CreateStudentPage() {
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-
     pdf.save(`Parent-${credentials?.parentUsername}-Credentials.pdf`);
   };
 
   return (
     <Wrapper>
-      <div className="card">
-        <h1>Student Admission</h1>
+      {/* PAGE HEADER */}
+      <DashboardHeaderCard>
+        <div className="header-left">
+          <UserIconWrapper>
+            <FaUserPlus />
+          </UserIconWrapper>
+          <h1>STUDENT ADMISSION</h1>
+        </div>
+      </DashboardHeaderCard>
 
-        {/* ================= STEP 1: CLASS SELECTION ================= */}
-        <h3>Step 1: Select Class</h3>
+      <div className="form-card">
+        {/* STEP 1: CLASS SELECTION */}
+        <section className="form-section">
+          <div className="section-header">
+            <span className="step-badge">1</span>
+            <h3>Select Class & Section</h3>
+          </div>
 
-        <label>Grade</label>
-        <select onChange={(e) => handleGradeChange(Number(e.target.value))}>
-          <option value="">Select Grade</option>
-          {grades.map((g) => (
-            <option key={g.id} value={g.id}>
-              Grade {g.grade}
-            </option>
-          ))}
-        </select>
+          <div className="input-grid">
+            <div className="field-group">
+              <label>
+                <FaSchool className="field-icon" /> Grade
+              </label>
+              <select
+                onChange={(e) => handleGradeChange(Number(e.target.value))}
+              >
+                <option value="">Select Grade</option>
+                {grades.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    Grade {g.grade}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {selectedGrade && (
-          <>
-            <label>Section</label>
-            <select
-              onChange={(e) => handleSectionChange(Number(e.target.value))}
-            >
-              <option value="">Select Section</option>
-              {sections.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.section} ({s.currentStrength}/{s.maxStrength})
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-
-        {selectedClass && <p>Seats Available: {seatsAvailable}</p>}
-
-        {isFull && (
-          <p style={{ color: "red" }}>
-            This section is full. Please select another.
-          </p>
-        )}
-
-        {/* ================= STEP 2: PARENT LOOKUP ================= */}
-        {selectedClass && !isFull && (
-          <>
-            <h3>Step 2: Parent Information</h3>
-            <input
-              placeholder="Phone"
-              value={phone}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-            />
-            {errors.phone && (
-              <p style={{ color: "red", fontSize: "12px" }}>{errors.phone}</p>
+            {selectedGrade && (
+              <div className="field-group">
+                <label>
+                  <FaUsers className="field-icon" /> Section
+                </label>
+                <select
+                  onChange={(e) => handleSectionChange(Number(e.target.value))}
+                >
+                  <option value="">Select Section</option>
+                  {sections.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      Section {s.section} ({s.currentStrength}/{s.maxStrength})
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
+          </div>
+
+          {selectedClass && (
+            <div className={`status-banner ${isFull ? "error" : "success"}`}>
+              {isFull ? (
+                <>
+                  <FaExclamationCircle />
+                  <span>
+                    This section is full. Please choose another section.
+                  </span>
+                </>
+              ) : (
+                <>
+                  <FaCheckCircle />
+                  <span>
+                    Seats Available: <strong>{seatsAvailable}</strong>
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* STEP 2: PARENT INFORMATION */}
+        {selectedClass && !isFull && (
+          <section className="form-section">
+            <div className="section-header">
+              <span className="step-badge">2</span>
+              <h3>Parent Information</h3>
+            </div>
+
+            <div className="field-group single-col">
+              <label>
+                <FaPhone className="field-icon" /> Phone Number (Auto Lookup)
+              </label>
+              <input
+                placeholder="e.g. 03001234567"
+                value={phone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+              />
+              {errors.phone && (
+                <span className="error-text">{errors.phone}</span>
+              )}
+            </div>
 
             {parentExists && (
-              <>
-                <p style={{ color: "green" }}>
-                  Existing parent found. Student will be attached.
+              <div className="existing-parent-box">
+                <p className="success-tag">
+                  <FaCheckCircle /> Existing parent record found! Fields locked
+                  automatically.
                 </p>
                 {existingChildren.length > 0 && (
-                  <div
-                    style={{
-                      background: "#f5f5f5",
-                      padding: "8px",
-                      borderRadius: "6px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <strong>Already enrolled:</strong>
-                    <ul style={{ margin: "4px 0 0 18px" }}>
+                  <div className="children-list">
+                    <strong>Enrolled Siblings:</strong>
+                    <ul>
                       {existingChildren.map((c) => (
                         <li key={c.id}>
                           {c.firstName} {c.lastName}
                           {c.grade
-                            ? ` — Grade ${c.grade}${c.section ? ` ${c.section}` : ""}`
+                            ? ` — Grade ${c.grade}${c.section ? ` (${c.section})` : ""}`
                             : ""}
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
-              </>
+              </div>
             )}
 
-            <input
-              placeholder="Father Name"
-              value={fatherName}
-              onChange={(e) => setFatherName(e.target.value)}
-              disabled={parentExists}
-            />
-            {errors.fatherName && (
-              <p style={{ color: "red", fontSize: "12px" }}>
-                {errors.fatherName}
-              </p>
-            )}
-            <input
-              placeholder="Mother Name"
-              value={motherName}
-              onChange={(e) => setMotherName(e.target.value)}
-              disabled={parentExists}
-            />
-            {errors.motherName && (
-              <p style={{ color: "red", fontSize: "12px" }}>
-                {errors.motherName}
-              </p>
-            )}
-            <input
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={parentExists}
-            />
-            {errors.email && (
-              <p style={{ color: "red", fontSize: "12px" }}>{errors.email}</p>
-            )}
-            <input
-              placeholder="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              disabled={parentExists}
-            />
-            {errors.address && (
-              <p style={{ color: "red", fontSize: "12px" }}>{errors.address}</p>
-            )}
+            <div className="input-grid">
+              <div className="field-group">
+                <label>
+                  <FaUser className="field-icon" /> Father Name
+                </label>
+                <input
+                  placeholder="Father Full Name"
+                  value={fatherName}
+                  onChange={(e) => setFatherName(e.target.value)}
+                  disabled={parentExists}
+                />
+                {errors.fatherName && (
+                  <span className="error-text">{errors.fatherName}</span>
+                )}
+              </div>
 
-            {/* ================= STEP 3: STUDENT INFO ================= */}
-            <h3>Step 3: Student Information</h3>
-            <input
-              placeholder="First Name"
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-            {errors.firstName && (
-              <p style={{ color: "red", fontSize: "12px" }}>
-                {errors.firstName}
-              </p>
-            )}
-            <input
-              placeholder="Last Name"
-              onChange={(e) => setLastName(e.target.value)}
-            />
-            {errors.lastName && (
-              <p style={{ color: "red", fontSize: "12px" }}>
-                {errors.lastName}
-              </p>
-            )}
-            <input
-              type="date"
-              onChange={(e) => setDateOfBirth(e.target.value)}
-            />
-            {errors.dateOfBirth && (
-              <p style={{ color: "red", fontSize: "12px" }}>
-                {errors.dateOfBirth}
-              </p>
-            )}
-            <select onChange={(e) => setGender(e.target.value)}>
-              <option value="">Select Gender</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-            </select>
-            {errors.gender && (
-              <p style={{ color: "red", fontSize: "12px" }}>{errors.gender}</p>
-            )}
+              <div className="field-group">
+                <label>
+                  <FaUser className="field-icon" /> Mother Name
+                </label>
+                <input
+                  placeholder="Mother Full Name"
+                  value={motherName}
+                  onChange={(e) => setMotherName(e.target.value)}
+                  disabled={parentExists}
+                />
+                {errors.motherName && (
+                  <span className="error-text">{errors.motherName}</span>
+                )}
+              </div>
 
-            <button onClick={handleSubmit} disabled={loading}>
-              {loading ? "Admitting..." : "Admit Student"}
-            </button>
-          </>
+              <div className="field-group">
+                <label>
+                  <FaEnvelope className="field-icon" /> Email Address
+                </label>
+                <input
+                  placeholder="name@domain.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={parentExists}
+                />
+                {errors.email && (
+                  <span className="error-text">{errors.email}</span>
+                )}
+              </div>
+
+              <div className="field-group">
+                <label>
+                  <FaMapMarkerAlt className="field-icon" /> Address
+                </label>
+                <input
+                  placeholder="Residential Address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  disabled={parentExists}
+                />
+                {errors.address && (
+                  <span className="error-text">{errors.address}</span>
+                )}
+              </div>
+            </div>
+          </section>
         )}
 
+        {/* STEP 3: STUDENT INFORMATION */}
+        {selectedClass && !isFull && (
+          <section className="form-section">
+            <div className="section-header">
+              <span className="step-badge">3</span>
+              <h3>Student Details</h3>
+            </div>
+
+            <div className="input-grid">
+              <div className="field-group">
+                <label>
+                  <FaUser className="field-icon" /> First Name
+                </label>
+                <input
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+                {errors.firstName && (
+                  <span className="error-text">{errors.firstName}</span>
+                )}
+              </div>
+
+              <div className="field-group">
+                <label>
+                  <FaUser className="field-icon" /> Last Name
+                </label>
+                <input
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+                {errors.lastName && (
+                  <span className="error-text">{errors.lastName}</span>
+                )}
+              </div>
+
+              <div className="field-group">
+                <label>
+                  <FaCalendarAlt className="field-icon" /> Date of Birth
+                </label>
+                <input
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                />
+                {errors.dateOfBirth && (
+                  <span className="error-text">{errors.dateOfBirth}</span>
+                )}
+              </div>
+
+              <div className="field-group">
+                <label>
+                  <FaVenusMars className="field-icon" /> Gender
+                </label>
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                >
+                  <option value="">Select Gender</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                </select>
+                {errors.gender && (
+                  <span className="error-text">{errors.gender}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="form-submit-row">
+              <button
+                className="submit-btn"
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? "Admitting Student..." : "Admit Student"}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {/* CREDENTIALS RESULT CARD */}
         {credentials && (
-          <>
+          <section className="credentials-section">
             <CredentialCard id="studentCredentialCard">
               <CredentialHeader>
-                <ResponseTitle>Login Credentials</ResponseTitle>
+                <ResponseTitle>Parent Access Credentials</ResponseTitle>
                 <PrintButton onClick={() => window.print()}>
-                  🖨️ Print
+                  <FaPrint /> Print Card
                 </PrintButton>
               </CredentialHeader>
 
-              {/* 👨‍👩‍👧 Parent Section (only if exists) */}
               {credentials.parentUsername && (
-                <>
-                  <hr style={{ margin: "15px 0" }} />
-
-                  <ResponseTitle>Parent Credentials</ResponseTitle>
-
+                <div className="credentials-body">
                   <ResponseItem>
                     <strong>Username:</strong> {credentials.parentUsername}
                   </ResponseItem>
@@ -459,15 +566,16 @@ export default function CreateStudentPage() {
                     <strong>Password:</strong>
                     <PasswordValue>{credentials.parentPassword}</PasswordValue>
                   </ResponseItem>
-                </>
+                </div>
               )}
             </CredentialCard>
 
-            {/* Buttons */}
             <ButtonGroup>
-              <PDFButton onClick={handleDownloadPDF}>📥 Download PDF</PDFButton>
+              <PDFButton onClick={handleDownloadPDF}>
+                <FaDownload /> Download Credential PDF
+              </PDFButton>
             </ButtonGroup>
-          </>
+          </section>
         )}
       </div>
     </Wrapper>

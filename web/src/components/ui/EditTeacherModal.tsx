@@ -7,12 +7,19 @@ import {
   ModalOverlay,
   ModalBox,
   ModalHeader,
+  CloseIconButton,
+  FormGroup,
   ModalInput,
   ModalSelect,
+  SectionTitle,
   SubjectRow,
-  Actions,
-  Button,
+  RemoveRowButton,
+  AddSubjectButton,
+  ModalActions,
+  CancelButton,
+  SaveButton,
 } from "@/components/ui/editTeacherModal";
+import { FaTimes, FaPlus, FaTrash } from "react-icons/fa";
 
 interface Props {
   teacher: any;
@@ -37,27 +44,30 @@ export default function EditTeacherModal({
   );
 
   const fetchSubjectsForGrade = async (grade: number) => {
-    if (!grade || subjectsByGrade[grade]) return; // cache it
-    const res = await api.get(`/subject/by-grade-subject?grade=${grade}`);
-    console.log("fetch subjects", res.data);
-    setSubjectsByGrade((prev) => ({ ...prev, [grade]: res.data }));
+    if (!grade || subjectsByGrade[grade]) return;
+    try {
+      const res = await api.get(`/subject/by-grade-subject?grade=${grade}`);
+      setSubjectsByGrade((prev) => ({ ...prev, [grade]: res.data }));
+    } catch (err) {
+      console.error("Failed to fetch subjects for grade:", err);
+    }
   };
 
-  // In your prefill useEffect, after setting subjectGrades:
   useEffect(() => {
     if (teacher && isOpen) {
-      setFullName(teacher.fullName);
+      setFullName(teacher.fullName || "");
       setQualification(teacher.qualification || "");
 
       const sgs = (teacher.subjectGrades || []).map((sg: any) => ({
-        subjectId: sg.subject.id,
-        grade: sg.grade,
+        subjectId: sg.subject?.id ?? null,
+        grade: sg.grade ?? null,
       }));
       setSubjectGrades(sgs);
 
-      // Pre-fetch subjects for each grade already assigned
-      const uniqueGrades = [...new Set(sgs.map((sg) => sg.grade))];
-      uniqueGrades.forEach((g) => fetchSubjectsForGrade(g)); // 👈 add this
+      const uniqueGrades = [
+        ...new Set(sgs.map((sg) => sg.grade).filter(Boolean)),
+      ] as number[];
+      uniqueGrades.forEach((g) => fetchSubjectsForGrade(g));
     }
   }, [teacher, isOpen]);
 
@@ -102,75 +112,93 @@ export default function EditTeacherModal({
   return (
     <ModalOverlay onClick={onClose}>
       <ModalBox onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
         <ModalHeader>
-          <h2>Edit Teacher</h2>
-          <Button onClick={onClose}>✕</Button>
+          <h3>Edit Teacher</h3>
+          <CloseIconButton onClick={onClose} aria-label="Close modal">
+            <FaTimes />
+          </CloseIconButton>
         </ModalHeader>
 
-        {/* Full Name */}
-        <label>Full Name</label>
-        <ModalInput
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-        />
+        <FormGroup>
+          <label>Full Name</label>
+          <ModalInput
+            placeholder="e.g. Sarah Jenkins"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
+        </FormGroup>
 
-        {/* Qualification */}
-        <label>Qualification</label>
-        <ModalInput
-          value={qualification}
-          onChange={(e) => setQualification(e.target.value)}
-        />
+        <FormGroup>
+          <label>Qualification</label>
+          <ModalInput
+            placeholder="e.g. M.Sc. Mathematics"
+            value={qualification}
+            onChange={(e) => setQualification(e.target.value)}
+          />
+        </FormGroup>
 
-        {/* Subjects */}
-        <h4>Subjects & Grades</h4>
+        <SectionTitle>
+          <h4>Subjects &amp; Assigned Grades</h4>
+        </SectionTitle>
+
         {subjectGrades.map((sg, index) => (
-          <div key={index} style={{ display: "flex", gap: "8px" }}>
-            {/* Grade input — fetch subjects when grade changes */}
-            <input
+          <SubjectRow key={index}>
+            <ModalInput
               type="number"
+              className="grade-input"
+              placeholder="Grade"
               value={sg.grade ?? ""}
               min={1}
-              max={10}
+              max={12}
               onChange={(e) => {
                 const grade = Number(e.target.value);
-
                 const updated = [...subjectGrades];
                 updated[index] = { grade, subjectId: null };
                 setSubjectGrades(updated);
 
-                fetchSubjectsForGrade(grade);
+                if (grade) fetchSubjectsForGrade(grade);
               }}
             />
 
-            {/* Subject dropdown — filtered by grade */}
-            <select
+            <ModalSelect
+              className="subject-select"
               value={sg.subjectId ?? ""}
               onChange={(e) =>
                 handleChange(index, "subjectId", Number(e.target.value))
               }
             >
               <option value="">
-                {sg.grade ? "Select Subject" : "Enter grade first"}
+                {sg.grade ? "Select Subject" : "Set grade first..."}
               </option>
               {(sg.grade ? subjectsByGrade[sg.grade] : [])?.map((s, i) => (
                 <option key={`${s.id}-${i}`} value={s.id}>
                   {s.name}
                 </option>
               ))}
-            </select>
+            </ModalSelect>
 
-            <button onClick={() => removeRow(index)}>❌</button>
-          </div>
+            <RemoveRowButton
+              type="button"
+              onClick={() => removeRow(index)}
+              title="Remove row"
+            >
+              <FaTrash />
+            </RemoveRowButton>
+          </SubjectRow>
         ))}
 
-        <Button onClick={addRow}>+ Add Subject</Button>
+        <AddSubjectButton type="button" onClick={addRow}>
+          <FaPlus /> Add Subject Assignment
+        </AddSubjectButton>
 
-        {/* Actions */}
-        <Actions>
-          <Button onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit}>Save</Button>
-        </Actions>
+        <ModalActions>
+          <CancelButton type="button" onClick={onClose}>
+            Cancel
+          </CancelButton>
+          <SaveButton type="button" onClick={handleSubmit}>
+            Save Changes
+          </SaveButton>
+        </ModalActions>
       </ModalBox>
     </ModalOverlay>
   );

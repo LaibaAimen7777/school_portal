@@ -1,116 +1,271 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
-/* ===== Overlay ===== */
+const fadeIn = keyframes`
+  from { opacity: 0; }
+  to { opacity: 1; }
+`;
+
+const slideUp = keyframes`
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+`;
+
 export const ModalOverlay = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-
-  background: rgba(0, 0, 0, 0.55);
-
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-
-  z-index: 9999;
+  padding: 1.5rem;
+  animation: ${fadeIn} 0.2s ease-out forwards;
 `;
 
-/* ===== Modal Box ===== */
 export const ModalBox = styled.div`
-  background: #ffffff;
-  width: 520px;
-  max-width: 95%;
-  max-height: 90vh;
-
-  border-radius: 12px;
-  padding: 20px;
-
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-
-  overflow-y: auto;
-  animation: fadeIn 0.2s ease-in-out;
-`;
-
-/* ===== Header ===== */
-export const ModalHeader = styled.div`
+  width: 100%;
+  max-width: 520px;
+  background: var(--bg-portal, rgba(20, 20, 25, 0.85)) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12)) !important;
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: ${slideUp} 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
-  margin-bottom: 15px;
-
-  h2 {
-    margin: 0;
+  /* Custom scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
   }
 `;
 
-/* ===== Close Button ===== */
-export const CloseButton = styled.button`
-  border: none;
-  background: transparent;
-  font-size: 18px;
-  cursor: pointer;
+export const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+
+  h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--heading-color, inherit);
+  }
 `;
 
-/* ===== Inputs ===== */
+export const CloseIconButton = styled.button`
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--heading-color, inherit);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: scale(1.05);
+  }
+`;
+
+export const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--heading-color, inherit);
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+`;
+
 export const ModalInput = styled.input`
   width: 100%;
-  padding: 8px;
-  margin: 5px 0 12px 0;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 10px;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: var(--heading-color, inherit);
+  outline: none;
+  transition: all 0.2s ease;
 
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  &::placeholder {
+    color: var(--heading-color, inherit);
+    opacity: 0.35;
+  }
+
+  &:focus {
+    border-color: var(--accent-color, #2563eb);
+    background: rgba(255, 255, 255, 0.07) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
 `;
 
 export const ModalSelect = styled.select`
   width: 100%;
-  padding: 8px;
-  margin: 5px 0 12px 0;
-
-  border: 1px solid #ddd;
-  border-radius: 6px;
-`;
-
-/* ===== Subject Row ===== */
-export const SubjectRow = styled.div`
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-`;
-
-/* ===== Actions ===== */
-export const Actions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-
-  margin-top: 15px;
-`;
-
-/* ===== Button ===== */
-export const Button = styled.button`
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: none;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 10px;
+  font-size: 0.9rem;
+  background: var(--bg-color) !important;
+  color: var(--heading-color, inherit);
+  outline: none;
+  transition: all 0.2s ease;
   cursor: pointer;
 
-  &:hover {
-    opacity: 0.85;
+  &:focus {
+    border-color: var(--accent-color, #2563eb);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  option {
+    background: #18181b;
+    color: #ffffff;
   }
 `;
 
-/* ===== Animation ===== */
-export const FadeWrapper = styled.div`
-  @keyframes fadeIn {
-    from {
-      transform: scale(0.95);
-      opacity: 0;
-    }
-    to {
-      transform: scale(1);
-      opacity: 1;
-    }
+export const SectionTitle = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+
+  h4 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--heading-color, inherit);
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+`;
+
+export const SubjectRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  .grade-input {
+    width: 90px;
+    flex-shrink: 0;
+  }
+
+  .subject-select {
+    flex: 1;
+  }
+`;
+
+export const RemoveRowButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+`;
+
+export const AddSubjectButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 10px;
+  border: 1px dashed var(--border-color, rgba(255, 255, 255, 0.2));
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: var(--heading-color, inherit);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: var(--accent-color, #2563eb);
+    color: var(--accent-color, #3b82f6);
+  }
+`;
+
+export const ModalActions = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+`;
+
+export const CancelButton = styled.button`
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  background: rgba(255, 255, 255, 0.04) !important;
+  color: var(--heading-color, inherit);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+`;
+
+export const SaveButton = styled.button`
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent-color, #2563eb);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
   }
 `;

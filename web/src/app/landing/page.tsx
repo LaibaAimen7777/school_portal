@@ -308,7 +308,7 @@ export default function LandingPage() {
         <Footer>
           <FooterBrand>
             <div className="brand-header">
-              <LogoImageWrapper small>
+              <LogoImageWrapper $small>
                 <Image
                   src="/images/logo.png" // <-- Put your logo image path here
                   alt="Learning Academy Logo"

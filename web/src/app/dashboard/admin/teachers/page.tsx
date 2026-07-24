@@ -9,12 +9,13 @@ import {
   TeachersHeader,
   TeachersTitle,
   AddButton,
-  LoadingMessage,
   TableWrapper,
   StyledTable,
   SubjectBadge,
   DeleteButton,
   EmptyState,
+  ActionGroup,
+  EditButton,
 } from "@/wrappers/adminTeacher";
 import { FaChalkboardTeacher, FaPlus, FaTrash, FaEdit } from "react-icons/fa";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
@@ -173,9 +174,8 @@ export default function TeachersPage() {
                       : "—"}
                   </td>
                   <td>
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      <button
-                        className="edit-btn"
+                    <ActionGroup>
+                      <EditButton
                         onClick={() => {
                           setEditingTeacher(teacher);
                           setIsEditOpen(true);
@@ -183,7 +183,7 @@ export default function TeachersPage() {
                       >
                         <FaEdit />
                         Edit
-                      </button>
+                      </EditButton>
 
                       <DeleteButton
                         onClick={() =>
@@ -193,7 +193,7 @@ export default function TeachersPage() {
                         <FaTrash />
                         Delete
                       </DeleteButton>
-                    </div>
+                    </ActionGroup>
                   </td>
                 </tr>
               ))
