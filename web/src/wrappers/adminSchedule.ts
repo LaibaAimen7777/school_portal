@@ -1,494 +1,527 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  max-width: 1400px;
+  width: 100%;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: var(--spacing-xl);
-  background-color: var(--bg-secondary);
-  min-height: 100vh;
-
-  @media (max-width: 768px) {
-    padding: var(--spacing-lg);
-  }
-
-  @media (max-width: 480px) {
-    padding: var(--spacing-md);
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 `;
 
 export const Header = styled.div`
+  background: var(--bg-portal, rgba(255, 255, 255, 0.03)) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-xl);
   flex-wrap: wrap;
-  gap: var(--spacing-md);
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
 `;
 
-export const Title = styled.h1`
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--heading-color);
+export const Title = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--heading-color, inherit);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   margin: 0;
+
+  svg {
+    color: var(--accent-color, #2563eb);
+    font-size: 1.4rem;
+  }
 `;
 
 export const AddButton = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.25rem;
-  background: var(--accent-color);
-  color: var(--button-text);
+  background-color: var(--accent-color, #2563eb);
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  border-radius: 10px;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s ease;
 
   &:hover {
+    opacity: 0.92;
     transform: translateY(-1px);
-    filter: brightness(1.05);
-    box-shadow: var(--shadow);
   }
 `;
 
 export const StatsContainer = styled.div`
-  display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 `;
 
 export const StatCard = styled.div`
-  padding: var(--spacing-md) var(--spacing-xl);
-  background: var(--bg-color);
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  min-width: 120px;
+  background: var(--bg-portal, rgba(255, 255, 255, 0.03)) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
 
-  .value {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--heading-color);
-    display: block;
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: rgba(37, 99, 235, 0.12);
+    color: var(--accent-color, #3b82f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
   }
 
-  .label {
-    font-size: 0.65rem;
-    color: var(--text-color);
-    opacity: 0.6;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  .stat-info {
+    display: flex;
+    flex-direction: column;
+
+    .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--heading-color, inherit);
+      line-height: 1.2;
+    }
+
+    .label {
+      font-size: 0.8rem;
+      color: var(--heading-color, inherit);
+      opacity: 0.7;
+      font-weight: 500;
+    }
   }
 `;
 
 export const FilterSection = styled.div`
+  background: var(--bg-portal, rgba(255, 255, 255, 0.03)) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg);
-  background: var(--bg-color);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
   align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
 `;
 
 export const FilterGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 0.5rem;
 `;
 
 export const FilterLabel = styled.label`
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-color);
-  opacity: 0.7;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--heading-color, inherit);
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  svg {
+    opacity: 0.6;
+  }
 `;
 
 export const FilterSelect = styled.select`
-  padding: 0.4rem 2rem 0.4rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-color);
-  color: var(--text-color);
-  font-size: 0.8rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 10px;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--heading-color, inherit);
+  outline: none;
   cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 1rem;
+  transition: all 0.2s ease;
+
+  option {
+    background: #1e293b;
+    color: #ffffff;
+  }
 
   &:focus {
-    outline: none;
-    border-color: var(--accent-color);
+    border-color: var(--accent-color, #2563eb);
   }
 `;
 
 export const ClearButton = styled.button`
-  padding: 0.4rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-color);
-  color: var(--text-color);
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: var(--transition);
+  transition: all 0.2s ease;
+  margin-left: auto;
 
   &:hover {
-    background: var(--bg-secondary);
+    background: rgba(239, 68, 68, 0.18) !important;
   }
 `;
 
-export const GridView = styled.div`
-  overflow-x: auto;
+export const WarningText = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
 `;
 
-export const WarningText = styled.p`
-  font-size: 0.75rem;
-  color: #f59e0b;
-  margin-bottom: var(--spacing-sm);
+export const GridView = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  background: var(--bg-portal, rgba(255, 255, 255, 0.03)) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
 `;
 
 export const ScheduleGrid = styled.div`
   display: grid;
-  grid-template-columns: 80px repeat(5, minmax(140px, 1fr));
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--bg-color);
-  min-width: 780px;
+  grid-template-columns: 80px repeat(5, minmax(180px, 1fr));
+  gap: 0.75rem;
 `;
 
 export const GridHeader = styled.div`
-  background: var(--bg-secondary);
-  padding: 0.75rem 0.5rem;
-  font-weight: 600;
-  text-align: center;
-  font-size: 0.75rem;
-  color: var(--heading-color);
-  border-left: 1px solid var(--border-color);
+  font-weight: 700;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-
-  &:first-child {
-    border-left: none;
-  }
+  letter-spacing: 0.5px;
+  color: var(--heading-color, inherit);
+  opacity: 0.8;
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
 `;
 
 export const TimeLabel = styled.div`
-  padding: 0.75rem 0.5rem;
-  font-size: 0.7rem;
-  color: var(--text-color);
-  opacity: 0.6;
-  font-weight: 500;
-  text-align: center;
-  border-top: 1px solid var(--border-color);
-  background: var(--bg-secondary);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding-top: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: monospace;
+  color: var(--heading-color, inherit);
+  opacity: 0.75;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
 `;
 
 export const Cell = styled.div`
-  border-top: 1px solid var(--border-color);
-  border-left: 1px solid var(--border-color);
-  min-height: 90px;
-  padding: 0.5rem;
+  min-height: 100px;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  padding: 0.35rem;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px dashed var(--border-color, rgba(255, 255, 255, 0.06));
+  border-radius: 10px;
+  position: relative;
 `;
 
-export const SlotCard = styled.div<{ $color: string }>`
-  background: var(--bg-color);
-  border-radius: 8px;
-  padding: 0.5rem 0.6rem;
-  font-size: 0.7rem;
+export const SlotCard = styled.div<{ $color?: string }>`
   position: relative;
-  border-left: 3px solid ${(props) => props.$color};
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition);
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 4px solid
+    ${(props) => props.$color || "var(--accent-color, #3b82f6)"};
+  border-radius: 10px;
+  padding: 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  transition: all 0.2s ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.08) !important;
   }
 
   .subject {
-    font-weight: 600;
-    color: var(--heading-color);
-    font-size: 0.75rem;
-    margin-bottom: 2px;
-    padding-right: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--heading-color, inherit);
   }
 
   .class {
-    color: var(--text-color);
-    font-size: 0.65rem;
-    opacity: 0.7;
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0.85;
+    color: var(--accent-color, #3b82f6);
   }
 
   .teacher {
-    color: var(--text-color);
-    font-size: 0.6rem;
-    opacity: 0.6;
+    font-size: 0.75rem;
+    opacity: 0.75;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
   }
 
   .room {
-    color: var(--text-color);
-    font-size: 0.55rem;
-    opacity: 0.5;
+    font-size: 0.7rem;
+    opacity: 0.6;
   }
 `;
 
 export const DeleteButton = styled.button`
   position: absolute;
-  top: 2px;
-  right: 4px;
-  background: none;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
   border: none;
+  background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
   cursor: pointer;
-  font-size: 0.6rem;
-  padding: 2px;
-  border-radius: 4px;
-  transition: var(--transition);
+  transition: all 0.2s ease;
+  opacity: 0;
 
-  &:hover {
-    background: rgba(239, 68, 68, 0.1);
+  ${SlotCard}:hover & {
+    opacity: 1;
   }
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  &:hover {
+    background: #ef4444;
+    color: #ffffff;
   }
 `;
 
 export const AddSlotButton = styled.button`
   width: 100%;
-  min-height: 78px;
-  border: 1px dashed var(--border-color);
-  border-radius: 6px;
-  background: none;
-  color: var(--border-color);
+  height: 100%;
+  min-height: 80px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--heading-color, inherit);
+  opacity: 0.3;
+  font-size: 1.25rem;
   cursor: pointer;
-  font-size: 1.2rem;
-  transition: var(--transition);
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
+    opacity: 0.9;
+    border-color: var(--accent-color, #3b82f6);
+    color: var(--accent-color, #3b82f6);
+    background: rgba(37, 99, 235, 0.05);
   }
 `;
 
 export const WeekView = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.25rem;
 `;
 
 export const DayColumn = styled.div`
-  background: var(--bg-color);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-  min-height: 400px;
+  background: var(--bg-portal, rgba(255, 255, 255, 0.03)) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06);
 `;
 
-export const DayTitle = styled.div`
-  padding: 0.75rem;
+export const DayTitle = styled.h3`
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  color: var(--heading-color, inherit);
+  opacity: 0.9;
   text-align: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-  background: var(--accent-color);
-  color: var(--button-text);
 `;
 
 export const DayContent = styled.div`
-  padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+
+  .empty-day {
+    text-align: center;
+    padding: 2rem 0;
+    font-size: 0.85rem;
+    opacity: 0.4;
+  }
 `;
 
 export const WeekSlotCard = styled.div<{
-  $bg: string;
-  $border: string;
-  $text: string;
+  $bg?: string;
+  $border?: string;
+  $text?: string;
 }>`
-  background: ${(props) => props.$bg};
-  border: 1px solid ${(props) => props.$border};
-  border-radius: 8px;
-  padding: 0.6rem 0.75rem;
   position: relative;
-  transition: var(--transition);
+  background: rgba(255, 255, 255, 0.04) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 4px solid
+    ${(props) => props.$text || "var(--accent-color, #3b82f6)"};
+  border-radius: 12px;
+  padding: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  transition: all 0.2s ease;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.07) !important;
   }
 
   .time {
-    font-size: 0.6rem;
-    color: var(--text-color);
-    opacity: 0.6;
-    font-weight: 500;
-    margin-bottom: 2px;
+    font-family: monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0.75;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
   }
 
   .subject {
-    font-weight: 600;
-    color: ${(props) => props.$text};
-    font-size: 0.8rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--heading-color, inherit);
   }
 
   .class {
-    font-size: 0.65rem;
-    color: var(--text-color);
-    opacity: 0.7;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-color, #3b82f6);
   }
 
   .teacher {
-    font-size: 0.6rem;
-    color: var(--text-color);
-    opacity: 0.6;
+    font-size: 0.8rem;
+    opacity: 0.75;
   }
 
   .room {
-    font-size: 0.55rem;
-    color: var(--text-color);
-    opacity: 0.5;
+    font-size: 0.75rem;
+    opacity: 0.6;
   }
 `;
 
 export const WeekDeleteButton = styled.button`
   position: absolute;
-  top: 4px;
-  right: 4px;
-  background: none;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
   border: none;
+  background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
   cursor: pointer;
-  font-size: 0.6rem;
-  padding: 2px 4px;
-  border-radius: 4px;
-  transition: var(--transition);
+  transition: all 0.2s ease;
+  opacity: 0;
+
+  ${WeekSlotCard}:hover & {
+    opacity: 1;
+  }
 
   &:hover {
-    background: rgba(239, 68, 68, 0.1);
+    background: #ef4444;
+    color: #ffffff;
   }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-export const EmptyDay = styled.div`
-  padding: 1rem;
-  text-align: center;
-  color: var(--text-color);
-  opacity: 0.4;
-  border: 1px dashed var(--border-color);
-  border-radius: 8px;
-  font-size: 0.75rem;
 `;
 
 export const EmptyState = styled.div`
-  text-align: center;
-  padding: var(--spacing-2xl);
-  background: var(--bg-color);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
+  background: var(--bg-portal, rgba(255, 255, 255, 0.03)) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 16px;
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+
+  svg {
+    font-size: 2.5rem;
+    opacity: 0.4;
+    color: var(--heading-color, inherit);
+  }
 
   p {
-    font-size: 0.9rem;
-    color: var(--text-color);
+    font-size: 0.95rem;
     opacity: 0.6;
-    margin-bottom: var(--spacing-md);
+    margin: 0;
   }
 
   button {
-    padding: 0.6rem 1.25rem;
-    background: var(--accent-color);
-    color: var(--button-text);
+    background: var(--accent-color, #2563eb);
+    color: #ffffff;
     border: none;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 500;
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.875rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.2s ease;
 
     &:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
+      opacity: 0.9;
     }
-  }
-`;
-
-export const LoadingState = styled.div`
-  text-align: center;
-  padding: var(--spacing-2xl);
-  background: var(--bg-color);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-
-  .loading-dots {
-    display: inline-flex;
-    gap: 0.5rem;
-    margin-bottom: var(--spacing-md);
-
-    span {
-      width: 10px;
-      height: 10px;
-      background: var(--accent-color);
-      border-radius: 50%;
-      animation: pulse 1.4s ease-in-out infinite;
-
-      &:nth-child(1) {
-        animation-delay: 0s;
-      }
-      &:nth-child(2) {
-        animation-delay: 0.2s;
-      }
-      &:nth-child(3) {
-        animation-delay: 0.4s;
-      }
-    }
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      transform: scale(0.8);
-      opacity: 0.5;
-    }
-    50% {
-      transform: scale(1.2);
-      opacity: 1;
-    }
-  }
-
-  p {
-    font-size: 0.85rem;
-    color: var(--text-color);
-    opacity: 0.6;
-    margin: 0;
   }
 `;
