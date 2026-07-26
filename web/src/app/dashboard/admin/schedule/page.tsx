@@ -4,6 +4,20 @@ import React, { useEffect, useState } from "react";
 import { api } from "@/services/api";
 import { useRouter } from "next/navigation";
 import * as S from "@/wrappers/adminSchedule";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
+import { showSuccess, showError } from "@/components/ui/toast";
+import {
+  FaCalendarAlt,
+  FaPlus,
+  FaClock,
+  FaGraduationCap,
+  FaUserTie,
+  FaFilter,
+  FaExclamationTriangle,
+  FaCalendarWeek,
+  FaTimes,
+  FaDoorOpen,
+} from "react-icons/fa";
 
 interface Schedule {
   id: number;
@@ -41,14 +55,14 @@ const formatDay = (day: string) => day.charAt(0) + day.slice(1).toLowerCase();
 const formatTime = (time: string) => time.substring(0, 5);
 
 const SUBJECT_COLORS = [
-  { bg: "#eff6ff", border: "#bfdbfe", text: "#1d4ed8" },
-  { bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d" },
-  { bg: "#fdf4ff", border: "#e9d5ff", text: "#7e22ce" },
-  { bg: "#fff7ed", border: "#fed7aa", text: "#c2410c" },
-  { bg: "#fef2f2", border: "#fecaca", text: "#b91c1c" },
-  { bg: "#f0fdfa", border: "#99f6e4", text: "#0f766e" },
-  { bg: "#fefce8", border: "#fde68a", text: "#b45309" },
-  { bg: "#f8fafc", border: "#cbd5e1", text: "#334155" },
+  "#3b82f6",
+  "#10b981",
+  "#a855f7",
+  "#f97316",
+  "#ef4444",
+  "#14b8a6",
+  "#f59e0b",
+  "#64748b",
 ];
 
 function getSubjectColor(subjectId: number) {
@@ -118,6 +132,8 @@ export default function ScheduleDisplayPage() {
         setTeachers(teachersRes.value.data);
       if (classesRes.status === "fulfilled") setClasses(classesRes.value.data);
       if (configRes.status === "fulfilled") setConfig(configRes.value.data);
+    } catch (err) {
+      showError("Failed to fetch schedule data");
     } finally {
       setLoading(false);
     }
@@ -143,15 +159,17 @@ export default function ScheduleDisplayPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Delete this schedule slot?")) return;
+    if (!confirm("Are you sure you want to delete this schedule slot?")) return;
     setDeletingId(id);
     try {
       await api.delete(`/schedule/${id}`);
       setSchedules((prev) => prev.filter((s) => s.id !== id));
+      showSuccess("Schedule slot deleted successfully");
     } catch {
-      alert("Failed to delete schedule");
+      showError("Failed to delete schedule slot");
+    } finally {
+      setDeletingId(null);
     }
-    setDeletingId(null);
   };
 
   const clearFilters = () => {
@@ -177,58 +195,65 @@ export default function ScheduleDisplayPage() {
     {} as Record<string, Schedule[]>,
   );
 
-  if (loading) {
-    return (
-      <S.Container>
-        <S.LoadingState>
-          <div className="loading-dots">
-            <span />
-            <span />
-            <span />
-          </div>
-          <p>Loading schedules...</p>
-        </S.LoadingState>
-      </S.Container>
-    );
-  }
+  if (loading) return <LoadingOverlay />;
 
   return (
     <S.Container>
       <S.Header>
-        <S.Title>Schedule Management</S.Title>
+        <S.Title>
+          <FaCalendarAlt /> Schedule Management
+        </S.Title>
         <S.AddButton
           onClick={() => router.push("/dashboard/admin/schedule/create")}
         >
-          + Create Schedule
+          <FaPlus /> Create Schedule
         </S.AddButton>
       </S.Header>
 
       <S.StatsContainer>
         <S.StatCard>
-          <span className="value">{schedules.length}</span>
-          <span className="label">Total slots</span>
+          <div className="stat-icon">
+            <FaClock />
+          </div>
+          <div className="stat-info">
+            <span className="value">{schedules.length}</span>
+            <span className="label">Total Slots</span>
+          </div>
         </S.StatCard>
+
         <S.StatCard>
-          <span className="value">
-            {new Set(schedules.map((s) => s.schoolClass.id)).size}
-          </span>
-          <span className="label">Classes covered</span>
+          <div className="stat-icon">
+            <FaGraduationCap />
+          </div>
+          <div className="stat-info">
+            <span className="value">
+              {new Set(schedules.map((s) => s.schoolClass.id)).size}
+            </span>
+            <span className="label">Classes Covered</span>
+          </div>
         </S.StatCard>
+
         <S.StatCard>
-          <span className="value">
-            {new Set(schedules.map((s) => s.teacher.id)).size}
-          </span>
-          <span className="label">Teachers assigned</span>
+          <div className="stat-icon">
+            <FaUserTie />
+          </div>
+          <div className="stat-info">
+            <span className="value">
+              {new Set(schedules.map((s) => s.teacher.id)).size}
+            </span>
+            <span className="label">Teachers Assigned</span>
+          </div>
         </S.StatCard>
       </S.StatsContainer>
 
       <S.FilterSection>
         <S.FilterGroup>
-          <S.FilterLabel>View:</S.FilterLabel>
+          <S.FilterLabel>
+            <FaFilter /> View Mode:
+          </S.FilterLabel>
           <S.FilterSelect
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as "grid" | "week")}
-            style={{ width: "130px" }}
           >
             <option value="grid">Grid View</option>
             <option value="week">Week View</option>
@@ -281,13 +306,16 @@ export default function ScheduleDisplayPage() {
         </S.FilterGroup>
 
         {(selectedDay || selectedClass || selectedTeacher) && (
-          <S.ClearButton onClick={clearFilters}>Clear filters ✕</S.ClearButton>
+          <S.ClearButton onClick={clearFilters}>
+            <FaTimes /> Clear Filters
+          </S.ClearButton>
         )}
       </S.FilterSection>
 
       {filteredSchedules.length === 0 ? (
         <S.EmptyState>
-          <p>No schedules found</p>
+          <FaCalendarWeek />
+          <p>No schedules found matching your current filter.</p>
           <button
             onClick={() =>
               router.push(
@@ -295,15 +323,16 @@ export default function ScheduleDisplayPage() {
               )
             }
           >
-            Create your first schedule
+            Create Your First Schedule
           </button>
         </S.EmptyState>
       ) : viewMode === "grid" ? (
         <S.GridView>
           {!config && (
             <S.WarningText>
-              ⚠️ School config not found — time slots may not match. Set it up
-              in School Config.
+              <FaExclamationTriangle />
+              School config not found — time slots may not match. Please set it
+              up in School Config.
             </S.WarningText>
           )}
           <S.ScheduleGrid>
@@ -323,16 +352,19 @@ export default function ScheduleDisplayPage() {
                         slots.map((slot) => {
                           const color = getSubjectColor(slot.subject.id);
                           return (
-                            <S.SlotCard key={slot.id} $color={color.text}>
+                            <S.SlotCard key={slot.id} $color={color}>
                               <div className="subject">{slot.subject.name}</div>
                               <div className="class">
                                 Gr {slot.schoolClass.grade}-
                                 {slot.schoolClass.section}
                               </div>
                               <div className="teacher">
+                                <FaUserTie />{" "}
                                 {slot.teacher.fullName.split(" ").slice(-1)[0]}
                               </div>
-                              <div className="room">{slot.room.name}</div>
+                              <div className="room">
+                                <FaDoorOpen /> {slot.room.name}
+                              </div>
                               <S.DeleteButton
                                 onClick={() => handleDelete(slot.id)}
                                 disabled={deletingId === slot.id}
@@ -370,13 +402,9 @@ export default function ScheduleDisplayPage() {
                   schedulesByDay[day].map((schedule) => {
                     const color = getSubjectColor(schedule.subject.id);
                     return (
-                      <S.WeekSlotCard
-                        key={schedule.id}
-                        $bg={color.bg}
-                        $border={color.border}
-                        $text={color.text}
-                      >
+                      <S.WeekSlotCard key={schedule.id} $text={color}>
                         <div className="time">
+                          <FaClock />
                           {formatTime(schedule.startTime)} –{" "}
                           {formatTime(schedule.endTime)}
                         </div>
@@ -386,9 +414,11 @@ export default function ScheduleDisplayPage() {
                           {schedule.schoolClass.section}
                         </div>
                         <div className="teacher">
-                          {schedule.teacher.fullName}
+                          <FaUserTie /> {schedule.teacher.fullName}
                         </div>
-                        <div className="room">{schedule.room.name}</div>
+                        <div className="room">
+                          <FaDoorOpen /> {schedule.room.name}
+                        </div>
                         <S.WeekDeleteButton
                           onClick={() => handleDelete(schedule.id)}
                           disabled={deletingId === schedule.id}
@@ -399,7 +429,7 @@ export default function ScheduleDisplayPage() {
                     );
                   })
                 ) : (
-                  <S.EmptyDay>No classes</S.EmptyDay>
+                  <div className="empty-day">No classes scheduled</div>
                 )}
               </S.DayContent>
             </S.DayColumn>

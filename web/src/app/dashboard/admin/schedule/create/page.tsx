@@ -1,24 +1,24 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { api } from "@/services/api";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import * as S from "@/wrappers/adminCreateSchedule";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
+import { showSuccess, showError } from "@/components/ui/toast";
 import {
-  Container,
-  Title,
-  Form,
-  FormGroup,
-  Label,
-  Select,
-  Input,
-  TimeSlotGroup,
-  CheckRoomsButton,
-  RoomsGrid,
-  RoomButton,
-  Message,
-  Toast,
-  Button,
-} from "@/wrappers/adminCreateSchedule";
+  FaPlusCircle,
+  FaArrowLeft,
+  FaGraduationCap,
+  FaBook,
+  FaUserTie,
+  FaCalendarDay,
+  FaClock,
+  FaSearchLocation,
+  FaDoorOpen,
+  FaExclamationCircle,
+  FaInfoCircle,
+} from "react-icons/fa";
 
 interface TeacherSubjectGrade {
   id: number;
@@ -56,14 +56,16 @@ interface SchoolConfig {
 
 const Days = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
 
-/** Add `minutes` to a "HH:MM" string, returns "HH:MM" */
 const addMinutes = (time: string, minutes: number): string => {
   const [h, m] = time.split(":").map(Number);
   const total = h * 60 + m + minutes;
-  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(
+    total % 60,
+  ).padStart(2, "0")}`;
 };
 
-const CreateSchedulePage = () => {
+function CreateScheduleForm() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const day = searchParams.get("day");
   const time = searchParams.get("time");
@@ -90,17 +92,14 @@ const CreateSchedulePage = () => {
   const [timeError, setTimeError] = useState<string>("");
   const [formData, setFormData] = useState(initialForm);
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [initialDataLoading, setInitialDataLoading] = useState(true);
   const [periodDuration, setPeriodDuration] = useState<number | null>(null);
 
-  // ── Fetch school config for period duration ───────────────────────────────
   useEffect(() => {
     api
       .get<SchoolConfig>("/school-config")
       .then((res) => setPeriodDuration(res.data.periodDurationMinutes))
-      .catch(() => {
-        /* non-critical — fall back to manual end time */
-      });
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -127,30 +126,34 @@ const CreateSchedulePage = () => {
   }, []);
 
   useEffect(() => {
-    if (classId && classes.length > 0 && subjects.length > 0) {
-      const selectedClass = classes.find((c) => c.id === Number(classId));
+    if (formData.classId && classes.length > 0 && subjects.length > 0) {
+      const selectedClass = classes.find(
+        (c) => c.id === Number(formData.classId),
+      );
       if (selectedClass) {
         setFilteredSubjects(
           subjects.filter((s) => s.grades?.includes(selectedClass.grade)),
         );
       }
     }
-  }, [classId, classes, subjects]);
+  }, [formData.classId, classes, subjects]);
 
   const fetchData = async () => {
-    const [teachersRes, subjectsRes, classesRes] = await Promise.all([
-      api.get("/teachers"),
-      api.get("/subject"),
-      api.get("/school-class"),
-    ]);
-    setTeachers(teachersRes.data);
-    setSubjects(subjectsRes.data);
-    setClasses(classesRes.data);
-  };
-
-  const showToast = (msg: string, ok: boolean) => {
-    setToast({ msg, ok });
-    setTimeout(() => setToast(null), 3500);
+    setInitialDataLoading(true);
+    try {
+      const [teachersRes, subjectsRes, classesRes] = await Promise.all([
+        api.get("/teachers"),
+        api.get("/subject"),
+        api.get("/school-class"),
+      ]);
+      setTeachers(teachersRes.data);
+      setSubjects(subjectsRes.data);
+      setClasses(classesRes.data);
+    } catch {
+      showError("Failed to fetch initial form data");
+    } finally {
+      setInitialDataLoading(false);
+    }
   };
 
   const validateTimeSlot = (start: string, end: string) => {
@@ -192,7 +195,6 @@ const CreateSchedulePage = () => {
     setFormData((prev) => {
       const newData = { ...prev, [name]: value };
 
-      // Auto-fill end time when start time changes and we have period duration
       if (name === "startTime") {
         newData.endTime =
           value && periodDuration ? addMinutes(value, periodDuration) : "";
@@ -203,7 +205,6 @@ const CreateSchedulePage = () => {
         validateTimeSlot(prev.startTime, value);
       }
 
-      // Reset rooms if time slot or day changes
       if (name === "dayOfWeek" || name === "startTime" || name === "endTime") {
         newData.roomId = "";
         setAvailableRooms([]);
@@ -216,7 +217,6 @@ const CreateSchedulePage = () => {
 
   const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const subjectId = Number(e.target.value);
-
     const selectedClass = classes.find(
       (c) => c.id === Number(formData.classId),
     );
@@ -245,11 +245,11 @@ const CreateSchedulePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.roomId) {
-      showToast("Please select a room", false);
+      showError("Please select an available room");
       return;
     }
     if (!formData.subjectId) {
-      showToast("Please select a subject", false);
+      showError("Please select a subject");
       return;
     }
     setLoading(true);
@@ -263,25 +263,21 @@ const CreateSchedulePage = () => {
         startTime: formData.startTime,
         endTime: formData.endTime,
       });
-      showToast("Schedule created successfully!", true);
-      setFormData(initialForm);
-      setFilteredSubjects([]);
-      setFilteredTeachers([]);
-      setAvailableRooms([]);
-      setRoomsFetched(false);
+      showSuccess("Schedule slot created successfully!");
+      router.push("/dashboard/admin/schedule");
     } catch (error: any) {
-      showToast(
-        error.response?.data?.message || "Error creating schedule",
-        false,
+      showError(
+        error.response?.data?.message || "Error creating schedule slot",
       );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const checkRooms = async () => {
     const { dayOfWeek, startTime, endTime } = formData;
     if (!dayOfWeek || !startTime || !endTime) {
-      showToast("Please select day and time first", false);
+      showError("Please select day and time slot first");
       return;
     }
     if (!validateTimeSlot(startTime, endTime)) return;
@@ -295,195 +291,233 @@ const CreateSchedulePage = () => {
       setAvailableRooms(res.data);
       setRoomsFetched(true);
     } catch {
-      showToast("Could not fetch available rooms", false);
+      showError("Could not fetch available rooms");
+    } finally {
+      setRoomsLoading(false);
     }
-    setRoomsLoading(false);
   };
 
   const selectedClass = classes.find((c) => c.id === Number(formData.classId));
   const isTimeSlotComplete =
     formData.dayOfWeek && formData.startTime && formData.endTime && !timeError;
 
+  if (initialDataLoading) return <LoadingOverlay />;
+
   return (
-    <Container>
-      {toast && <Toast $ok={toast.ok}>{toast.msg}</Toast>}
-      <Title>Create Schedule</Title>
+    <S.Container>
+      <S.Header>
+        <S.Title>
+          <FaPlusCircle /> Create Schedule Slot
+        </S.Title>
+        <S.BackButton onClick={() => router.back()}>
+          <FaArrowLeft /> Back to Schedule
+        </S.BackButton>
+      </S.Header>
 
-      <Form onSubmit={handleSubmit}>
-        {/* CLASS */}
-        <FormGroup>
-          <Label>Class</Label>
-          <Select
-            name="classId"
-            value={formData.classId}
-            onChange={handleClassChange}
-            required
-          >
-            <option value="">Select Class</option>
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                Grade {c.grade}-{c.section} (Strength: {c.currentStrength})
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
-
-        {/* SUBJECT */}
-        <FormGroup>
-          <Label>Subject</Label>
-          <Select
-            name="subjectId"
-            value={formData.subjectId}
-            onChange={handleSubjectChange}
-            required
-            disabled={!formData.classId}
-          >
-            <option value="">
-              {formData.classId ? "Select Subject" : "Select a class first"}
-            </option>
-            {filteredSubjects.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </Select>
-          {formData.classId && filteredSubjects.length === 0 && (
-            <Message type="error">
-              No subjects assigned to Grade {selectedClass?.grade}. Add them in
-              Curriculum settings.
-            </Message>
-          )}
-        </FormGroup>
-
-        {/* TEACHER */}
-        <FormGroup>
-          <Label>Teacher</Label>
-          <Select
-            name="teacherId"
-            value={formData.teacherId}
-            onChange={handleChange}
-            required
-            disabled={!formData.subjectId}
-          >
-            <option value="">
-              {formData.subjectId ? "Select Teacher" : "Select a subject first"}
-            </option>
-            {filteredTeachers.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.fullName}
-              </option>
-            ))}
-          </Select>
-          {formData.subjectId && filteredTeachers.length === 0 && (
-            <Message type="error">
-              No teachers assigned to this subject. Assign one in teacher
-              settings.
-            </Message>
-          )}
-        </FormGroup>
-
-        {/* DAY */}
-        <FormGroup>
-          <Label>Day</Label>
-          <Select
-            name="dayOfWeek"
-            value={formData.dayOfWeek}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Day</option>
-            {Days.map((d) => (
-              <option key={d} value={d}>
-                {d[0] + d.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </Select>
-        </FormGroup>
-
-        {/* TIME SLOT */}
-        <FormGroup>
-          <Label>
-            Time Slot
-            {periodDuration && (
-              <span
-                style={{
-                  marginLeft: "8px",
-                  fontSize: "12px",
-                  fontWeight: 400,
-                  color: "#6b7280",
-                }}
+      <S.FormCard>
+        <S.Form onSubmit={handleSubmit}>
+          <S.FormGrid>
+            {/* CLASS */}
+            <S.FormGroup>
+              <S.Label>
+                <FaGraduationCap /> Class
+              </S.Label>
+              <S.Select
+                name="classId"
+                value={formData.classId}
+                onChange={handleClassChange}
+                required
               >
-                (end time auto-set to {periodDuration} min period)
-              </span>
-            )}
-          </Label>
-          <TimeSlotGroup>
-            <Input
-              type="time"
-              name="startTime"
-              value={formData.startTime}
-              onChange={handleChange}
-              required
-            />
-            <Input
-              type="time"
-              name="endTime"
-              value={formData.endTime}
-              onChange={handleChange}
-              required
-            />
-          </TimeSlotGroup>
-          {timeError && <Message type="error">{timeError}</Message>}
-        </FormGroup>
+                <option value="">Select Class</option>
+                {classes.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    Grade {c.grade}-{c.section} (Strength: {c.currentStrength})
+                  </option>
+                ))}
+              </S.Select>
+            </S.FormGroup>
 
-        {/* CHECK ROOMS */}
-        <CheckRoomsButton
-          type="button"
-          onClick={checkRooms}
-          disabled={!isTimeSlotComplete || roomsLoading}
-        >
-          {roomsLoading ? "Checking..." : "🔍 Check Available Rooms"}
-        </CheckRoomsButton>
+            {/* SUBJECT */}
+            <S.FormGroup>
+              <S.Label>
+                <FaBook /> Subject
+              </S.Label>
+              <S.Select
+                name="subjectId"
+                value={formData.subjectId}
+                onChange={handleSubjectChange}
+                required
+                disabled={!formData.classId}
+              >
+                <option value="">
+                  {formData.classId ? "Select Subject" : "Select a class first"}
+                </option>
+                {filteredSubjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </S.Select>
+              {formData.classId && filteredSubjects.length === 0 && (
+                <S.Message type="error">
+                  <FaExclamationCircle /> No subjects assigned to Grade{" "}
+                  {selectedClass?.grade}.
+                </S.Message>
+              )}
+            </S.FormGroup>
 
-        {roomsFetched && availableRooms.length > 0 && (
-          <FormGroup>
-            <Label>Available Rooms</Label>
-            <RoomsGrid>
-              {availableRooms.map((room) => (
-                <RoomButton
-                  key={room.id}
-                  type="button"
-                  selected={formData.roomId === String(room.id)}
-                  onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      roomId: String(room.id),
-                    }))
-                  }
+            {/* TEACHER */}
+            <S.FormGroup>
+              <S.Label>
+                <FaUserTie /> Teacher
+              </S.Label>
+              <S.Select
+                name="teacherId"
+                value={formData.teacherId}
+                onChange={handleChange}
+                required
+                disabled={!formData.subjectId}
+              >
+                <option value="">
+                  {formData.subjectId
+                    ? "Select Teacher"
+                    : "Select a subject first"}
+                </option>
+                {filteredTeachers.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.fullName}
+                  </option>
+                ))}
+              </S.Select>
+              {formData.subjectId && filteredTeachers.length === 0 && (
+                <S.Message type="error">
+                  <FaExclamationCircle /> No teachers assigned to this subject.
+                </S.Message>
+              )}
+            </S.FormGroup>
+
+            {/* DAY */}
+            <S.FormGroup>
+              <S.Label>
+                <FaCalendarDay /> Day
+              </S.Label>
+              <S.Select
+                name="dayOfWeek"
+                value={formData.dayOfWeek}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Day</option>
+                {Days.map((d) => (
+                  <option key={d} value={d}>
+                    {d[0] + d.slice(1).toLowerCase()}
+                  </option>
+                ))}
+              </S.Select>
+            </S.FormGroup>
+          </S.FormGrid>
+
+          {/* TIME SLOT */}
+          <S.FormGroup>
+            <S.Label>
+              <FaClock /> Time Slot
+              {periodDuration && (
+                <span
+                  style={{ opacity: 0.6, fontWeight: 400, fontSize: "0.75rem" }}
                 >
-                  {room.name}
-                </RoomButton>
-              ))}
-            </RoomsGrid>
-          </FormGroup>
-        )}
+                  (end time auto-calculated by {periodDuration} min period
+                  config)
+                </span>
+              )}
+            </S.Label>
+            <S.TimeSlotGroup>
+              <S.Input
+                type="time"
+                name="startTime"
+                value={formData.startTime}
+                onChange={handleChange}
+                required
+              />
+              <S.Input
+                type="time"
+                name="endTime"
+                value={formData.endTime}
+                onChange={handleChange}
+                required
+              />
+            </S.TimeSlotGroup>
+            {timeError && (
+              <S.Message type="error">
+                <FaExclamationCircle /> {timeError}
+              </S.Message>
+            )}
+          </S.FormGroup>
 
-        {roomsFetched && availableRooms.length === 0 && isTimeSlotComplete && (
-          <Message type="error">No rooms available for this time slot</Message>
-        )}
+          {/* CHECK ROOMS */}
+          <S.CheckRoomsButton
+            type="button"
+            onClick={checkRooms}
+            disabled={!isTimeSlotComplete || roomsLoading}
+          >
+            <FaSearchLocation />{" "}
+            {roomsLoading
+              ? "Checking Availability..."
+              : "Check Available Rooms"}
+          </S.CheckRoomsButton>
 
-        {!roomsFetched && !roomsLoading && isTimeSlotComplete && (
-          <Message type="info">
-            Click "Check Available Rooms" to see options
-          </Message>
-        )}
+          {roomsFetched && availableRooms.length > 0 && (
+            <S.FormGroup>
+              <S.Label>
+                <FaDoorOpen /> Select Available Room
+              </S.Label>
+              <S.RoomsGrid>
+                {availableRooms.map((room) => (
+                  <S.RoomButton
+                    key={room.id}
+                    type="button"
+                    selected={formData.roomId === String(room.id)}
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        roomId: String(room.id),
+                      }))
+                    }
+                  >
+                    <FaDoorOpen /> {room.name}
+                  </S.RoomButton>
+                ))}
+              </S.RoomsGrid>
+            </S.FormGroup>
+          )}
 
-        <Button type="submit" disabled={loading || !formData.roomId}>
-          {loading ? "Creating..." : "Create Schedule"}
-        </Button>
-      </Form>
-    </Container>
+          {roomsFetched &&
+            availableRooms.length === 0 &&
+            isTimeSlotComplete && (
+              <S.Message type="error">
+                <FaExclamationCircle /> No rooms available for this time slot.
+              </S.Message>
+            )}
+
+          {!roomsFetched && !roomsLoading && isTimeSlotComplete && (
+            <S.Message type="info">
+              <FaInfoCircle /> Click "Check Available Rooms" to view room
+              options.
+            </S.Message>
+          )}
+
+          <S.SubmitButton type="submit" disabled={loading || !formData.roomId}>
+            {loading ? "Creating Schedule..." : "Save Schedule Slot"}
+          </S.SubmitButton>
+        </S.Form>
+      </S.FormCard>
+    </S.Container>
   );
-};
+}
 
-export default CreateSchedulePage;
+export default function CreateSchedulePage() {
+  return (
+    <Suspense fallback={<LoadingOverlay />}>
+      <CreateScheduleForm />
+    </Suspense>
+  );
+}
