@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { api } from "@/services/api";
 import * as S from "@/wrappers/parentPortalStyles";
+import { useRouter } from "next/navigation";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface ScheduleItem {
@@ -57,13 +59,13 @@ type Tab = (typeof TABS)[number];
 
 // ── Helper functions ──────────────────────────────────────────────────────────
 const getPercentColor = (pct: number | null): string => {
-  if (pct == null) return "#64748b";
+  if (pct == null) return "var(--text-color)";
   if (pct >= 85) return "#22c55e";
   if (pct >= 70) return "#f59e0b";
   return "#ef4444";
 };
 
-// ── Main page ─────────────────────────────────────────────────────────────────
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function ParentPortalPage() {
   const [data, setData] = useState<PortalData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,9 +73,8 @@ export default function ParentPortalPage() {
   const [activeChild, setActiveChild] = useState(0);
   const [activeTab, setActiveTab] = useState<Tab>("Schedule");
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [changingPassword, setChangingPassword] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     api
@@ -97,75 +98,88 @@ export default function ParentPortalPage() {
     );
   }
 
-  const handleChangePassword = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      const res = await api.post(
-        `/parent/change-password`,
-        {
-          password: newPassword, // 👈 send password in body
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      console.log("Password changed:", res.data);
-    } catch (err: any) {
-      console.error(err.response?.data || err.message);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    router.push("/login");
   };
 
   const child = data.children[activeChild];
 
+  const allChildrenNames = data.children
+    .map((c) => `${c.firstName} ${c.lastName}`)
+    .join(", ");
+
   return (
     <S.Container>
-      {data.mustChangePassword && (
-        <div
-          style={{
-            background: "#fef3c7",
-            border: "1px solid #f59e0b",
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "16px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span style={{ color: "#92400e", fontWeight: 500 }}>
-            ⚠️ Please change your password for security
-          </span>
+      {/* Top Banner Header using App Logo */}
+      <S.BannerHeader>
+        <S.BannerHeaderContent>
+          <S.LogoWrapper>
+            <Image
+              src="/images/logo.png"
+              alt="School Logo"
+              width={50}
+              height={50}
+              priority
+            />
+          </S.LogoWrapper>
+          <S.BannerTitle>PARENT PORTAL</S.BannerTitle>
 
-          <button
-            onClick={() => setShowPasswordModal(true)}
-            style={{
-              padding: "6px 12px",
-              background: "#2563eb",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-            }}
-          >
-            Change Password
-          </button>
-        </div>
-      )}
-      <S.Header>
-        <S.HeaderContent>
-          <S.HeaderLabel>Parent Portal</S.HeaderLabel>
-          <S.HeaderTitle>
-            {data.parent.fatherName} / {data.parent.motherName}
-          </S.HeaderTitle>
-        </S.HeaderContent>
-      </S.Header>
+          <S.LogoutButton onClick={handleLogout}>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span>Logout</span>
+          </S.LogoutButton>
+        </S.BannerHeaderContent>
+      </S.BannerHeader>
 
       <S.MainContent>
-        {/* Child switcher */}
+        {/* Warning Banner */}
+        {data.mustChangePassword && (
+          <S.WarningBanner>
+            <S.WarningMessage>
+              <S.WarningIcon>⚠️</S.WarningIcon>
+              <span>Please change your password for security.</span>
+            </S.WarningMessage>
+            <S.BannerButton onClick={() => setShowPasswordModal(true)}>
+              Change Password
+            </S.BannerButton>
+          </S.WarningBanner>
+        )}
+
+        {/* Parent Summary Card */}
+        <S.ParentSummaryCard>
+          <S.ParentAvatar>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+          </S.ParentAvatar>
+          <S.ParentDetails>
+            <h2>
+              {data.parent.fatherName} & {data.parent.motherName}
+            </h2>
+            <p>{allChildrenNames}</p>
+          </S.ParentDetails>
+          <S.IllustrationWrapper>
+            <img
+              src="/images/children-illustration.png"
+              alt="Children Illustration"
+            />
+          </S.IllustrationWrapper>
+        </S.ParentSummaryCard>
+
+        {/* Child Switcher */}
         {data.children.length > 1 && (
           <S.ChildSwitcher>
             {data.children.map((c, i) => (
@@ -183,7 +197,7 @@ export default function ParentPortalPage() {
           </S.ChildSwitcher>
         )}
 
-        {/* Child header */}
+        {/* Child Header Card */}
         <S.ChildHeader>
           <S.ChildAvatar>
             {child.firstName[0]}
@@ -227,7 +241,7 @@ export default function ParentPortalPage() {
           </S.StatsContainer>
         </S.ChildHeader>
 
-        {/* Tabs */}
+        {/* Navigation Tabs */}
         <S.TabsContainer>
           {TABS.map((tab) => (
             <S.TabButton
@@ -240,7 +254,7 @@ export default function ParentPortalPage() {
           ))}
         </S.TabsContainer>
 
-        {/* Tab panels */}
+        {/* Active Tab View */}
         <S.TabPanel>
           {activeTab === "Schedule" && (
             <ScheduleTab schedule={child.schedule} />
@@ -253,77 +267,95 @@ export default function ParentPortalPage() {
           )}
         </S.TabPanel>
       </S.MainContent>
+
+      {/* Change Password Modal */}
       {showPasswordModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              width: "400px",
-              background: "white",
-              padding: "20px",
-              borderRadius: "10px",
-            }}
-          >
-            <h3>Change Password</h3>
-
-            <input
-              type="password"
-              placeholder="New Password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              style={{ width: "100%", marginBottom: "10px" }}
-            />
-
-            <input
-              type="password"
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              style={{ width: "100%", marginBottom: "10px" }}
-            />
-
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button
-                onClick={handleChangePassword}
-                disabled={changingPassword}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  background: "#2563eb",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                }}
-              >
-                {changingPassword ? "Updating..." : "Update"}
-              </button>
-
-              <button
-                onClick={() => setShowPasswordModal(false)}
-                style={{
-                  flex: 1,
-                  padding: "10px",
-                  background: "#e5e7eb",
-                  border: "none",
-                  borderRadius: "6px",
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <PasswordModal onClose={() => setShowPasswordModal(false)} />
       )}
     </S.Container>
+  );
+}
+
+// ── Password Modal ────────────────────────────────────────────────────────────
+function PasswordModal({ onClose }: { onClose: () => void }) {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setModalError("Passwords do not match.");
+      return;
+    }
+
+    setChangingPassword(true);
+    setModalError(null);
+
+    try {
+      const token = localStorage.getItem("token");
+      await api.post(
+        `/parent/change-password`,
+        { password: newPassword },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      onClose();
+    } catch (err: any) {
+      setModalError(
+        err.response?.data?.message || "Failed to update password.",
+      );
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  return (
+    <S.ModalOverlay onClick={onClose}>
+      <S.ModalCard onClick={(e) => e.stopPropagation()}>
+        <S.ModalHeader>
+          <h3>Change Password</h3>
+          <p>Please enter your new security credentials below.</p>
+        </S.ModalHeader>
+
+        <form onSubmit={handleChangePassword}>
+          <S.InputGroup>
+            <S.Label htmlFor="new-password">New Password</S.Label>
+            <S.Input
+              id="new-password"
+              type="password"
+              placeholder="••••••••"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </S.InputGroup>
+
+          <S.InputGroup>
+            <S.Label htmlFor="confirm-password">Confirm Password</S.Label>
+            <S.Input
+              id="confirm-password"
+              type="password"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </S.InputGroup>
+
+          {modalError && <S.ModalError>{modalError}</S.ModalError>}
+
+          <S.ModalActions>
+            <S.SecondaryButton type="button" onClick={onClose}>
+              Cancel
+            </S.SecondaryButton>
+            <S.PrimaryButton type="submit" disabled={changingPassword}>
+              {changingPassword ? "Updating..." : "Update Password"}
+            </S.PrimaryButton>
+          </S.ModalActions>
+        </form>
+      </S.ModalCard>
+    </S.ModalOverlay>
   );
 }
 
@@ -341,25 +373,27 @@ function ScheduleTab({ schedule }: { schedule: ScheduleItem[] }) {
   }, {});
 
   return (
-    <div style={{ padding: "var(--spacing-xl)" }}>
+    <S.ScheduleWrapper>
       {DAYS.filter((d) => byDay[d].length > 0).map((day) => (
         <S.ScheduleDay key={day}>
           <S.ScheduleDayTitle>
             {day[0] + day.slice(1).toLowerCase()}
           </S.ScheduleDayTitle>
-          {byDay[day].map((s) => (
-            <S.ScheduleItem key={s.id}>
-              <S.ScheduleTime>
-                {s.startTime} – {s.endTime}
-              </S.ScheduleTime>
-              <S.ScheduleSubject>{s.subject ?? "—"}</S.ScheduleSubject>
-              <S.ScheduleTeacher>{s.teacher ?? "—"}</S.ScheduleTeacher>
-              {s.room && <S.RoomBadge>{s.room}</S.RoomBadge>}
-            </S.ScheduleItem>
-          ))}
+          <S.ScheduleList>
+            {byDay[day].map((s) => (
+              <S.ScheduleItem key={s.id}>
+                <S.ScheduleTime>
+                  {s.startTime} – {s.endTime}
+                </S.ScheduleTime>
+                <S.ScheduleSubject>{s.subject ?? "—"}</S.ScheduleSubject>
+                <S.ScheduleTeacher>{s.teacher ?? "—"}</S.ScheduleTeacher>
+                {s.room && <S.RoomBadge>{s.room}</S.RoomBadge>}
+              </S.ScheduleItem>
+            ))}
+          </S.ScheduleList>
         </S.ScheduleDay>
       ))}
-    </div>
+    </S.ScheduleWrapper>
   );
 }
 
@@ -428,15 +462,17 @@ function AttendanceTab({ attendance }: { attendance: Child["attendance"] }) {
       {attendance.recent.length === 0 ? (
         <S.EmptyState>No attendance records yet.</S.EmptyState>
       ) : (
-        attendance.recent.map((r, i) => (
-          <S.AttendanceRecord key={i}>
-            <S.AttendanceDate>{r.date}</S.AttendanceDate>
-            <S.AttendanceSubject>{r.subject ?? "—"}</S.AttendanceSubject>
-            <S.AttendanceStatus $status={r.status}>
-              {r.status === "PRESENT" ? "Present" : "Absent"}
-            </S.AttendanceStatus>
-          </S.AttendanceRecord>
-        ))
+        <S.AttendanceList>
+          {attendance.recent.map((r, i) => (
+            <S.AttendanceRecord key={i}>
+              <S.AttendanceDate>{r.date}</S.AttendanceDate>
+              <S.AttendanceSubject>{r.subject ?? "—"}</S.AttendanceSubject>
+              <S.AttendanceStatus $status={r.status}>
+                {r.status === "PRESENT" ? "Present" : "Absent"}
+              </S.AttendanceStatus>
+            </S.AttendanceRecord>
+          ))}
+        </S.AttendanceList>
       )}
     </S.AttendanceSection>
   );
