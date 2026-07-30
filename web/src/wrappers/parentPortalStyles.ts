@@ -683,30 +683,35 @@ export const LogoBrand = styled.div`
 `;
 
 export const LogoutButton = styled.button`
-  display: flex;
+  background-color: var(--bg-secondary);
+  color: var(--button-text);
+  border: 2px solid var(--border-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.65rem 1.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 0 var(--border-color);
+
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
-  background: rgba(0, 0, 0, 0.1);
-  color: var(--button-text, #1a1a1a);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition, all 0.2s ease);
 
   svg {
     width: 16px;
     height: 16px;
+    stroke-width: 2.5;
   }
 
   &:hover {
-    background: rgba(0, 0, 0, 0.2);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--border-color);
   }
 
   &:active {
-    transform: translateY(0);
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 var(--border-color);
   }
 `;
