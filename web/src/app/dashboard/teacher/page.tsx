@@ -19,13 +19,27 @@ import { showError } from "@/components/ui/toast";
 export default function TeacherOverview() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingData, setPendingData] = useState<any[]>([]);
+
+  const todayDate = new Date().toISOString().split("T")[0];
+
+  const todayPending = pendingData.filter((p: any) => p.date === todayDate);
+  const previousPending = pendingData.filter((p: any) => p.date < todayDate);
+
+  const hasPendingAttendance = pendingData.length > 0;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/teachers/dashboard");
-        setData(res.data);
+
+        const [dashboardRes, pendingRes] = await Promise.all([
+          api.get("/teachers/dashboard"),
+          api.get("/attendance/pending?teacherId=1"), // 👈 NEW API
+        ]);
+
+        setData(dashboardRes.data);
+        setPendingData(pendingRes.data || []);
       } catch (err) {
         console.error("Failed to fetch:", err);
         showError("Failed to load dashboard data");
@@ -33,6 +47,7 @@ export default function TeacherOverview() {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
@@ -105,6 +120,59 @@ export default function TeacherOverview() {
             Here's what's happening today
           </p>
         </div>
+
+        {hasPendingAttendance && (
+          <div
+            style={{
+              background: "#fff3cd",
+              border: "1px solid #ffeeba",
+              color: "#856404",
+              padding: "14px 18px",
+              borderRadius: "10px",
+              marginBottom: "20px",
+              fontWeight: 500,
+            }}
+          >
+            ⚠️ You have {pendingData.length} pending attendance records.
+            {/* TODAY */}
+            {todayPending.length > 0 && (
+              <div style={{ marginTop: "10px" }}>
+                <strong>Today:</strong>
+                {todayPending.map((p: any) => (
+                  <div key={`${p.scheduleId}-${p.date}`}>
+                    • {p.subject} ({p.startTime})
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* PREVIOUS */}
+            {previousPending.length > 0 && (
+              <div style={{ marginTop: "10px" }}>
+                <strong>Previous Days:</strong>
+                {previousPending.map((p: any) => (
+                  <div key={`${p.scheduleId}-${p.date}`}>
+                    • {p.subject} ({p.date}) — {p.startTime}
+                  </div>
+                ))}
+              </div>
+            )}
+            <Link href="/dashboard/teacher/attendance">
+              <button
+                style={{
+                  marginTop: "10px",
+                  padding: "6px 12px",
+                  background: "#856404",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                }}
+              >
+                Go to Attendance
+              </button>
+            </Link>
+          </div>
+        )}
 
         {/* 📊 Stats */}
         <StatsGrid>

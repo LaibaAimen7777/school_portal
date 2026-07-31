@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Param, Req } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 
 @Controller('attendance')
@@ -16,5 +16,10 @@ export class AttendanceController {
   @Post('mark')
   markAttendance(@Body() body: any) {
     return this.service.mark(body);
+  }
+
+  @Get('pending')
+  getPending(@Query('teacherId') teacherId: number) {
+    return this.service.getPreviousPending(Number(teacherId));
   }
 }
