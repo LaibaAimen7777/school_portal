@@ -1,5 +1,16 @@
-import { Body, Controller, Get, Post, Query, Param, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Param,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('attendance')
 export class AttendanceController {
@@ -18,6 +29,8 @@ export class AttendanceController {
     return this.service.mark(body);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles('teacher')
   @Get('pending')
   getPending(@Query('teacherId') teacherId: number) {
     return this.service.getPreviousPending(Number(teacherId));

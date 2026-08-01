@@ -66,7 +66,7 @@ export class AttendanceService {
     ) d
     JOIN schedule s 
       ON UPPER(DAYNAME(d.date)) = s.dayOfWeek
-    JOIN subject sub 
+    JOIN subjects sub 
       ON sub.id = s.subjectId
     LEFT JOIN attendance a 
       ON a.scheduleId = s.id 
