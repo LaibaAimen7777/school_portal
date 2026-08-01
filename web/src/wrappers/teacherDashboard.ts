@@ -2,780 +2,701 @@ import styled from "styled-components";
 
 export const DashboardContainer = styled.div`
   min-height: 100vh;
-  background-color: var(--bg-color);
-  font-family:
-    var(--font-main),
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
+  background-color: var(--bg-secondary, #f9f8f3);
+  color: var(--text-color, #1a1a1a);
+  font-family: inherit;
 `;
 
-/* ==========================================
-   ✨ PREMIUM MINIMAL TOP NAV
-   ========================================== */
-
-export const NavWrapper = styled.nav`
-  width: 100%;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  backdrop-filter: blur(8px);
+// ── Banner Navbar Header ─────────────────────────────────────────────────────
+export const BannerHeader = styled.header`
+  background-color: var(--accent-color, #f2b72b);
+  padding: 12px 24px;
+  border-bottom: 2px solid var(--border-color, #1a1a1a);
 `;
 
-export const NavContainer = styled.div`
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 2.5rem;
-  height: 64px;
+export const BannerHeaderContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-
-  @media (max-width: 768px) {
-    padding: 0 1.25rem;
-    height: auto;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding-top: 0.75rem;
-  }
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 16px;
 `;
 
-export const BrandGroup = styled.a`
+export const BrandSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 12px;
   text-decoration: none;
+`;
 
-  .brand-icon {
-    font-size: 1.35rem;
-  }
+export const LogoCircle = styled.div`
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color, #1a1a1a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
 
-  .brand-name {
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--heading-color);
-    letter-spacing: -0.3px;
+  img {
+    object-fit: contain;
   }
 `;
 
-export const NavLinksList = styled.ul`
+export const LoadingContainer = styled.div`
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 1.75rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  height: 100%;
-
-  @media (max-width: 768px) {
-    width: 100%;
-    justify-content: space-between;
-    gap: 0;
-    border-top: 1px solid var(--border-color);
-  }
+  min-height: 400px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 `;
 
-export const NavLinkItem = styled.li`
-  height: 100%;
+export const NavTabsInline = styled.nav`
   display: flex;
   align-items: center;
-`;
-
-export const TopNavLink = styled.a<{ $active?: boolean }>`
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: ${(props) =>
-    props.$active ? "var(--heading-color)" : "var(--text-color)"};
-  text-decoration: none;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0 0.25rem;
-  position: relative;
-  opacity: ${(props) => (props.$active ? "1" : "0.65")};
-  transition: all 0.2s ease;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: -1px; /* Aligns line flush perfectly with wrapper border bottom */
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: var(--accent-color);
-    transform: ${(props) => (props.$active ? "scaleX(1)" : "scaleX(0)")};
-    transition: transform 0.2s ease;
-  }
-
-  &:hover {
-    opacity: 1;
-    color: var(--heading-color);
-
-    &::after {
-      transform: scaleX(1);
-    }
-  }
-
-  @media (max-width: 768px) {
-    padding: 0.75rem 0.5rem;
-
-    &::after {
-      bottom: 0;
-    }
-  }
-`;
-
-export const NavRightStatus = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-color);
-  opacity: 0.7;
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    background-color: #22c55e;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #22c55e;
-  }
+  gap: 10px;
 
   @media (max-width: 768px) {
     display: none;
   }
 `;
 
-/* ==========================================
-   💻 WORKSPACE & HERO CONTAINERS
-   ========================================== */
+export const PillButton = styled.button<{ $active?: boolean }>`
+  background-color: var(--bg-color, #ffffff);
+  color: var(--button-text, #1a1a1a);
+  border: 2px solid var(--border-color, #1a1a1a);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.55rem 1.4rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: ${(props) =>
+    props.$active
+      ? "0 4px 0 var(--border-color, #1a1a1a)"
+      : "0 2px 0 var(--border-color, #1a1a1a)"};
+  transform: ${(props) => (props.$active ? "translateY(-1px)" : "none")};
+  text-transform: uppercase;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
+  }
+`;
+
+export const LogoutPillButton = styled(PillButton)`
+  &:hover {
+    background-color: #fee2e2;
+  }
+`;
+
+// ── Workspace & Hero Banner ──────────────────────────────────────────────────
+export const MainContainer = styled.main`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+`;
 
 export const Container = styled.div`
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2.5rem;
-
-  @media (max-width: 768px) {
-    padding: 1.5rem 1rem;
-  }
 `;
 
-export const HeaderCard = styled.div`
-  background: linear-gradient(
-    135deg,
-    var(--bg-color) 0%,
-    var(--bg-secondary) 100%
-  );
-  border-radius: 24px;
-  border: 1px solid var(--border-color);
-  padding: 2.5rem;
-  margin-bottom: var(--spacing-xl);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.02);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 280px;
-    height: 100%;
-    background: linear-gradient(
-      225deg,
-      rgba(var(--accent-color-rgb, 99, 102, 241), 0.03) 0%,
-      transparent 70%
-    );
-    pointer-events: none;
-  }
-
-  @media (max-width: 768px) {
-    padding: 1.75rem;
-  }
-`;
-
-export const HeaderContent = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--spacing-lg);
-`;
-
-export const TeacherInfo = styled.div`
+export const BannerHeroCard = styled.div`
+  background-color: var(--accent-color, #f2b72b);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 20px;
+  padding: 24px 32px;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
   }
 `;
 
-export const Avatar = styled.div`
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, var(--accent-color) 0%, #4f46e5 100%);
-  border-radius: 20px;
+export const HeroAvatar = styled.div`
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  background-color: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
   font-size: 2rem;
-  font-weight: 700;
-  box-shadow: 0 8px 20px -6px rgba(var(--accent-color-rgb, 99, 102, 241), 0.3);
+  font-weight: 900;
+  color: var(--heading-color, #1a1a1a);
+  flex-shrink: 0;
+  box-shadow: 0 3px 0 var(--border-color, #1a1a1a);
 `;
 
-export const TeacherDetails = styled.div`
-  .welcome-tag {
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--accent-color);
-    margin-bottom: 0.25rem;
-  }
+export const HeroDetails = styled.div`
+  flex: 1;
 
   h2 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--heading-color);
-    letter-spacing: -0.5px;
+    margin: 0;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: var(--heading-color, #1a1a1a);
+    text-transform: uppercase;
   }
+`;
+
+export const SubDetails = styled.p`
+  margin: 4px 0 8px 0;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--heading-color, #1a1a1a);
+  opacity: 0.8;
+  letter-spacing: 0.05em;
 `;
 
 export const BadgeGroup = styled.div`
   display: flex;
-  gap: 0.5rem;
   flex-wrap: wrap;
   align-items: center;
+  gap: 8px;
 `;
 
-export const Badge = styled.span<{ $primary?: boolean }>`
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.85rem;
-  background: ${(props) =>
-    props.$primary ? "var(--heading-color)" : "var(--bg-color)"};
-  color: ${(props) =>
-    props.$primary ? "var(--bg-color)" : "var(--text-color)"};
-  border: 1px solid
-    ${(props) => (props.$primary ? "transparent" : "var(--border-color)")};
-  border-radius: 99px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.01);
-
-  &.id-badge {
-    opacity: 0.8;
-    background: transparent;
-    border: 1px dashed var(--border-color);
-  }
+export const SubjectPill = styled.span`
+  background: var(--bg-color, #ffffff);
+  border: 1.5px solid var(--border-color, #1a1a1a);
+  border-radius: 9999px;
+  padding: 3px 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--heading-color, #1a1a1a);
+  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
 `;
 
-export const DateDisplay = styled.div`
+export const DatePillCard = styled.div`
+  background: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 16px;
+  padding: 10px 18px;
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background: var(--bg-color);
-  padding: 0.75rem 1.25rem;
-  border-radius: 14px;
-  border: 1px solid var(--border-color);
+  flex-direction: column;
+  align-items: flex-end;
+  box-shadow: 0 3px 0 var(--border-color, #1a1a1a);
 
-  .icon {
-    font-size: 1.25rem;
-  }
-
-  .label {
-    display: block;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-color);
+  .date-label {
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
     opacity: 0.6;
-    margin-bottom: 0.15rem;
+    margin-bottom: 2px;
   }
 
-  p {
-    margin: 0;
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--heading-color);
+  .date-value {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--heading-color, #1a1a1a);
   }
-`;
 
-export const MainContentWrapper = styled.div`
-  animation: fadeIn 0.4s ease-out;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  @media (max-width: 768px) {
+    align-items: flex-start;
   }
 `;
 
-/* ==========================================
-   ⚙️ REUSED SUB-CARDS AND GRIDS
-   ========================================== */
+export const ContentCard = styled.div`
+  background: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+`;
 
 export const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
 `;
 
 export const StatCard = styled.div`
-  background: var(--bg-color);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  padding: var(--spacing-lg);
-  transition: var(--transition);
+  background-color: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow);
-    border-color: var(--accent-color);
+    box-shadow: 0 6px 0 var(--border-color, #1a1a1a);
   }
 
   .label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--text-color, #1a1a1a);
+    opacity: 0.7;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-color);
-    opacity: 0.6;
-    margin-bottom: var(--spacing-sm);
   }
 
   .value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--heading-color);
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--heading-color, #1a1a1a);
+    word-break: break-word;
   }
 `;
 
-export const SectionCard = styled.div`
-  background: var(--bg-color);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  padding: var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
-  transition: var(--transition);
-
-  &:hover {
-    box-shadow: var(--shadow);
-  }
+export const SectionCard = styled.section`
+  background-color: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
 `;
 
 export const SectionHeader = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-lg);
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border-color, #1a1a1a);
 
   h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--heading-color);
     margin: 0;
+    font-size: 1.1rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    color: var(--heading-color, #1a1a1a);
+    text-transform: uppercase;
   }
+`;
 
-  button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: var(--accent-color);
-    color: var(--button-text);
-    border: none;
-    border-radius: 8px;
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
+// ── Table Wrapper (Fallback or Standard View) ─────────────────────────────────
+export const TableWrapper = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 16px;
 
-    &:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.05);
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+
+    th {
+      text-align: left;
+      padding: 8px 16px;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    td {
+      padding: 12px 16px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      border-top: 2px solid var(--border-color, #1a1a1a);
+      border-bottom: 2px solid var(--border-color, #1a1a1a);
+      background-color: var(--bg-secondary, #f9f8f3);
+
+      &:first-child {
+        border-left: 2px solid var(--border-color, #1a1a1a);
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+      }
+
+      &:last-child {
+        border-right: 2px solid var(--border-color, #1a1a1a);
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+      }
     }
   }
 `;
 
-export const TableWrapper = styled.div`
-  background: var(--bg-color);
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
+// ── Day Button (Pill selector for days of the week) ─────────────────────────
+export const DayButton = styled.button<{ $active?: boolean }>`
+  background-color: ${(props) =>
+    props.$active
+      ? "var(--accent-color, #f2b72b)"
+      : "var(--bg-color, #ffffff)"};
+  color: var(--button-text, #1a1a1a);
+  border: 2px solid var(--border-color, #1a1a1a);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s ease;
+  box-shadow: ${(props) =>
+    props.$active
+      ? "0 3px 0 var(--border-color, #1a1a1a)"
+      : "0 2px 0 var(--border-color, #1a1a1a)"};
+  transform: ${(props) => (props.$active ? "translateY(-1px)" : "none")};
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+    background-color: ${(props) =>
+      props.$active ? "var(--accent-color, #f2b72b)" : "#fef3c7"};
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
+  }
+`;
+
+// ── Badge Component (Tags, Grades, Status Indicators) ────────────────────────
+export const Badge = styled.span<{ $primary?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: ${(props) =>
+    props.$primary
+      ? "var(--accent-color, #f2b72b)"
+      : "var(--bg-color, #ffffff)"};
+  color: var(--heading-color, #1a1a1a);
+  border: 1.5px solid var(--border-color, #1a1a1a);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
+
+  &.id-badge {
+    background-color: var(--bg-secondary, #f9f8f3);
+    border-style: dashed;
+    box-shadow: none;
+  }
+`;
+
+// ── Group Wrapper for Badges/Day Buttons ─────────────────────────────────────
+
+export const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+`;
+
+export const ModalContainer = styled.div`
+  background-color: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 0 var(--border-color, #1a1a1a);
   overflow: hidden;
+`;
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+export const ModalHeader = styled.div`
+  padding: 20px 24px;
+  border-bottom: 2px solid var(--border-color, #1a1a1a);
+  background-color: var(--accent-color, #f2b72b);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-  th {
-    text-align: left;
-    padding: 0.75rem 1rem;
-    background-color: var(--bg-secondary);
-    color: var(--heading-color);
-    font-weight: 600;
-    font-size: 0.75rem;
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--border-color);
+    letter-spacing: 0.05em;
+    color: var(--heading-color, #1a1a1a);
+  }
+`;
+
+export const ModalBody = styled.div`
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+export const ModalFooter = styled.div`
+  padding: 16px 24px;
+  border-top: 2px solid var(--border-color, #1a1a1a);
+  background-color: var(--bg-secondary, #f9f8f3);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+`;
+
+// ── Attendance Modal Specific Components ──────────────────────────────────────
+
+export const StudentRow = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: var(--bg-secondary, #f9f8f3);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 0.9rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+`;
+
+export const StatusButton = styled.button<{
+  $status: "PRESENT" | "ABSENT" | "LATE" | "NONE";
+  $active: boolean;
+}>`
+  background-color: ${(props) => {
+    if (!props.$active) return "var(--bg-color, #ffffff)";
+    if (props.$status === "PRESENT") return "#22c55e"; // Green
+    if (props.$status === "ABSENT") return "#ef4444"; // Red
+    if (props.$status === "LATE") return "#f59e0b"; // Orange
+    return "var(--bg-color, #ffffff)";
+  }};
+  color: ${(props) =>
+    props.$active ? "#ffffff" : "var(--text-color, #1a1a1a)"};
+  border: 2px solid var(--border-color, #1a1a1a);
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  box-shadow: ${(props) =>
+    props.$active
+      ? "0 2px 0 var(--border-color, #1a1a1a)"
+      : "0 3px 0 var(--border-color, #1a1a1a)"};
+  transform: ${(props) => (props.$active ? "translateY(1px)" : "none")};
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  }
+`;
+
+export const CancelButton = styled.button`
+  background-color: var(--bg-color, #ffffff);
+  color: var(--button-text, #1a1a1a);
+  border: 2px solid var(--border-color, #1a1a1a);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.6rem 1.4rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 0 var(--border-color, #1a1a1a);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--border-color, #1a1a1a);
+    background-color: #fee2e2;
   }
 
-  td {
-    padding: 0.75rem 1rem;
-    color: var(--text-color);
-    font-size: 0.85rem;
-    border-bottom: 1px solid var(--border-color);
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
   }
+`;
 
-  tr:last-child td {
-    border-bottom: none;
-  }
+export const SubmitButton = styled(CancelButton)`
+  background-color: var(--accent-color, #f2b72b);
 
-  tr:hover td {
-    background-color: var(--bg-secondary);
+  &:hover {
+    background-color: #fbbf24;
   }
 `;
 
 export const DaySelector = styled.div`
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: var(--spacing-lg);
+  margin-top: 16px;
+  margin-bottom: 24px;
 `;
 
-export const DayButton = styled.button<{ $active: boolean }>`
-  padding: 0.4rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: ${(props) =>
-    props.$active ? "var(--accent-color)" : "var(--bg-color)"};
-  color: ${(props) =>
-    props.$active ? "var(--button-text)" : "var(--text-color)"};
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow);
-  }
-`;
-
-export const LoadingContainer = styled.div`
-  display: flex;
+export const StudentCount = styled.span`
+  background: var(--bg-secondary, #f9f8f3);
+  border: 1.5px solid var(--border-color, #1a1a1a);
+  color: var(--heading-color, #1a1a1a);
+  border-radius: 9999px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
-  font-size: 0.9rem;
-  color: var(--text-color);
-  opacity: 0.7;
+  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
 `;
 
-export const StudentCount = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+// ── Students Page Components ──────────────────────────────────────────────────
 
-  .badge {
-    background-color: var(--accent-color);
-    color: var(--button-text);
-    padding: 0.2rem 0.5rem;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 600;
+export const SearchInput = styled.input`
+  background-color: var(--bg-secondary, #f9f8f3);
+  color: var(--text-color, #1a1a1a);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 9999px;
+  padding: 10px 18px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  outline: none;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
+  transition: all 0.2s ease;
+
+  &:focus {
+    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+    background-color: var(--bg-color, #ffffff);
+  }
+
+  &::placeholder {
+    color: var(--text-color, #1a1a1a);
+    opacity: 0.5;
   }
 `;
 
 export const StudentsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 `;
 
-export const StudentCard = styled.div<{ $expandable?: boolean }>`
-  background: var(--bg-color);
-  border-radius: 12px;
-  border: 1px solid var(--border-color);
-  padding: var(--spacing-lg);
-  transition: var(--transition);
+export const StudentCard = styled.div`
+  background-color: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow);
-    border-color: var(--accent-color);
+    box-shadow: 0 6px 0 var(--border-color, #1a1a1a);
   }
 `;
 
 export const StudentHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: var(--spacing-md);
+  gap: 12px;
 `;
 
 export const StudentInitials = styled.div`
   width: 48px;
   height: 48px;
-  background-color: var(--accent-color);
-  border-radius: 10px;
+  border-radius: 12px;
+  background-color: var(--accent-color, #f2b72b);
+  border: 2px solid var(--border-color, #1a1a1a);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--button-text);
-  font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--heading-color, #1a1a1a);
+  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
+  flex-shrink: 0;
 `;
 
 export const StudentInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+
   h4 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--heading-color);
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--heading-color, #1a1a1a);
   }
 
-  p {
-    margin: 0;
+  span {
     font-size: 0.75rem;
-    color: var(--text-color);
+    font-weight: 800;
     opacity: 0.7;
   }
 `;
 
 export const StudentDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1.5px dashed var(--border-color, #1a1a1a);
   font-size: 0.8rem;
-  color: var(--text-color);
-
-  p {
-    margin: 0.25rem 0;
-  }
+  font-weight: 800;
 `;
 
 export const ParentInfo = styled.div`
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-md);
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-secondary, #f9f8f3);
+  border: 1.5px solid var(--border-color, #1a1a1a);
   border-radius: 10px;
+  padding: 8px 12px;
+  margin-top: 4px;
+  font-size: 0.75rem;
 
-  h5 {
-    margin: 0 0 0.75rem 0;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--heading-color);
+  .parent-label {
+    font-size: 0.65rem;
+    font-weight: 900;
+    opacity: 0.6;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
   }
 
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.75rem;
-
-    strong {
-      font-weight: 600;
-    }
-  }
-`;
-
-export const SearchInput = styled.input`
-  width: 100%;
-  max-width: 320px;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-color);
-  color: var(--text-color);
-  font-size: 0.85rem;
-  margin-bottom: var(--spacing-lg);
-
-  &:focus {
-    outline: none;
-    border-color: var(--accent-color);
-  }
-
-  &::placeholder {
-    color: var(--text-color);
-    opacity: 0.5;
-  }
-`;
-
-export const PreviewGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-`;
-
-export const PreviewCard = styled.div`
-  background: var(--bg-secondary);
-  border-radius: 10px;
-  padding: 1rem;
-  transition: var(--transition);
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-  }
-`;
-
-export const PreviewContent = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-`;
-
-export const ModalOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-export const ModalContainer = styled.div`
-  background: var(--bg-color);
-  border-radius: 16px;
-  padding: var(--spacing-xl);
-  width: 90%;
-  max-width: 600px;
-  max-height: 85vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow);
-`;
-
-export const ModalHeader = styled.div`
-  margin-bottom: var(--spacing-lg);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--border-color);
-
-  h2 {
-    margin: 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--heading-color);
-  }
-
-  p {
-    margin: 0.25rem 0 0 0;
-    font-size: 0.8rem;
-    color: var(--text-color);
-    opacity: 0.7;
-  }
-`;
-
-export const ModalBody = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: var(--spacing-lg);
-`;
-
-export const ModalFooter = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--border-color);
-`;
-
-export const StudentRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.6rem;
-  margin-bottom: 0.5rem;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-
-  span {
-    font-size: 0.85rem;
-    color: var(--text-color);
-  }
-`;
-
-export const StatusButton = styled.button<{
-  $active: boolean;
-  $status: "PRESENT" | "ABSENT";
-}>`
-  padding: 0.3rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.7rem;
-  font-weight: 500;
-  background: ${(props) =>
-    props.$active
-      ? props.$status === "PRESENT"
-        ? "#22c55e"
-        : "#ef4444"
-      : "var(--bg-color)"};
-  color: ${(props) => (props.$active ? "white" : "var(--text-color)")};
-  border: 1px solid var(--border-color);
-  transition: var(--transition);
-
-  &:hover {
-    transform: translateY(-1px);
-  }
-`;
-
-export const CancelButton = styled.button`
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-color);
-  color: var(--text-color);
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: var(--transition);
-
-  &:hover {
-    background: var(--bg-secondary);
-  }
-`;
-
-export const SubmitButton = styled.button`
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: none;
-  background: var(--accent-color);
-  color: var(--button-text);
-  font-size: 0.8rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--transition);
-
-  &:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.05);
+  .parent-name {
+    font-weight: 800;
+    color: var(--heading-color, #1a1a1a);
   }
 `;
