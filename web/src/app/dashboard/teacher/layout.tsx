@@ -81,8 +81,8 @@ export default function TeacherLayout({
               <Image
                 src="/images/logo.png"
                 alt="Logo"
-                width={28}
-                height={28}
+                width={40}
+                height={40}
                 priority
               />
             </S.LogoCircle>

@@ -19,7 +19,7 @@ import styled from "styled-components";
 
 // ── Local Aesthetic Components ────────────────────────────────────────────────
 const PendingAlertCard = styled.div`
-  background-color: #fffbeb;
+  background-color: var(--bg-container);
   border: 2px solid var(--border-color, #1a1a1a);
   border-radius: 16px;
   padding: 20px;

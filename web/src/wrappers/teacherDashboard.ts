@@ -2,8 +2,8 @@ import styled from "styled-components";
 
 export const DashboardContainer = styled.div`
   min-height: 100vh;
-  background-color: var(--bg-secondary, #f9f8f3);
-  color: var(--text-color, #1a1a1a);
+  background-color: var(--bg-secondary, #f8fafc);
+  color: var(--text-color, #0f172a);
   font-family: inherit;
 `;
 
@@ -11,7 +11,7 @@ export const DashboardContainer = styled.div`
 export const BannerHeader = styled.header`
   background-color: var(--accent-color, #f2b72b);
   padding: 12px 24px;
-  border-bottom: 2px solid var(--border-color, #1a1a1a);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 `;
 
 export const BannerHeaderContent = styled.div`
@@ -31,17 +31,20 @@ export const BrandSection = styled.div`
 `;
 
 export const LogoCircle = styled.div`
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  border: 1.5px solid var(--border-color, #1a1a1a);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.4);
 
   img {
     object-fit: contain;
+    border: 1px solid black;
+
+    border-radius: 30px;
   }
 `;
 
@@ -50,15 +53,15 @@ export const LoadingContainer = styled.div`
   justify-content: center;
   align-items: center;
   min-height: 400px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #64748b;
 `;
 
 export const NavTabsInline = styled.nav`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 
   @media (max-width: 768px) {
     display: none;
@@ -66,13 +69,15 @@ export const NavTabsInline = styled.nav`
 `;
 
 export const PillButton = styled.button<{ $active?: boolean }>`
-  background-color: var(--bg-color, #ffffff);
-  color: var(--button-text, #1a1a1a);
-  border: 2px solid var(--border-color, #1a1a1a);
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  padding: 0.55rem 1.4rem;
+  background-color: ${(props) =>
+    props.$active ? "#0f172a" : "var(--bg-color, #ffffff)"};
+  color: ${(props) =>
+    props.$active ? "#ffffff" : "var(--button-text, #1a1a1a)"};
+  border: 1px solid ${(props) => (props.$active ? "#0f172a" : "#cbd5e1")};
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 0.5rem 1.25rem;
   border-radius: 9999px;
   cursor: pointer;
   text-decoration: none;
@@ -80,27 +85,25 @@ export const PillButton = styled.button<{ $active?: boolean }>`
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  box-shadow: ${(props) =>
-    props.$active
-      ? "0 4px 0 var(--border-color, #1a1a1a)"
-      : "0 2px 0 var(--border-color, #1a1a1a)"};
-  transform: ${(props) => (props.$active ? "translateY(-1px)" : "none")};
-  text-transform: uppercase;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+    background-color: ${(props) => (props.$active ? "#1e293b" : "#f8fafc")};
+    border-color: ${(props) => (props.$active ? "#1e293b" : "#94a3b8")};
   }
 
   &:active {
-    transform: translateY(1px);
-    box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
+    transform: translateY(0);
   }
 `;
 
 export const LogoutPillButton = styled(PillButton)`
+  border-color: #fecdd3;
+  color: #e11d48;
+
   &:hover {
-    background-color: #fee2e2;
+    background-color: #ffe4e6;
+    border-color: #fda4af;
   }
 `;
 
@@ -118,14 +121,14 @@ export const Container = styled.div`
 
 export const BannerHeroCard = styled.div`
   background-color: var(--accent-color, #f2b72b);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
   padding: 24px 32px;
   display: flex;
   align-items: center;
   gap: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -134,19 +137,19 @@ export const BannerHeroCard = styled.div`
 `;
 
 export const HeroAvatar = styled.div`
-  width: 72px;
-  height: 72px;
-  border-radius: 14px;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
   background-color: var(--bg-color, #ffffff);
-  border: 2px solid var(--border-color, #1a1a1a);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  font-weight: 900;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--heading-color, #1a1a1a);
   flex-shrink: 0;
-  box-shadow: 0 3px 0 var(--border-color, #1a1a1a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 `;
 
 export const HeroDetails = styled.div`
@@ -154,21 +157,19 @@ export const HeroDetails = styled.div`
 
   h2 {
     margin: 0;
-    font-size: 1.6rem;
-    font-weight: 900;
-    letter-spacing: 0.04em;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--heading-color, #1a1a1a);
-    text-transform: uppercase;
   }
 `;
 
 export const SubDetails = styled.p`
   margin: 4px 0 8px 0;
-  font-size: 0.8rem;
-  font-weight: 800;
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--heading-color, #1a1a1a);
-  opacity: 0.8;
-  letter-spacing: 0.05em;
+  opacity: 0.85;
 `;
 
 export const BadgeGroup = styled.div`
@@ -180,36 +181,37 @@ export const BadgeGroup = styled.div`
 
 export const SubjectPill = styled.span`
   background: var(--bg-color, #ffffff);
-  border: 1.5px solid var(--border-color, #1a1a1a);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 9999px;
   padding: 3px 12px;
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: var(--heading-color, #1a1a1a);
-  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 `;
 
 export const DatePillCard = styled.div`
   background: var(--bg-color, #ffffff);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
   padding: 10px 18px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  box-shadow: 0 3px 0 var(--border-color, #1a1a1a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 
   .date-label {
-    font-size: 0.65rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    opacity: 0.6;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #64748b;
     margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .date-value {
-    font-size: 0.85rem;
-    font-weight: 800;
+    font-size: 0.875rem;
+    font-weight: 700;
     color: var(--heading-color, #1a1a1a);
   }
 
@@ -220,10 +222,10 @@ export const DatePillCard = styled.div`
 
 export const ContentCard = styled.div`
   background: var(--bg-color, #ffffff);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 20px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 `;
 
 export const StatsGrid = styled.div`
@@ -235,65 +237,62 @@ export const StatsGrid = styled.div`
 
 export const StatCard = styled.div`
   background-color: var(--bg-color, #ffffff);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 16px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
   padding: 18px 20px;
-  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
   display: flex;
   flex-direction: column;
   gap: 6px;
   transition:
-    transform 0.2s ease,
+    border-color 0.2s ease,
     box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 0 var(--border-color, #1a1a1a);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   }
 
   .label {
-    font-size: 0.7rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    color: var(--text-color, #1a1a1a);
-    opacity: 0.7;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #64748b;
     text-transform: uppercase;
   }
 
   .value {
-    font-size: 1.6rem;
-    font-weight: 900;
-    color: var(--heading-color, #1a1a1a);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--heading-color, #0f172a);
     word-break: break-word;
   }
 `;
 
 export const SectionCard = styled.section`
   background-color: var(--bg-color, #ffffff);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 20px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 `;
 
 export const SectionHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--border-color, #1a1a1a);
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
 
   h3 {
     margin: 0;
     font-size: 1.1rem;
-    font-weight: 900;
-    letter-spacing: 0.04em;
-    color: var(--heading-color, #1a1a1a);
-    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--heading-color, #0f172a);
   }
 `;
 
-// ── Table Wrapper (Fallback or Standard View) ─────────────────────────────────
+// ── Table Wrapper ─────────────────────────────────────────────────────────────
 export const TableWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
@@ -301,114 +300,94 @@ export const TableWrapper = styled.div`
 
   table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
+    border-collapse: collapse;
 
     th {
       text-align: left;
-      padding: 8px 16px;
-      font-size: 0.72rem;
-      font-weight: 900;
-      letter-spacing: 0.06em;
+      padding: 10px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #64748b;
       text-transform: uppercase;
-      opacity: 0.7;
+      border-bottom: 1px solid var(--border-color, #e2e8f0);
     }
 
     td {
-      padding: 12px 16px;
-      font-weight: 800;
-      font-size: 0.85rem;
-      border-top: 2px solid var(--border-color, #1a1a1a);
-      border-bottom: 2px solid var(--border-color, #1a1a1a);
-      background-color: var(--bg-secondary, #f9f8f3);
+      padding: 14px 16px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      color: #334155;
+      border-bottom: 1px solid var(--border-color, #f1f5f9);
+    }
 
-      &:first-child {
-        border-left: 2px solid var(--border-color, #1a1a1a);
-        border-top-left-radius: 12px;
-        border-bottom-left-radius: 12px;
-      }
+    tr:last-child td {
+      border-bottom: none;
+    }
 
-      &:last-child {
-        border-right: 2px solid var(--border-color, #1a1a1a);
-        border-top-right-radius: 12px;
-        border-bottom-right-radius: 12px;
-      }
+    tr:hover td {
+      background-color: #f8fafc;
     }
   }
 `;
 
-// ── Day Button (Pill selector for days of the week) ─────────────────────────
+// ── Day Button ───────────────────────────────────────────────────────────────
 export const DayButton = styled.button<{ $active?: boolean }>`
   background-color: ${(props) =>
     props.$active
       ? "var(--accent-color, #f2b72b)"
       : "var(--bg-color, #ffffff)"};
   color: var(--button-text, #1a1a1a);
-  border: 2px solid var(--border-color, #1a1a1a);
+  border: 1px solid
+    ${(props) => (props.$active ? "var(--accent-color, #f2b72b)" : "#cbd5e1")};
   font-size: 0.75rem;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  padding: 0.5rem 1.25rem;
-  border-radius: 9999px;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+  border-radius: 8px;
   cursor: pointer;
-  text-transform: uppercase;
-  transition: all 0.15s ease;
-  box-shadow: ${(props) =>
-    props.$active
-      ? "0 3px 0 var(--border-color, #1a1a1a)"
-      : "0 2px 0 var(--border-color, #1a1a1a)"};
-  transform: ${(props) => (props.$active ? "translateY(-1px)" : "none")};
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+    border-color: #94a3b8;
     background-color: ${(props) =>
-      props.$active ? "var(--accent-color, #f2b72b)" : "#fef3c7"};
-  }
-
-  &:active {
-    transform: translateY(1px);
-    box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
+      props.$active ? "var(--accent-color, #f2b72b)" : "#f8fafc"};
   }
 `;
 
-// ── Badge Component (Tags, Grades, Status Indicators) ────────────────────────
+// ── Badge Component ──────────────────────────────────────────────────────────
 export const Badge = styled.span<{ $primary?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   background-color: ${(props) =>
-    props.$primary
-      ? "var(--accent-color, #f2b72b)"
-      : "var(--bg-color, #ffffff)"};
-  color: var(--heading-color, #1a1a1a);
-  border: 1.5px solid var(--border-color, #1a1a1a);
-  border-radius: 9999px;
-  padding: 4px 12px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
+    props.$primary ? "var(--accent-color, #f2b72b)" : "#f1f5f9"};
+  color: var(--heading-color, #0f172a);
+  border: 1px solid
+    ${(props) => (props.$primary ? "rgba(0, 0, 0, 0.08)" : "#e2e8f0")};
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
 
   &.id-badge {
-    background-color: var(--bg-secondary, #f9f8f3);
+    background-color: transparent;
     border-style: dashed;
-    box-shadow: none;
+    border-color: #cbd5e1;
+    color: #64748b;
   }
 `;
 
-// ── Group Wrapper for Badges/Day Buttons ─────────────────────────────────────
-
+// ── Modal Overlay & Container ────────────────────────────────────────────────
 export const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(2px);
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -418,20 +397,22 @@ export const ModalOverlay = styled.div`
 
 export const ModalContainer = styled.div`
   background-color: var(--bg-color, #ffffff);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 20px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 16px;
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 0 var(--border-color, #1a1a1a);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 `;
 
 export const ModalHeader = styled.div`
-  padding: 20px 24px;
-  border-bottom: 2px solid var(--border-color, #1a1a1a);
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-color, #e2e8f0);
   background-color: var(--accent-color, #f2b72b);
   display: flex;
   justify-content: space-between;
@@ -439,10 +420,8 @@ export const ModalHeader = styled.div`
 
   h2 {
     margin: 0;
-    font-size: 1.25rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 1.15rem;
+    font-weight: 700;
     color: var(--heading-color, #1a1a1a);
   }
 `;
@@ -458,25 +437,24 @@ export const ModalBody = styled.div`
 
 export const ModalFooter = styled.div`
   padding: 16px 24px;
-  border-top: 2px solid var(--border-color, #1a1a1a);
-  background-color: var(--bg-secondary, #f9f8f3);
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  background-color: var(--bg-secondary, #f8fafc);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
 `;
 
 // ── Attendance Modal Specific Components ──────────────────────────────────────
-
 export const StudentRow = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background-color: var(--bg-secondary, #f9f8f3);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 12px;
-  font-weight: 800;
-  font-size: 0.9rem;
+  background-color: var(--bg-color, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
 
   @media (max-width: 640px) {
     flex-direction: column;
@@ -491,113 +469,97 @@ export const StatusButton = styled.button<{
 }>`
   background-color: ${(props) => {
     if (!props.$active) return "var(--bg-color, #ffffff)";
-    if (props.$status === "PRESENT") return "#22c55e"; // Green
-    if (props.$status === "ABSENT") return "#ef4444"; // Red
-    if (props.$status === "LATE") return "#f59e0b"; // Orange
+    if (props.$status === "PRESENT") return "#22c55e";
+    if (props.$status === "ABSENT") return "#ef4444";
+    if (props.$status === "LATE") return "#f59e0b";
     return "var(--bg-color, #ffffff)";
   }};
   color: ${(props) =>
-    props.$active ? "#ffffff" : "var(--text-color, #1a1a1a)"};
-  border: 2px solid var(--border-color, #1a1a1a);
-  padding: 6px 14px;
-  border-radius: 9999px;
+    props.$active ? "#ffffff" : "var(--text-color, #475569)"};
+  border: 1px solid ${(props) => (props.$active ? "transparent" : "#cbd5e1")};
+  padding: 5px 12px;
+  border-radius: 6px;
   font-size: 0.75rem;
-  font-weight: 900;
+  font-weight: 600;
   cursor: pointer;
-  text-transform: uppercase;
   transition: all 0.2s ease;
-  box-shadow: ${(props) =>
-    props.$active
-      ? "0 2px 0 var(--border-color, #1a1a1a)"
-      : "0 3px 0 var(--border-color, #1a1a1a)"};
-  transform: ${(props) => (props.$active ? "translateY(1px)" : "none")};
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+    border-color: #94a3b8;
   }
 `;
 
 export const CancelButton = styled.button`
   background-color: var(--bg-color, #ffffff);
-  color: var(--button-text, #1a1a1a);
-  border: 2px solid var(--border-color, #1a1a1a);
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 0.6rem 1.4rem;
-  border-radius: 9999px;
+  color: var(--button-text, #334155);
+  border: 1px solid #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 3px 0 var(--border-color, #1a1a1a);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 0 var(--border-color, #1a1a1a);
-    background-color: #fee2e2;
-  }
-
-  &:active {
-    transform: translateY(1px);
-    box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
+    background-color: #f1f5f9;
   }
 `;
 
 export const SubmitButton = styled(CancelButton)`
   background-color: var(--accent-color, #f2b72b);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1a1a1a;
 
   &:hover {
-    background-color: #fbbf24;
+    background-color: #eab308;
   }
 `;
 
 export const DaySelector = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   margin-top: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 `;
 
 export const StudentCount = styled.span`
-  background: var(--bg-secondary, #f9f8f3);
-  border: 1.5px solid var(--border-color, #1a1a1a);
-  color: var(--heading-color, #1a1a1a);
-  border-radius: 9999px;
-  padding: 3px 10px;
-  font-size: 0.72rem;
-  font-weight: 800;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: var(--heading-color, #334155);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
 `;
 
 // ── Students Page Components ──────────────────────────────────────────────────
-
 export const SearchInput = styled.input`
-  background-color: var(--bg-secondary, #f9f8f3);
-  color: var(--text-color, #1a1a1a);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 9999px;
-  padding: 10px 18px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  background-color: var(--bg-color, #ffffff);
+  color: var(--text-color, #0f172a);
+  border: 1px solid var(--border-color, #cbd5e1);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.875rem;
+  font-weight: 500;
   outline: none;
   width: 100%;
   max-width: 320px;
-  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
-  transition: all 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:focus {
-    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
-    background-color: var(--bg-color, #ffffff);
+    border-color: #0f172a;
+    box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
   }
 
   &::placeholder {
-    color: var(--text-color, #1a1a1a);
-    opacity: 0.5;
+    color: #94a3b8;
   }
 `;
 
@@ -610,20 +572,20 @@ export const StudentsGrid = styled.div`
 
 export const StudentCard = styled.div`
   background-color: var(--bg-color, #ffffff);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 16px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   gap: 12px;
   transition:
-    transform 0.2s ease,
+    border-color 0.2s ease,
     box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 0 var(--border-color, #1a1a1a);
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   }
 `;
 
@@ -634,18 +596,17 @@ export const StudentHeader = styled.div`
 `;
 
 export const StudentInitials = styled.div`
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
   background-color: var(--accent-color, #f2b72b);
-  border: 2px solid var(--border-color, #1a1a1a);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 900;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--heading-color, #1a1a1a);
-  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
   flex-shrink: 0;
 `;
 
@@ -656,15 +617,14 @@ export const StudentInfo = styled.div`
   h4 {
     margin: 0;
     font-size: 0.95rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    color: var(--heading-color, #1a1a1a);
+    font-weight: 700;
+    color: var(--heading-color, #0f172a);
   }
 
   span {
     font-size: 0.75rem;
-    font-weight: 800;
-    opacity: 0.7;
+    font-weight: 500;
+    color: #64748b;
   }
 `;
 
@@ -673,30 +633,31 @@ export const StudentDetails = styled.div`
   flex-direction: column;
   gap: 6px;
   padding-top: 10px;
-  border-top: 1.5px dashed var(--border-color, #1a1a1a);
-  font-size: 0.8rem;
-  font-weight: 800;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.825rem;
+  font-weight: 500;
+  color: #475569;
 `;
 
 export const ParentInfo = styled.div`
-  background-color: var(--bg-secondary, #f9f8f3);
-  border: 1.5px solid var(--border-color, #1a1a1a);
-  border-radius: 10px;
+  background-color: var(--bg-secondary, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 8px;
   padding: 8px 12px;
   margin-top: 4px;
   font-size: 0.75rem;
 
   .parent-label {
     font-size: 0.65rem;
-    font-weight: 900;
-    opacity: 0.6;
+    font-weight: 600;
+    color: #64748b;
     text-transform: uppercase;
     display: block;
     margin-bottom: 2px;
   }
 
   .parent-name {
-    font-weight: 800;
-    color: var(--heading-color, #1a1a1a);
+    font-weight: 600;
+    color: var(--heading-color, #0f172a);
   }
 `;
