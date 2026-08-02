@@ -33,7 +33,8 @@
   --pill-text: #111111;
 
   --card-bg: #ffffff;
-  --button-bg: #111111;
+  --button-bg: #eeb22d;
+  --button-hover: #d79c1f;
   --button-text: #ffffff;
   --button-text-hover: #111111;
   --scallop-color: #eeb22d;
@@ -89,6 +90,7 @@
 
   --card-bg: #162a20;
   --button-bg: #286348;
+  --button-hover: #1f4f39;
   --button-text: #ffffff;
   --button-text-hover: #e8f3ed;
   --scallop-color: #1e4d38;

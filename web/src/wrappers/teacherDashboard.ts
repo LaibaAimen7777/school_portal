@@ -70,9 +70,8 @@ export const NavTabsInline = styled.nav`
 
 export const PillButton = styled.button<{ $active?: boolean }>`
   background-color: ${(props) =>
-    props.$active ? "#0f172a" : "var(--bg-color, #ffffff)"};
-  color: ${(props) =>
-    props.$active ? "#ffffff" : "var(--button-text, #1a1a1a)"};
+    props.$active ? "#173f2e" : "var(--bg-color, #ffffff)"};
+  color: ${(props) => (props.$active ? "#ffffff" : "var(--button-text)")};
   border: 1px solid ${(props) => (props.$active ? "#0f172a" : "#cbd5e1")};
   font-size: 0.8rem;
   font-weight: 600;
@@ -88,7 +87,7 @@ export const PillButton = styled.button<{ $active?: boolean }>`
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
   &:hover {
-    background-color: ${(props) => (props.$active ? "#1e293b" : "#f8fafc")};
+    background-color: var(--button-hover);
     border-color: ${(props) => (props.$active ? "#1e293b" : "#94a3b8")};
   }
 
@@ -99,7 +98,7 @@ export const PillButton = styled.button<{ $active?: boolean }>`
 
 export const LogoutPillButton = styled(PillButton)`
   border-color: #fecdd3;
-  color: #e11d48;
+  color: #ad1b44;
 
   &:hover {
     background-color: #ffe4e6;
@@ -350,8 +349,9 @@ export const DayButton = styled.button<{ $active?: boolean }>`
 
   &:hover {
     border-color: #94a3b8;
-    background-color: ${(props) =>
-      props.$active ? "var(--accent-color, #f2b72b)" : "#f8fafc"};
+    /* background-color: ${(props) =>
+      props.$active ? "var(--accent-color, #f2b72b)" : "#f8fafc"}; */
+    background-color: var(--accent-color);
   }
 `;
 
@@ -470,7 +470,7 @@ export const StatusButton = styled.button<{
   background-color: ${(props) => {
     if (!props.$active) return "var(--bg-color, #ffffff)";
     if (props.$status === "PRESENT") return "#22c55e";
-    if (props.$status === "ABSENT") return "#ef4444";
+    if (props.$status === "ABSENT") return "#891e1e";
     if (props.$status === "LATE") return "#f59e0b";
     return "var(--bg-color, #ffffff)";
   }};
