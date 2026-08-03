@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import styled from "styled-components";
 import AttendanceModal from "./components/AttendanceModal";
 import { api } from "@/services/api";
+import { showSuccess, showError } from "@/components/ui/toast";
+import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import {
   Container,
   SectionCard,
@@ -14,6 +17,103 @@ import {
   DayButton,
   Badge,
 } from "@/wrappers/teacherDashboard";
+
+// ── Modern Date Selector Styled Components ─────────────────────────────────
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+`;
+
+const DatePickerWrapper = styled.div`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  input[type="date"] {
+    background-color: var(--bg-color, #ffffff);
+    color: var(--text-color, #0f172a);
+    border: 1px solid var(--border-color, #cbd5e1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+    &:hover {
+      border-color: #94a3b8;
+    }
+
+    &:focus {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
+    }
+  }
+`;
+
+const QuickTodayButton = styled.button`
+  background: var(--bg-secondary, #f1f5f9);
+  border: 1px solid var(--border-color, #e2e8f0);
+  color: var(--text-color, #334155);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+`;
+
+const WeekStrip = styled.div`
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0;
+`;
+
+const DayCard = styled.button<{ $active?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid ${(props) => (props.$active ? "#0f172a" : "#e2e8f0")};
+  background-color: ${(props) => (props.$active ? "#0f172a" : "#ffffff")};
+  color: ${(props) => (props.$active ? "#ffffff" : "#334155")};
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  .day-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .day-num {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  &:hover {
+    border-color: #94a3b8;
+  }
+`;
+
+// Status badge helper styling
+const StatusBadge = styled(Badge)<{ $marked?: boolean }>`
+  background-color: ${(props) => (props.$marked ? "#dcfce7" : "#fee2e2")};
+  color: ${(props) => (props.$marked ? "#15803d" : "#b91c1c")};
+  border-color: ${(props) => (props.$marked ? "#bbf7d0" : "#fecaca")};
+`;
 
 export default function AttendancePage() {
   const [schedules, setSchedules] = useState<any[]>([]);
@@ -43,9 +143,6 @@ export default function AttendancePage() {
       setSchedules(schedulesData);
       setStudents(res.data.students || []);
 
-      // ✅ NEW: check attendance for each schedule
-      const date = selectedDate;
-
       const statusMap: Record<number, boolean> = {};
 
       await Promise.all(
@@ -54,8 +151,7 @@ export default function AttendancePage() {
             const res = await api.get(
               `/attendance?scheduleId=${schedule.id}&date=${selectedDate}`,
             );
-
-            statusMap[schedule.id] = res.data.length > 0; // true if exists
+            statusMap[schedule.id] = res.data.length > 0;
           } catch {
             statusMap[schedule.id] = false;
           }
@@ -71,20 +167,21 @@ export default function AttendancePage() {
     }
   };
 
-  const selectedDay = new Date(selectedDate)
-    .toLocaleDateString("en-US", {
-      weekday: "long",
-    })
+  // Convert "YYYY-MM-DD" string to Localized Day format reliably
+  const [year, month, day] = selectedDate.split("-").map(Number);
+  const localDateObj = new Date(year, month - 1, day);
+
+  const selectedDay = localDateObj
+    .toLocaleDateString("en-US", { weekday: "long" })
     .toUpperCase();
 
   const todaySchedules = schedules.filter((s) => s.dayOfWeek === selectedDay);
 
   const openAttendance = async (schedule: any) => {
     try {
-      const date = new Date().toISOString().split("T")[0];
-
+      // ✅ FIX: Fetch attendance based on selectedDate rather than hardcoded current date
       const res = await api.get(
-        `/attendance?scheduleId=${schedule.id}&date=${date}`,
+        `/attendance?scheduleId=${schedule.id}&date=${selectedDate}`,
       );
 
       const mapped: any = {};
@@ -96,28 +193,29 @@ export default function AttendancePage() {
       setSelectedSchedule(schedule);
       setShowModal(true);
     } catch (err) {
-      console.log(err);
+      console.error("Failed to fetch attendance details:", err);
+      showError("Could not load attendance details");
     }
   };
 
   const handleSubmit = async (data: any) => {
     try {
-      const date = new Date().toISOString().split("T")[0];
       await api.post("/attendance/mark", { ...data, date: selectedDate });
-      alert("Attendance saved!");
+      showSuccess("Attendance Saved");
       setShowModal(false);
+      fetchData();
     } catch (err) {
       console.error(err);
-      alert("Error saving attendance");
+      showError("Error saving attendance");
     }
   };
 
+  const handleResetToToday = () => {
+    setSelectedDate(new Date().toISOString().split("T")[0]);
+  };
+
   if (loading) {
-    return (
-      <LoadingContainer>
-        <p>Loading attendance data...</p>
-      </LoadingContainer>
-    );
+    return <LoadingOverlay />;
   }
 
   if (error) {
@@ -133,19 +231,33 @@ export default function AttendancePage() {
       <SectionCard>
         <SectionHeader>
           <h3>
-            Today's Classes -{" "}
-            {new Date().toLocaleDateString("en-US", {
+            Classes for{" "}
+            {localDateObj.toLocaleDateString("en-US", {
               weekday: "long",
               year: "numeric",
-              month: "long",
+              month: "short",
               day: "numeric",
             })}
           </h3>
+
+          {/* Clean Integrated Header Controls */}
+          <HeaderActions>
+            <DatePickerWrapper>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+            </DatePickerWrapper>
+            <QuickTodayButton onClick={handleResetToToday}>
+              Today
+            </QuickTodayButton>
+          </HeaderActions>
         </SectionHeader>
 
-        <StatsGrid>
+        <StatsGrid style={{ marginTop: "16px" }}>
           <StatCard>
-            <div className="label">Today's Classes</div>
+            <div className="label">Scheduled Classes</div>
             <div className="value">{todaySchedules.length}</div>
           </StatCard>
           <StatCard>
@@ -159,16 +271,8 @@ export default function AttendancePage() {
             </div>
           </StatCard>
         </StatsGrid>
-        <div style={{ marginBottom: "1rem" }}>
-          <label>Select Date: </label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-        </div>
 
-        <TableWrapper>
+        <TableWrapper style={{ marginTop: "24px" }}>
           <table>
             <thead>
               <tr>
@@ -201,7 +305,7 @@ export default function AttendancePage() {
                       {schedule.startTime} - {schedule.endTime}
                     </td>
                     <td>
-                      <span style={{ fontWeight: "bold" }}>
+                      <span style={{ fontWeight: 600, color: "#0f172a" }}>
                         {classStudents.length}
                       </span>{" "}
                       students
@@ -218,15 +322,11 @@ export default function AttendancePage() {
                       </DayButton>
                     </td>
                     <td>
-                      {attendanceStatus[schedule.id] ? (
-                        <Badge style={{ background: "green", color: "white" }}>
-                          Marked
-                        </Badge>
-                      ) : (
-                        <Badge style={{ background: "red", color: "white" }}>
-                          Not Marked
-                        </Badge>
-                      )}
+                      <StatusBadge $marked={attendanceStatus[schedule.id]}>
+                        {attendanceStatus[schedule.id]
+                          ? "Marked"
+                          : "Not Marked"}
+                      </StatusBadge>
                     </td>
                   </tr>
                 );
@@ -234,10 +334,14 @@ export default function AttendancePage() {
               {todaySchedules.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
-                    style={{ textAlign: "center", padding: "2rem" }}
+                    colSpan={6}
+                    style={{
+                      textAlign: "center",
+                      padding: "3rem 1rem",
+                      color: "#64748b",
+                    }}
                   >
-                    No classes scheduled for today
+                    No classes scheduled for {selectedDay.toLowerCase()}.
                   </td>
                 </tr>
               )}
