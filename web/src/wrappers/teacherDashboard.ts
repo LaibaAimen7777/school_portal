@@ -11,14 +11,14 @@ export const DashboardContainer = styled.div`
 export const BannerHeader = styled.header`
   background-color: var(--accent-color, #f2b72b);
   padding: 12px 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid black;
 `;
 
 export const BannerHeaderContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
   gap: 16px;
 `;
@@ -97,12 +97,36 @@ export const PillButton = styled.button<{ $active?: boolean }>`
 `;
 
 export const LogoutPillButton = styled(PillButton)`
-  border-color: #fecdd3;
-  color: #ad1b44;
+  background-color: var(--bg-secondary);
+  color: var(--button-text);
+  border: 2px solid var(--border-color);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.65rem 1.75rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 0 var(--border-color);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2.5;
+  }
 
   &:hover {
-    background-color: #ffe4e6;
-    border-color: #fda4af;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--border-color);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 var(--border-color);
   }
 `;
 
@@ -120,7 +144,7 @@ export const Container = styled.div`
 
 export const BannerHeroCard = styled.div`
   background-color: var(--accent-color, #f2b72b);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid black;
   border-radius: 16px;
   padding: 24px 32px;
   display: flex;

@@ -72,42 +72,6 @@ const QuickTodayButton = styled.button`
   }
 `;
 
-const WeekStrip = styled.div`
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 4px 0;
-`;
-
-const DayCard = styled.button<{ $active?: boolean }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid ${(props) => (props.$active ? "#0f172a" : "#e2e8f0")};
-  background-color: ${(props) => (props.$active ? "#0f172a" : "#ffffff")};
-  color: ${(props) => (props.$active ? "#ffffff" : "#334155")};
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  .day-name {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    opacity: 0.8;
-  }
-
-  .day-num {
-    font-size: 1rem;
-    font-weight: 700;
-  }
-
-  &:hover {
-    border-color: #94a3b8;
-  }
-`;
-
 // Status badge helper styling
 const StatusBadge = styled(Badge)<{ $marked?: boolean }>`
   background-color: ${(props) => (props.$marked ? "#dcfce7" : "#fee2e2")};
