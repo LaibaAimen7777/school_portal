@@ -33,6 +33,7 @@ export class AttendanceController {
   @Roles('teacher')
   @Get('pending')
   getPending(@Query('teacherId') teacherId: number) {
+    console.log('techer id in att conteoller', teacherId);
     return this.service.getPreviousPending(Number(teacherId));
   }
 }

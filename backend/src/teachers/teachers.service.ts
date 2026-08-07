@@ -241,6 +241,8 @@ export class TeachersService {
       order: { dayOfWeek: 'ASC', startTime: 'ASC' },
     });
 
+    const teacherId = teacher.id;
+
     const classIds = schedules
       .map((s) => s.schoolClass?.id)
       .filter(Boolean) as number[];
@@ -253,6 +255,6 @@ export class TeachersService {
           })
         : [];
 
-    return { teacher, schedules, students };
+    return { teacher, schedules, students, teacherId };
   }
 }

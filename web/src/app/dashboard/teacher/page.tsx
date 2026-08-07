@@ -121,10 +121,18 @@ export default function TeacherOverview() {
       try {
         setLoading(true);
 
-        const [dashboardRes, pendingRes] = await Promise.all([
-          api.get("/teachers/dashboard"),
-          api.get("/attendance/pending?teacherId=1"),
-        ]);
+        // const [dashboardRes, pendingRes] = await Promise.all([
+        //   api.get("/teachers/dashboard"),
+        //   api.get("/attendance/pending?teacherId=1"),
+        // ]);
+
+        const dashboardRes = await api.get("/teachers/dashboard");
+        const tId = dashboardRes.data.teacherId;
+        const pendingRes = await api.get(
+          `/attendance/pending?teacherId=${tId}`,
+        );
+
+        console.log("attendance data on the page", pendingRes);
 
         setData(dashboardRes.data);
         setPendingData(pendingRes.data || []);

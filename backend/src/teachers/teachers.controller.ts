@@ -37,6 +37,7 @@ export class TeachersController {
   async getDashboard(@Req() req) {
     // console.log(req.user);
     const userId = req.user.id;
+    console.log('user id in teacher controller', userId);
     return this.teachersService.getDashboard(userId);
   }
 
