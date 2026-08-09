@@ -81,30 +81,14 @@ export default function TeacherLayout({
               <Image
                 src="/images/logo.png"
                 alt="Logo"
-                width={40}
-                height={40}
+                width={50}
+                height={50}
                 priority
               />
             </S.LogoCircle>
           </S.BrandSection>
 
-          <S.NavTabsInline>
-            {[
-              { name: "OVERVIEW", path: "/dashboard/teacher" },
-              { name: "SCHEDULE", path: "/dashboard/teacher/schedule" },
-              { name: "STUDENTS", path: "/dashboard/teacher/students" },
-              { name: "ATTENDANCE", path: "/dashboard/teacher/attendance" },
-            ].map((item) => (
-              <S.PillButton
-                key={item.path}
-                as={Link}
-                href={item.path}
-                $active={isActive(item.path)}
-              >
-                {item.name}
-              </S.PillButton>
-            ))}
-          </S.NavTabsInline>
+          <S.BannerTitle>TEACHER PORTAL</S.BannerTitle>
 
           <S.LogoutPillButton onClick={handleLogout}>
             {" "}

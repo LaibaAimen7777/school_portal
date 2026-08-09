@@ -15,7 +15,7 @@ export const BannerHeader = styled.header`
 export const BannerHeaderContent = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Spacing out brand and logout btn */
+  justify-content: space-between;
   max-width: 1200px;
   margin: 0 auto;
 `;

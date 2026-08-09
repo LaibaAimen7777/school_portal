@@ -2,23 +2,8 @@ import styled from "styled-components";
 
 export const DashboardContainer = styled.div`
   min-height: 100vh;
-  /* 1. Base fallback color in case the image is slow to load */
   background-color: var(--bg-secondary, #f8fafc);
-
-  /* 2. Softened tint overlay (Light mode friendly) */
-  background-image:
-    linear-gradient(
-      var(--bg-image-tint, rgba(248, 250, 252, 0.88)),
-      var(--bg-image-tint, rgba(248, 250, 252, 0.88))
-    ),
-    url("/images/teachBackground.gif");
-
-  /* 3. 'cover' prevents screen gaps; 'fixed' stays smooth while scrolling */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-
+  /* background-image: "/images/teachBackground.jfif"; */
   color: var(--text-color, #0f172a);
   font-family: inherit;
 `;
@@ -30,15 +15,21 @@ export const BannerHeader = styled.header`
   border-bottom: 1px solid black;
 `;
 
+export const BannerTitle = styled.h1`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--button-text, #1a1a1a);
+  letter-spacing: 0.05em;
+  margin: 0;
+`;
+
 export const BannerHeaderContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1300px;
+  max-width: 1200px;
   margin: 0 auto;
-  gap: 16px;
 `;
-
 export const BrandSection = styled.div`
   display: flex;
   align-items: center;
@@ -148,7 +139,7 @@ export const LogoutPillButton = styled(PillButton)`
 
 // ── Workspace & Hero Banner ──────────────────────────────────────────────────
 export const MainContainer = styled.main`
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
   padding: 24px;
 `;
@@ -156,6 +147,7 @@ export const MainContainer = styled.main`
 export const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
+  background-color: var(--bg-color);
 `;
 
 export const BannerHeroCard = styled.div`

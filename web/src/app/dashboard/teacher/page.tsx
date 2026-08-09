@@ -10,44 +10,58 @@ import {
   StatCard,
   SectionCard,
   SectionHeader,
-  TableWrapper,
   LoadingContainer,
 } from "@/wrappers/teacherDashboard";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import { showError } from "@/components/ui/toast";
 import styled from "styled-components";
 
-// ── Local Aesthetic Components ────────────────────────────────────────────────
-const PendingAlertCard = styled.div`
-  background-color: var(--bg-container);
+// ── Redesigned Styled Components ──────────────────────────────────────────────
+const WelcomeHero = styled.div`
+  background-color: var(--bg-container, #ffffff);
   border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 16px;
-  padding: 20px;
+  border-radius: 20px;
+  padding: 28px;
   margin-bottom: 24px;
   box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
 `;
 
-const AlertBadge = styled.span`
-  background: #f59e0b;
-  color: #ffffff;
-  border: 1.5px solid var(--border-color, #1a1a1a);
-  border-radius: 9999px;
-  padding: 4px 12px;
-  font-size: 0.75rem;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  display: inline-block;
-  margin-bottom: 10px;
+const HeroText = styled.div`
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--text-color, #1a1a1a);
+    margin: 0 0 6px 0;
+  }
+
+  p {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #64748b;
+    margin: 0;
+  }
+`;
+
+const QuickActionGroup = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 `;
 
 const ActionPillButton = styled.button`
   background-color: var(--bg-color, #ffffff);
   color: var(--button-text, #1a1a1a);
   border: 2px solid var(--border-color, #1a1a1a);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 800;
-  letter-spacing: 0.05em;
-  padding: 0.6rem 1.4rem;
+  letter-spacing: 0.04em;
+  padding: 0.65rem 1.4rem;
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -69,73 +83,78 @@ const PrimaryPillButton = styled(ActionPillButton)`
   background-color: var(--accent-color, #f2b72b);
 `;
 
-const ScheduleRowItem = styled.div<{ $isNext?: boolean }>`
-  display: grid;
-  grid-template-columns: 1fr 180px 120px;
-  align-items: center;
-  padding: 12px 18px;
-  background: ${(props) =>
-    props.$isNext ? "#fef3c7" : "var(--bg-secondary, #f9f8f3)"};
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 14px;
-  margin-bottom: 10px;
-  font-weight: 800;
-  font-size: 0.85rem;
-  box-shadow: ${(props) =>
-    props.$isNext ? "0 3px 0 var(--border-color, #1a1a1a)" : "none"};
+const ScheduleList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+`;
 
-  &:last-child {
-    margin-bottom: 0;
-  }
+const ScheduleRowItem = styled.div<{ $isNext?: boolean }>`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: ${(props) =>
+    props.$isNext ? "#fef3c7" : "var(--bg-secondary, #ffffff)"};
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: ${(props) =>
+    props.$isNext
+      ? "0 4px 0 var(--border-color, #1a1a1a)"
+      : "0 2px 0 rgba(0,0,0,0.05)"};
+  transition: all 0.2s ease;
 
   @media (max-width: 640px) {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 `;
 
-const TagPill = styled.span`
-  background: var(--bg-color, #ffffff);
+const ScheduleInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .subject-title {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--text-color, #1a1a1a);
+  }
+`;
+
+const ScheduleMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+
+const TagPill = styled.span<{ $accent?: boolean }>`
+  background: ${(props) =>
+    props.$accent ? "#f2b72b" : "var(--bg-color, #ffffff)"};
   border: 1.5px solid var(--border-color, #1a1a1a);
-  padding: 3px 12px;
+  padding: 4px 12px;
   border-radius: 9999px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  justify-self: start;
+  color: #1a1a1a;
 `;
 
 export default function TeacherOverview() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [pendingData, setPendingData] = useState<any[]>([]);
-
-  const todayDate = new Date().toISOString().split("T")[0];
-
-  const todayPending = pendingData.filter((p: any) => p.date === todayDate);
-  const previousPending = pendingData.filter((p: any) => p.date < todayDate);
-
-  const hasPendingAttendance = pendingData.length > 0;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-
-        // const [dashboardRes, pendingRes] = await Promise.all([
-        //   api.get("/teachers/dashboard"),
-        //   api.get("/attendance/pending?teacherId=1"),
-        // ]);
-
         const dashboardRes = await api.get("/teachers/dashboard");
-        const tId = dashboardRes.data.teacherId;
-        const pendingRes = await api.get(
-          `/attendance/pending?teacherId=${tId}`,
-        );
-
-        console.log("attendance data on the page", pendingRes);
-
         setData(dashboardRes.data);
-        setPendingData(pendingRes.data || []);
       } catch (err) {
         console.error("Failed to fetch:", err);
         showError("Failed to load dashboard data");
@@ -194,57 +213,35 @@ export default function TeacherOverview() {
     })
     .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))[0];
 
+  const formattedDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
   return (
     <DashboardContainer>
       <Container>
-        {/* ⚠️ Pending Attendance Banner */}
-        {hasPendingAttendance && (
-          <PendingAlertCard>
-            <AlertBadge>
-              ⚠️ {pendingData.length} PENDING ATTENDANCE RECORDS
-            </AlertBadge>
+        {/* 🌟 Header Banner */}
+        <WelcomeHero>
+          <HeroText>
+            <h1>Welcome Back, {teacher.name || "Teacher"} </h1>
+            <p>{formattedDate} — Here is your teaching schedule for today.</p>
+          </HeroText>
 
-            {todayPending.length > 0 && (
-              <div
-                style={{
-                  marginTop: "8px",
-                  fontSize: "0.85rem",
-                  fontWeight: 700,
-                }}
-              >
-                <strong>Today:</strong>
-                {todayPending.map((p: any) => (
-                  <div key={`${p.scheduleId}-${p.date}`}>
-                    • {p.subject} ({p.startTime})
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {previousPending.length > 0 && (
-              <div
-                style={{
-                  marginTop: "8px",
-                  fontSize: "0.85rem",
-                  fontWeight: 700,
-                }}
-              >
-                <strong>Previous Days:</strong>
-                {previousPending.map((p: any) => (
-                  <div key={`${p.scheduleId}-${p.date}`}>
-                    • {p.subject} ({p.date}) — {p.startTime}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div style={{ marginTop: "16px" }}>
-              <Link href="/dashboard/teacher/attendance">
-                <PrimaryPillButton>Take Attendance Now</PrimaryPillButton>
-              </Link>
-            </div>
-          </PendingAlertCard>
-        )}
+          <QuickActionGroup>
+            <Link href="/dashboard/teacher/attendance">
+              <PrimaryPillButton>Take Attendance</PrimaryPillButton>
+            </Link>
+            <Link href="/dashboard/teacher/students">
+              <ActionPillButton>Students</ActionPillButton>
+            </Link>
+            <Link href="/dashboard/teacher/schedule">
+              <ActionPillButton>Schedule</ActionPillButton>
+            </Link>
+          </QuickActionGroup>
+        </WelcomeHero>
 
         {/* 📊 Stat Cards Section */}
         <StatsGrid>
@@ -260,7 +257,7 @@ export default function TeacherOverview() {
 
           <StatCard>
             <div className="label">NEXT CLASS</div>
-            <div className="value" style={{ fontSize: "1rem" }}>
+            <div className="value" style={{ fontSize: "1.1rem" }}>
               {nextClass
                 ? `${nextClass.subject?.name} (${nextClass.startTime})`
                 : "No more today"}
@@ -273,36 +270,6 @@ export default function TeacherOverview() {
           </StatCard>
         </StatsGrid>
 
-        {/* ⚡ Quick Action Pill Buttons */}
-        <SectionCard style={{ marginTop: "24px" }}>
-          <SectionHeader>
-            <h3 style={{ textTransform: "uppercase", fontWeight: 900 }}>
-              Quick Actions
-            </h3>
-          </SectionHeader>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              marginTop: "16px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Link href="/dashboard/teacher/attendance">
-              <PrimaryPillButton>Take Attendance</PrimaryPillButton>
-            </Link>
-
-            <Link href="/dashboard/teacher/students">
-              <ActionPillButton>Students</ActionPillButton>
-            </Link>
-
-            <Link href="/dashboard/teacher/schedule">
-              <ActionPillButton>Schedule</ActionPillButton>
-            </Link>
-          </div>
-        </SectionCard>
-
         {/* 📅 Today Schedule List */}
         <SectionCard style={{ marginTop: "24px" }}>
           <SectionHeader>
@@ -311,44 +278,40 @@ export default function TeacherOverview() {
             </h3>
           </SectionHeader>
 
-          <div style={{ marginTop: "16px" }}>
+          <ScheduleList>
             {todaySchedules.map((s: any) => (
               <ScheduleRowItem key={s.id} $isNext={nextClass?.id === s.id}>
-                <div>
-                  <span style={{ fontSize: "0.9rem" }}>
-                    {s.subject?.name || "Unknown"}
+                <ScheduleInfo>
+                  <span className="subject-title">
+                    {s.subject?.name || "Unknown Subject"}
                   </span>
                   {nextClass?.id === s.id && (
-                    <TagPill
-                      style={{
-                        marginLeft: "10px",
-                        background: "#f2b72b",
-                      }}
-                    >
-                      UPCOMING NEXT
-                    </TagPill>
+                    <TagPill $accent>UPCOMING NEXT</TagPill>
                   )}
-                </div>
-                <TagPill>
-                  {s.startTime} – {s.endTime}
-                </TagPill>
-                <TagPill>RM: {s.room?.name || "—"}</TagPill>
+                </ScheduleInfo>
+
+                <ScheduleMeta>
+                  <TagPill>
+                    {s.startTime} – {s.endTime}
+                  </TagPill>
+                  <TagPill>RM: {s.room?.name || "—"}</TagPill>
+                </ScheduleMeta>
               </ScheduleRowItem>
             ))}
 
             {todaySchedules.length === 0 && (
               <div
                 style={{
-                  padding: "16px",
+                  padding: "2rem",
                   fontWeight: 700,
-                  color: "#666",
+                  color: "#64748b",
                   textAlign: "center",
                 }}
               >
                 No classes scheduled for today.
               </div>
             )}
-          </div>
+          </ScheduleList>
         </SectionCard>
       </Container>
     </DashboardContainer>
