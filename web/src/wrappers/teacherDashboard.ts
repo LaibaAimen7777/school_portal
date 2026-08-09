@@ -2,7 +2,23 @@ import styled from "styled-components";
 
 export const DashboardContainer = styled.div`
   min-height: 100vh;
+  /* 1. Base fallback color in case the image is slow to load */
   background-color: var(--bg-secondary, #f8fafc);
+
+  /* 2. Softened tint overlay (Light mode friendly) */
+  background-image:
+    linear-gradient(
+      var(--bg-image-tint, rgba(248, 250, 252, 0.88)),
+      var(--bg-image-tint, rgba(248, 250, 252, 0.88))
+    ),
+    url("/images/teachBackground.gif");
+
+  /* 3. 'cover' prevents screen gaps; 'fixed' stays smooth while scrolling */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
   color: var(--text-color, #0f172a);
   font-family: inherit;
 `;
