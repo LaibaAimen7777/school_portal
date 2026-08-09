@@ -25,7 +25,7 @@
   --bg-yellow: #eeb22d;
   --bg-dark-yellow: #e5a41c;
   --accent-color: #eeb22d;
-  --secondary-color: #111111;
+  --secondary-color: #2b2620;
 
   --nav-bg: var(--accent-color);
   --nav-text: #111111;
@@ -90,7 +90,7 @@
 
   --card-bg: #162a20;
   --button-bg: #286348;
-  --button-hover: #1f4f39;
+  --button-hover: #2f694f;
   --button-text: #ffffff;
   --button-text-hover: #e8f3ed;
   --scallop-color: #1e4d38;

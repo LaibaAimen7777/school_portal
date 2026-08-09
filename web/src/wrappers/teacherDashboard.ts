@@ -328,6 +328,8 @@ export const TableWrapper = styled.div`
   width: 100%;
   overflow-x: auto;
   margin-top: 16px;
+  background-color: var(--accent-color);
+  border-radius: 15px;
 
   table {
     width: 100%;
@@ -339,7 +341,7 @@ export const TableWrapper = styled.div`
       font-size: 0.75rem;
       font-weight: 600;
       letter-spacing: 0.04em;
-      color: #64748b;
+      color: var(--pill-text);
       text-transform: uppercase;
       border-bottom: 1px solid var(--border-color, #e2e8f0);
     }
@@ -348,7 +350,7 @@ export const TableWrapper = styled.div`
       padding: 14px 16px;
       font-weight: 500;
       font-size: 0.875rem;
-      color: #334155;
+      color: var(--pill-text);
       border-bottom: 1px solid var(--border-color, #f1f5f9);
     }
 
@@ -357,7 +359,7 @@ export const TableWrapper = styled.div`
     }
 
     tr:hover td {
-      background-color: #f8fafc;
+      background-color: var(--button-hover);
     }
   }
 `;

@@ -55,6 +55,9 @@ const NavIconButton = styled.button`
   justify-content: center;
   box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
   transition: all 0.15s ease;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
 
   &:hover {
     transform: translateY(-2px);
@@ -93,11 +96,8 @@ const DayPillCard = styled.button<{ $active?: boolean }>`
   padding: 6px 14px;
   border-radius: 12px;
   border: 2px solid var(--border-color, #1a1a1a);
-  background-color: ${(props) =>
-    props.$active
-      ? "var(--accent-color, #f2b72b)"
-      : "var(--bg-color, #ffffff)"};
-  color: #1a1a1a;
+  background-color: var(--bg-yellow);
+  color: var(--pill-text);
   cursor: pointer;
   transition: all 0.15s ease;
   min-width: 58px;
@@ -142,9 +142,9 @@ const RightControls = styled.div`
 `;
 
 const QuickTodayButton = styled.button`
-  background: var(--bg-color, #ffffff);
+  background: var(--bg-yellow);
   border: 2px solid var(--border-color, #1a1a1a);
-  color: #1a1a1a;
+  color: var(--pill-text);
   padding: 6px 14px;
   border-radius: 10px;
   font-size: 0.78rem;
@@ -415,7 +415,9 @@ export default function AttendancePage() {
                       {schedule.startTime} - {schedule.endTime}
                     </td>
                     <td>
-                      <span style={{ fontWeight: 800, color: "#1a1a1a" }}>
+                      <span
+                        style={{ fontWeight: 800, color: "var(--pill-text)" }}
+                      >
                         {classStudents.length}
                       </span>{" "}
                       students
@@ -448,7 +450,7 @@ export default function AttendancePage() {
                     style={{
                       textAlign: "center",
                       padding: "3rem 1rem",
-                      color: "#64748b",
+                      color: "var(--pill-text)",
                       fontWeight: 700,
                     }}
                   >

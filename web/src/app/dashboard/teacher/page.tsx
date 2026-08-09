@@ -54,8 +54,8 @@ const ScheduleRowItem = styled.div<{ $isNext?: boolean }>`
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  background: ${(props) =>
-    props.$isNext ? "#fef3c7" : "var(--bg-secondary, #ffffff)"};
+  background: ${(props) => (props.$isNext ? "#fef3c7" : "var(--bg-secondary)")};
+  background-color: var(--bg-yellow);
   border: 2px solid var(--border-color, #1a1a1a);
   border-radius: 16px;
   font-weight: 800;
@@ -96,12 +96,13 @@ const ScheduleMeta = styled.div`
 const TagPill = styled.span<{ $accent?: boolean }>`
   background: ${(props) =>
     props.$accent ? "#f2b72b" : "var(--bg-color, #ffffff)"};
+
   border: 1.5px solid var(--border-color, #1a1a1a);
   padding: 4px 12px;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: var(--pill-text);
 `;
 
 export default function TeacherOverview() {
