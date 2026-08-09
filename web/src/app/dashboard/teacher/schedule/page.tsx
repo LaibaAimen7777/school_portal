@@ -12,6 +12,7 @@ import {
   StudentCount,
   LoadingContainer,
 } from "@/wrappers/teacherDashboard";
+import TeacherHeader from "@/components/ui/TeacherHeader";
 
 export default function TeacherSchedule() {
   const [schedules, setSchedules] = useState<any[]>([]);
@@ -59,6 +60,11 @@ export default function TeacherSchedule() {
 
   return (
     <Container>
+      <TeacherHeader
+        title="Schedule Management"
+        subtitle="Check all your scheduled classes from here."
+        activeTab="schedule"
+      />
       <SectionCard>
         <SectionHeader>
           <h3>Weekly Schedule</h3>

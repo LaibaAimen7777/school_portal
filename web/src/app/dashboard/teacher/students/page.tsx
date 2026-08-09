@@ -16,6 +16,7 @@ import {
   ParentInfo,
   LoadingContainer,
 } from "@/wrappers/teacherDashboard";
+import TeacherHeader from "@/components/ui/TeacherHeader";
 
 export default function TeacherStudents() {
   const [students, setStudents] = useState<any[]>([]);
@@ -71,6 +72,11 @@ export default function TeacherStudents() {
 
   return (
     <Container>
+      <TeacherHeader
+        title="Student Management"
+        subtitle="See all the student details from here."
+        activeTab="students"
+      />
       <SectionCard>
         <SectionHeader>
           <h3>My Students ({students.length})</h3>

@@ -15,44 +15,7 @@ import {
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import { showError } from "@/components/ui/toast";
 import styled from "styled-components";
-
-// ── Redesigned Styled Components ──────────────────────────────────────────────
-const WelcomeHero = styled.div`
-  background-color: var(--bg-container, #ffffff);
-  border: 2px solid var(--border-color, #1a1a1a);
-  border-radius: 20px;
-  padding: 28px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 20px;
-`;
-
-const HeroText = styled.div`
-  h1 {
-    font-size: 1.6rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    color: var(--text-color, #1a1a1a);
-    margin: 0 0 6px 0;
-  }
-
-  p {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #64748b;
-    margin: 0;
-  }
-`;
-
-const QuickActionGroup = styled.div`
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-`;
+import TeacherHeader from "@/components/ui/TeacherHeader";
 
 const ActionPillButton = styled.button`
   background-color: var(--bg-color, #ffffff);
@@ -77,10 +40,6 @@ const ActionPillButton = styled.button`
     transform: translateY(1px);
     box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
   }
-`;
-
-const PrimaryPillButton = styled(ActionPillButton)`
-  background-color: var(--accent-color, #f2b72b);
 `;
 
 const ScheduleList = styled.div`
@@ -213,35 +172,13 @@ export default function TeacherOverview() {
     })
     .sort((a: any, b: any) => a.startTime.localeCompare(b.startTime))[0];
 
-  const formattedDate = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-
   return (
     <DashboardContainer>
       <Container>
-        {/* 🌟 Header Banner */}
-        <WelcomeHero>
-          <HeroText>
-            <h1>Welcome Back, {teacher.name || "Teacher"} </h1>
-            <p>{formattedDate} — Here is your teaching schedule for today.</p>
-          </HeroText>
-
-          <QuickActionGroup>
-            <Link href="/dashboard/teacher/attendance">
-              <PrimaryPillButton>Take Attendance</PrimaryPillButton>
-            </Link>
-            <Link href="/dashboard/teacher/students">
-              <ActionPillButton>Students</ActionPillButton>
-            </Link>
-            <Link href="/dashboard/teacher/schedule">
-              <ActionPillButton>Schedule</ActionPillButton>
-            </Link>
-          </QuickActionGroup>
-        </WelcomeHero>
+        <TeacherHeader
+          title={`Welcome Back, ${teacher.name || "Teacher"} `}
+          activeTab="overview"
+        />
 
         {/* 📊 Stat Cards Section */}
         <StatsGrid>

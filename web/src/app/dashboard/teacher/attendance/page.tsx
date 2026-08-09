@@ -17,6 +17,7 @@ import {
   DayButton,
   Badge,
 } from "@/wrappers/teacherDashboard";
+import TeacherHeader from "@/components/ui/TeacherHeader";
 
 // ── Modern Date Selector Styled Components ─────────────────────────────────
 const HeaderActions = styled.div`
@@ -192,6 +193,11 @@ export default function AttendancePage() {
 
   return (
     <Container>
+      <TeacherHeader
+        title="Attendance Management"
+        subtitle="Mark and update student attendance for scheduled classes."
+        activeTab="attendance"
+      />
       <SectionCard>
         <SectionHeader>
           <h3>
