@@ -19,57 +19,149 @@ import {
 } from "@/wrappers/teacherDashboard";
 import TeacherHeader from "@/components/ui/TeacherHeader";
 
-// ── Modern Date Selector Styled Components ─────────────────────────────────
-const HeaderActions = styled.div`
+// ── Neo-Brutalist Date Selector Components ─────────────────────────────────
+const DateBarContainer = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+  margin-top: 12px;
+  padding: 12px;
+  background-color: var(--bg-secondary, #f8fafc);
+  border: 2px solid var(--border-color, #1a1a1a);
+  border-radius: 16px;
+  box-shadow: 0 3px 0 var(--border-color, #1a1a1a);
 `;
 
-const DatePickerWrapper = styled.div`
-  position: relative;
-  display: inline-flex;
+const ArrowStepper = styled.div`
+  display: flex;
   align-items: center;
+  gap: 8px;
+`;
+
+const NavIconButton = styled.button`
+  background: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
+  color: var(--text-color, #1a1a1a);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
+  transition: all 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
+  }
+`;
+
+const WeekStrip = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px;
+  flex: 1;
+  justify-content: center;
+
+  /* Custom scrollbar styling for compact look */
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+`;
+
+const DayPillCard = styled.button<{ $active?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color, #1a1a1a);
+  background-color: ${(props) =>
+    props.$active
+      ? "var(--accent-color, #f2b72b)"
+      : "var(--bg-color, #ffffff)"};
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 58px;
+  box-shadow: ${(props) =>
+    props.$active ? "0 3px 0 var(--border-color, #1a1a1a)" : "none"};
+
+  .day-name {
+    font-size: 0.68rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .day-num {
+    font-size: 0.95rem;
+    font-weight: 900;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 0 var(--border-color, #1a1a1a);
+  }
+`;
+
+const RightControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
   input[type="date"] {
     background-color: var(--bg-color, #ffffff);
-    color: var(--text-color, #0f172a);
-    border: 1px solid var(--border-color, #cbd5e1);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    font-weight: 600;
+    color: var(--text-color, #1a1a1a);
+    border: 2px solid var(--border-color, #1a1a1a);
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    font-weight: 800;
     outline: none;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-
-    &:hover {
-      border-color: #94a3b8;
-    }
-
-    &:focus {
-      border-color: #0f172a;
-      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
-    }
+    box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
   }
 `;
 
 const QuickTodayButton = styled.button`
-  background: var(--bg-secondary, #f1f5f9);
-  border: 1px solid var(--border-color, #e2e8f0);
-  color: var(--text-color, #334155);
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  background: var(--bg-color, #ffffff);
+  border: 2px solid var(--border-color, #1a1a1a);
+  color: #1a1a1a;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 0 var(--border-color, #1a1a1a);
 
   &:hover {
-    background: #e2e8f0;
-    color: #0f172a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 var(--border-color, #1a1a1a);
+  }
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 var(--border-color, #1a1a1a);
   }
 `;
 
@@ -142,9 +234,28 @@ export default function AttendancePage() {
 
   const todaySchedules = schedules.filter((s) => s.dayOfWeek === selectedDay);
 
+  // ── Date Stepper Logic ───────────────────────────────────────────────────
+  const shiftDateByDays = (days: number) => {
+    const d = new Date(year, month - 1, day);
+    d.setDate(d.getDate() + days);
+    setSelectedDate(d.toISOString().split("T")[0]);
+  };
+
+  // Generate 7 days centered around current selected date for the week strip
+  const getWeekDays = () => {
+    const daysArr = [];
+    for (let i = -3; i <= 3; i++) {
+      const d = new Date(year, month - 1, day + i);
+      const isoStr = d.toISOString().split("T")[0];
+      const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+      const dayNum = d.getDate();
+      daysArr.push({ isoStr, dayName, dayNum });
+    }
+    return daysArr;
+  };
+
   const openAttendance = async (schedule: any) => {
     try {
-      // ✅ FIX: Fetch attendance based on selectedDate rather than hardcoded current date
       const res = await api.get(
         `/attendance?scheduleId=${schedule.id}&date=${selectedDate}`,
       );
@@ -198,9 +309,10 @@ export default function AttendancePage() {
         subtitle="Mark and update student attendance for scheduled classes."
         activeTab="attendance"
       />
+
       <SectionCard>
         <SectionHeader>
-          <h3>
+          <h3 style={{ textTransform: "uppercase", fontWeight: 900 }}>
             Classes for{" "}
             {localDateObj.toLocaleDateString("en-US", {
               weekday: "long",
@@ -209,39 +321,67 @@ export default function AttendancePage() {
               day: "numeric",
             })}
           </h3>
+        </SectionHeader>
 
-          {/* Clean Integrated Header Controls */}
-          <HeaderActions>
-            <DatePickerWrapper>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
-            </DatePickerWrapper>
+        {/* 🗓️ Upgraded Interactive Date Bar */}
+        <DateBarContainer>
+          <ArrowStepper>
+            <NavIconButton
+              onClick={() => shiftDateByDays(-1)}
+              title="Previous Day"
+            >
+              ←
+            </NavIconButton>
+            <NavIconButton onClick={() => shiftDateByDays(1)} title="Next Day">
+              →
+            </NavIconButton>
+          </ArrowStepper>
+
+          {/* Quick 7-Day Clickable Strip */}
+          <WeekStrip>
+            {getWeekDays().map((item) => (
+              <DayPillCard
+                key={item.isoStr}
+                $active={item.isoStr === selectedDate}
+                onClick={() => setSelectedDate(item.isoStr)}
+              >
+                <span className="day-name">{item.dayName}</span>
+                <span className="day-num">{item.dayNum}</span>
+              </DayPillCard>
+            ))}
+          </WeekStrip>
+
+          <RightControls>
             <QuickTodayButton onClick={handleResetToToday}>
               Today
             </QuickTodayButton>
-          </HeaderActions>
-        </SectionHeader>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+            />
+          </RightControls>
+        </DateBarContainer>
 
-        <StatsGrid style={{ marginTop: "16px" }}>
+        {/* 📊 Stat Cards */}
+        <StatsGrid style={{ marginTop: "20px" }}>
           <StatCard>
-            <div className="label">Scheduled Classes</div>
+            <div className="label">SCHEDULED CLASSES</div>
             <div className="value">{todaySchedules.length}</div>
           </StatCard>
           <StatCard>
-            <div className="label">Total Students</div>
+            <div className="label">TOTAL STUDENTS</div>
             <div className="value">{students.length}</div>
           </StatCard>
           <StatCard>
-            <div className="label">Total Subjects</div>
+            <div className="label">TOTAL SUBJECTS</div>
             <div className="value">
               {new Set(todaySchedules.map((s: any) => s.subject?.id)).size}
             </div>
           </StatCard>
         </StatsGrid>
 
+        {/* 📋 Attendance Table */}
         <TableWrapper style={{ marginTop: "24px" }}>
           <table>
             <thead>
@@ -275,7 +415,7 @@ export default function AttendancePage() {
                       {schedule.startTime} - {schedule.endTime}
                     </td>
                     <td>
-                      <span style={{ fontWeight: 600, color: "#0f172a" }}>
+                      <span style={{ fontWeight: 800, color: "#1a1a1a" }}>
                         {classStudents.length}
                       </span>{" "}
                       students
@@ -309,6 +449,7 @@ export default function AttendancePage() {
                       textAlign: "center",
                       padding: "3rem 1rem",
                       color: "#64748b",
+                      fontWeight: 700,
                     }}
                   >
                     No classes scheduled for {selectedDay.toLowerCase()}.

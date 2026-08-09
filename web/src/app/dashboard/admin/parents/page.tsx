@@ -62,6 +62,11 @@ export default function ParentsPage() {
   const [loading, setLoading] = useState(true);
   const [resettingId, setResettingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedParent, setSelectedParent] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
   const [credentials, setCredentials] = useState<{
     username: string;
     password: string;
@@ -80,6 +85,11 @@ export default function ParentsPage() {
     }
   }, [credentials]);
 
+  const handleResetClick = (parentId: number, parentName: string) => {
+    setSelectedParent({ id: parentId, name: parentName });
+    setIsModalOpen(true);
+  };
+
   const fetchParents = async () => {
     try {
       const res = await api.get("/parent");
@@ -93,13 +103,13 @@ export default function ParentsPage() {
   };
 
   const resetPassword = async (parentId: number, parentName: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to reset password for ${parentName}? A new temporary password will be generated.`,
-      )
-    ) {
-      return;
-    }
+    // if (
+    //   !confirm(
+    //     `Are you sure you want to reset password for ${parentName}? A new temporary password will be generated.`,
+    //   )
+    // ) {
+    //   return;
+    // }
 
     setResettingId(parentId);
 
@@ -119,6 +129,16 @@ export default function ParentsPage() {
     } finally {
       setResettingId(null);
     }
+  };
+
+  const handleConfirmReset = async () => {
+    if (!selectedParent) return;
+
+    setIsModalOpen(false);
+
+    await resetPassword(selectedParent.id, selectedParent.name);
+
+    setSelectedParent(null);
   };
 
   const handleDownloadPDF = async () => {
@@ -267,7 +287,7 @@ export default function ParentsPage() {
                   <td>
                     <ResetButton
                       onClick={() =>
-                        resetPassword(
+                        handleResetClick(
                           parent.id,
                           parent.fatherName || parent.motherName || "Parent",
                         )
@@ -329,6 +349,42 @@ export default function ParentsPage() {
 
               <PrimaryButton onClick={handleDownloadPDF}>
                 <FaDownload /> Download PDF
+              </PrimaryButton>
+            </div>
+          </CredentialCard>
+        </CredentialCardContainer>
+      )}
+      {isModalOpen && selectedParent && (
+        <CredentialCardContainer onClick={() => setIsModalOpen(false)}>
+          <CredentialCard onClick={(e) => e.stopPropagation()}>
+            <div className="card-header">
+              <h3>Confirm Password Reset</h3>
+              <SecondaryButton
+                style={{ padding: "0.4rem 0.6rem", border: "none" }}
+                onClick={() => setIsModalOpen(false)}
+              >
+                <FaTimes />
+              </SecondaryButton>
+            </div>
+
+            <p style={{ marginTop: "1rem", lineHeight: "1.5" }}>
+              Are you sure you want to reset password for{" "}
+              <strong>{selectedParent.name}</strong>? <br />A new temporary
+              password will be generated.
+            </p>
+
+            <div className="card-actions">
+              <SecondaryButton onClick={() => setIsModalOpen(false)}>
+                Cancel
+              </SecondaryButton>
+
+              <PrimaryButton
+                onClick={handleConfirmReset}
+                disabled={resettingId === selectedParent.id}
+              >
+                {resettingId === selectedParent.id
+                  ? "Resetting..."
+                  : "Confirm Reset"}
               </PrimaryButton>
             </div>
           </CredentialCard>

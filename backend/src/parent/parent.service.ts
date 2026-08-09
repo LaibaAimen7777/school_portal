@@ -154,36 +154,40 @@ export class ParentService {
   }
 
   async resetParentPassword(parentId: number) {
-    const parent = await this.userRepository.findOne({
+    // const parent = await this.userRepository.findOne({
+    //   where: { id: parentId },
+    //   relations: ['parent'],
+    // });
+    const parent = await this.parentRepository.findOne({
       where: { id: parentId },
-      relations: ['parent'],
+      relations: ['user'],
     });
 
     console.log(parentId);
     console.log('parent', parent);
 
     if (!parent) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Parent not found');
     }
 
-    if (!parent.parent) {
-      throw new BadRequestException('Parent not found');
+    if (!parent.user) {
+      throw new BadRequestException('User not found');
     }
 
     const newPassword = crypto.randomBytes(8).toString('hex');
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    parent.password = hashedPassword;
-    parent.must_change_password = true;
-    parent.can_login = true;
-    parent.is_active = true;
+    parent.user.password = hashedPassword;
+    parent.user.must_change_password = true;
+    parent.user.can_login = true;
+    parent.user.is_active = true;
 
-    await this.userRepository.save(parent);
+    await this.userRepository.save(parent.user);
 
     return {
       message: 'Password reset successfully',
-      username: parent.username,
+      username: parent.user.username,
       temporaryPassword: newPassword,
     };
   }
