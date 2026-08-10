@@ -104,6 +104,10 @@ export default function ScheduleDisplayPage() {
   const [selectedDay, setSelectedDay] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedScheduleId, setSelectedScheduleId] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     fetchData();
@@ -158,17 +162,30 @@ export default function ScheduleDisplayPage() {
     setFilteredSchedules(filtered);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this schedule slot?")) return;
+  const handleDeleteClick = (id: number) => {
+    setSelectedScheduleId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (selectedScheduleId === null) return;
+
+    const id = selectedScheduleId;
+
+    setIsDeleteModalOpen(false);
     setDeletingId(id);
+
     try {
       await api.delete(`/schedule/${id}`);
+
       setSchedules((prev) => prev.filter((s) => s.id !== id));
+
       showSuccess("Schedule slot deleted successfully");
     } catch {
       showError("Failed to delete schedule slot");
     } finally {
       setDeletingId(null);
+      setSelectedScheduleId(null);
     }
   };
 
@@ -366,7 +383,7 @@ export default function ScheduleDisplayPage() {
                                 <FaDoorOpen /> {slot.room.name}
                               </div>
                               <S.DeleteButton
-                                onClick={() => handleDelete(slot.id)}
+                                onClick={() => handleDeleteClick(slot.id)}
                                 disabled={deletingId === slot.id}
                               >
                                 ✕
@@ -420,7 +437,7 @@ export default function ScheduleDisplayPage() {
                           <FaDoorOpen /> {schedule.room.name}
                         </div>
                         <S.WeekDeleteButton
-                          onClick={() => handleDelete(schedule.id)}
+                          onClick={() => handleDeleteClick(schedule.id)}
                           disabled={deletingId === schedule.id}
                         >
                           ✕
@@ -435,6 +452,40 @@ export default function ScheduleDisplayPage() {
             </S.DayColumn>
           ))}
         </S.WeekView>
+      )}
+      {isDeleteModalOpen && (
+        <S.ModalOverlay onClick={() => setIsDeleteModalOpen(false)}>
+          <S.DeleteModal onClick={(e) => e.stopPropagation()}>
+            <S.ModalHeader>
+              <div>
+                <h3>Delete Schedule</h3>
+                <p>This action cannot be undone.</p>
+              </div>
+
+              <S.ModalCloseButton onClick={() => setIsDeleteModalOpen(false)}>
+                <FaTimes />
+              </S.ModalCloseButton>
+            </S.ModalHeader>
+
+            <S.ModalContent>
+              <div className="warning-icon">
+                <FaExclamationTriangle />
+              </div>
+
+              <p>Are you sure you want to delete this schedule slot?</p>
+            </S.ModalContent>
+
+            <S.ModalActions>
+              <S.CancelButton onClick={() => setIsDeleteModalOpen(false)}>
+                Cancel
+              </S.CancelButton>
+
+              <S.ConfirmDeleteButton onClick={handleConfirmDelete}>
+                Delete Schedule
+              </S.ConfirmDeleteButton>
+            </S.ModalActions>
+          </S.DeleteModal>
+        </S.ModalOverlay>
       )}
     </S.Container>
   );

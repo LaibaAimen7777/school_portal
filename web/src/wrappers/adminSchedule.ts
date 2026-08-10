@@ -525,3 +525,110 @@ export const EmptyState = styled.div`
     }
   }
 `;
+
+export const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+`;
+
+export const DeleteModal = styled.div`
+  width: 420px;
+  max-width: 100%;
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+`;
+
+export const ModalHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: #666;
+    font-size: 0.9rem;
+  }
+`;
+
+export const ModalCloseButton = styled.button`
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #777;
+
+  &:hover {
+    color: #111;
+  }
+`;
+
+export const ModalContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+
+  .warning-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fff3cd;
+    color: #eeb22d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+    color: #444;
+    line-height: 1.5;
+  }
+`;
+
+export const ModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+`;
+
+export const CancelButton = styled.button`
+  padding: 0.65rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+`;
+
+export const ConfirmDeleteButton = styled.button`
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #dc3545;
+  color: white;
+  cursor: pointer;
+
+  &:hover {
+    background: #c82333;
+  }
+`;

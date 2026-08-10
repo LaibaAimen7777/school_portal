@@ -397,7 +397,7 @@ export const Badge = styled.span<{ $primary?: boolean }>`
   gap: 6px;
   background-color: ${(props) =>
     props.$primary ? "var(--accent-color, #f2b72b)" : "#f1f5f9"};
-  color: var(--heading-color, #0f172a);
+  color: var(--heading-color);
   border: 1px solid
     ${(props) => (props.$primary ? "rgba(0, 0, 0, 0.08)" : "#e2e8f0")};
   border-radius: 6px;
@@ -559,8 +559,8 @@ export const DaySelector = styled.div`
 `;
 
 export const StudentCount = styled.span`
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--button-hover);
+  border: 1px solid var(--pill-text);
   color: var(--heading-color, #334155);
   border-radius: 6px;
   padding: 2px 8px;
