@@ -16,6 +16,7 @@ import { AttendanceController } from './attendance/attendance.controller';
 import { AttendanceModule } from './attendance/attendance.module';
 
 import { SchoolConfigModule } from './school-config/school-config.module';
+import { GradeScheduleOverrideModule } from './grade_schedule_override/grade_schedule_override.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { SchoolConfigModule } from './school-config/school-config.module';
     RoomsModule,
     AttendanceModule,
     SchoolConfigModule,
+    GradeScheduleOverrideModule,
   ],
   // controllers: [AttendanceController, AssignmentsController, ExamsController],
   // providers: [AssignmentsService, ExamsService],

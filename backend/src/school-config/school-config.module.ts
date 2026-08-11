@@ -4,9 +4,12 @@ import { SchoolConfigService } from './school-config.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SchoolConfig } from './entities/school-config.entity';
 import { Schedule } from 'src/schedule/entities/schedule.entity';
+import { GradeScheduleOverride } from 'src/grade_schedule_override/entities/gradeSchedule.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SchoolConfig, Schedule])],
+  imports: [
+    TypeOrmModule.forFeature([SchoolConfig, Schedule, GradeScheduleOverride]),
+  ],
   controllers: [SchoolConfigController],
   providers: [SchoolConfigService],
 })
