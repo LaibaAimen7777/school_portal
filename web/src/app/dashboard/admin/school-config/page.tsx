@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import { api } from "@/services/api";
 import { showSuccess, showError } from "@/components/ui/toast";
 import * as S from "@/wrappers/schoolConfigStyles";
@@ -507,13 +507,13 @@ export default function SchoolConfigPage() {
               </span>
               <S.BadgeContainer>
                 {periods.map((p, i) => (
-                  <>
-                    <S.PeriodBadge key={i}>
+                  <Fragment key={`${p.label}-${p.start}-${p.end}`}>
+                    <S.PeriodBadge>
                       <strong>{p.label}</strong> {p.start} – {p.end}
                     </S.PeriodBadge>
+
                     {p.isBreakAfter && breakTime && (
                       <S.PeriodBadge
-                        key={`break-${i}`}
                         style={{
                           background: "#fef9c3",
                           color: "#854d0e",
@@ -523,7 +523,7 @@ export default function SchoolConfigPage() {
                         🍽 Break {breakTime}
                       </S.PeriodBadge>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </S.BadgeContainer>
             </div>
