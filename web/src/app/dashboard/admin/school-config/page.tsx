@@ -11,7 +11,16 @@ interface SchoolConfig {
   schoolEndTime: string;
   periodDurationMinutes: number;
   breakDurationMinutes: number;
+  breakAfterPeriod: number;
+  fridayEndTime: string | null;
   updatedAt: string;
+}
+
+interface GradeOverride {
+  id: number;
+  grade: number;
+  endTime: string | null;
+  fridayEndTime: string | null;
 }
 
 interface ConflictItem {
@@ -32,28 +41,52 @@ interface ClassItem {
   currentStrength: number;
 }
 
+type PeriodEntry = {
+  label: string;
+  start: string;
+  end: string;
+  isBreakAfter: boolean; // break comes after this period
+};
+
 export default function SchoolConfigPage() {
   const [config, setConfig] = useState<SchoolConfig | null>(null);
   const [form, setForm] = useState({
     schoolStartTime: "",
     schoolEndTime: "",
     periodDurationMinutes: 40,
-    breakDurationMinutes: 5,
+    breakDurationMinutes: 20,
+    breakAfterPeriod: 4,
+    fridayEndTime: "",
   });
   const [conflicts, setConflicts] = useState<ConflictItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [timeError, setTimeError] = useState("");
   const [showConflicts, setShowConflicts] = useState(false);
+
+  // Classes state
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [newGrade, setNewGrade] = useState<number>(1);
   const [newSection, setNewSection] = useState<string>("A");
   const [newMaxStrength, setNewMaxStrength] = useState<number>(30);
   const [addingClass, setAddingClass] = useState(false);
 
+  // Grade overrides state
+  const [gradeOverrides, setGradeOverrides] = useState<GradeOverride[]>([]);
+  const [newOverride, setNewOverride] = useState({
+    grade: 1,
+    endTime: "",
+    fridayEndTime: "",
+  });
+  const [addingOverride, setAddingOverride] = useState(false);
+
+  // Period preview: which grade to preview (null = school default)
+  const [previewGrade, setPreviewGrade] = useState<number | "">("");
+
   useEffect(() => {
     fetchConfig();
     fetchClasses();
+    fetchGradeOverrides();
   }, []);
 
   const fetchConfig = async () => {
@@ -66,6 +99,8 @@ export default function SchoolConfigPage() {
         schoolEndTime: res.data.schoolEndTime,
         periodDurationMinutes: res.data.periodDurationMinutes,
         breakDurationMinutes: res.data.breakDurationMinutes,
+        breakAfterPeriod: res.data.breakAfterPeriod ?? 4,
+        fridayEndTime: res.data.fridayEndTime ?? "",
       });
     } catch {
       showError("Failed to load school config");
@@ -76,6 +111,15 @@ export default function SchoolConfigPage() {
   const fetchClasses = async () => {
     const res = await api.get("/school-class");
     setClasses(res.data);
+  };
+
+  const fetchGradeOverrides = async () => {
+    try {
+      const res = await api.get("/school-config/grade-overrides");
+      setGradeOverrides(res.data);
+    } catch {
+      // fail silently — table may not exist yet
+    }
   };
 
   const validateTimes = (start: string, end: string) => {
@@ -91,10 +135,9 @@ export default function SchoolConfigPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => {
-      const next = {
-        ...prev,
-        [name]: name.includes("Duration") ? Number(value) : value,
-      };
+      const isNumeric =
+        name.includes("Duration") || name === "breakAfterPeriod";
+      const next = { ...prev, [name]: isNumeric ? Number(value) : value };
       if (name === "schoolStartTime" || name === "schoolEndTime") {
         validateTimes(
           name === "schoolStartTime" ? value : prev.schoolStartTime,
@@ -115,7 +158,10 @@ export default function SchoolConfigPage() {
     setShowConflicts(false);
 
     try {
-      const res = await api.patch("/school-config", form);
+      const res = await api.patch("/school-config", {
+        ...form,
+        fridayEndTime: form.fridayEndTime || null,
+      });
       setConfig(res.data.config);
 
       if (res.data.conflicts?.length > 0) {
@@ -144,9 +190,48 @@ export default function SchoolConfigPage() {
     }
   };
 
-  const computePeriods = () => {
-    if (!form.schoolStartTime || !form.schoolEndTime) return [];
-    const periods: { label: string; start: string; end: string }[] = [];
+  const handleAddOverride = async () => {
+    if (!newOverride.endTime && !newOverride.fridayEndTime) {
+      return showError("Set at least one time override");
+    }
+    if (gradeOverrides.find((o) => o.grade === newOverride.grade)) {
+      return showError(
+        `Grade ${newOverride.grade} already has an override — edit or delete it first`,
+      );
+    }
+    setAddingOverride(true);
+    try {
+      await api.post("/school-config/grade-overrides", {
+        grade: newOverride.grade,
+        endTime: newOverride.endTime || null,
+        fridayEndTime: newOverride.fridayEndTime || null,
+      });
+      showSuccess(`Grade ${newOverride.grade} override added`);
+      fetchGradeOverrides();
+      setNewOverride({ grade: 1, endTime: "", fridayEndTime: "" });
+    } catch (err: any) {
+      showError(err.response?.data?.message || "Failed to add override");
+    }
+    setAddingOverride(false);
+  };
+
+  const handleDeleteOverride = async (grade: number) => {
+    try {
+      await api.delete(`/school-config/grade-overrides/${grade}`);
+      setGradeOverrides((prev) => prev.filter((o) => o.grade !== grade));
+      showSuccess(`Grade ${grade} override removed`);
+    } catch {
+      showError("Failed to remove override");
+    }
+  };
+
+  // Core period computation — accepts a specific end time so we can preview
+  // any grade or the Friday variant.
+  const computePeriods = (endTimeOverride?: string): PeriodEntry[] => {
+    const startTime = form.schoolStartTime;
+    const endTime = endTimeOverride || form.schoolEndTime;
+    if (!startTime || !endTime || endTime <= startTime) return [];
+
     const toMins = (t: string) => {
       const [h, m] = t.split(":").map(Number);
       return h * 60 + m;
@@ -159,25 +244,76 @@ export default function SchoolConfigPage() {
       return `${h}:${m}`;
     };
 
-    let cursor = toMins(form.schoolStartTime);
-    const end = toMins(form.schoolEndTime);
+    const periods: PeriodEntry[] = [];
+    let cursor = toMins(startTime);
+    const end = toMins(endTime);
     let i = 1;
 
     while (cursor + form.periodDurationMinutes <= end) {
       const pEnd = cursor + form.periodDurationMinutes;
+      const isBreakAfter = i === form.breakAfterPeriod;
+
       periods.push({
         label: `Period ${i}`,
         start: toTime(cursor),
         end: toTime(pEnd),
+        isBreakAfter,
       });
-      cursor = pEnd + form.breakDurationMinutes;
+
+      // Break only after the designated period, not every period
+      cursor = isBreakAfter ? pEnd + form.breakDurationMinutes : pEnd;
       i++;
     }
 
     return periods;
   };
 
-  const periods = computePeriods();
+  // Resolve effective end times for the preview grade
+  const resolveEndTimes = () => {
+    const override =
+      previewGrade !== ""
+        ? gradeOverrides.find((o) => o.grade === previewGrade)
+        : null;
+
+    const regularEnd = override?.endTime || form.schoolEndTime;
+    const fridayEnd =
+      override?.fridayEndTime ||
+      form.fridayEndTime ||
+      override?.endTime ||
+      form.schoolEndTime;
+
+    return { regularEnd, fridayEnd };
+  };
+
+  const { regularEnd, fridayEnd } = resolveEndTimes();
+  const periods = computePeriods(regularEnd);
+  const fridayPeriods =
+    form.fridayEndTime ||
+    (previewGrade !== "" &&
+      gradeOverrides.find((o) => o.grade === previewGrade)?.fridayEndTime)
+      ? computePeriods(fridayEnd)
+      : [];
+
+  const breakTime =
+    periods.find((p) => p.isBreakAfter) !== undefined
+      ? (() => {
+          const bp = periods.find((p) => p.isBreakAfter)!;
+          const toMins = (t: string) => {
+            const [h, m] = t.split(":").map(Number);
+            return h * 60 + m;
+          };
+          const toTime = (mins: number) => {
+            const h = Math.floor(mins / 60)
+              .toString()
+              .padStart(2, "0");
+            const m = (mins % 60).toString().padStart(2, "0");
+            return `${h}:${m}`;
+          };
+          const breakStart = toMins(bp.end);
+          const breakEnd = breakStart + form.breakDurationMinutes;
+          return `${bp.end} – ${toTime(breakEnd)}`;
+        })()
+      : null;
 
   if (fetching) {
     return (
@@ -197,6 +333,7 @@ export default function SchoolConfigPage() {
       </S.Header>
 
       <S.Form onSubmit={handleSave}>
+        {/* ── School Hours ── */}
         <S.Section>
           <S.SectionTitle>School Hours</S.SectionTitle>
           <S.Grid>
@@ -211,7 +348,7 @@ export default function SchoolConfigPage() {
               />
             </S.Field>
             <S.Field>
-              <S.Label>End time</S.Label>
+              <S.Label>Default end time</S.Label>
               <S.Input
                 type="time"
                 name="schoolEndTime"
@@ -224,8 +361,9 @@ export default function SchoolConfigPage() {
           {timeError && <S.ErrorText>{timeError}</S.ErrorText>}
         </S.Section>
 
+        {/* ── Period & Break Settings ── */}
         <S.Section>
-          <S.SectionTitle>Period Settings</S.SectionTitle>
+          <S.SectionTitle>Period &amp; Break Settings</S.SectionTitle>
           <S.Grid>
             <S.Field>
               <S.Label>Period duration (minutes)</S.Label>
@@ -246,33 +384,208 @@ export default function SchoolConfigPage() {
                 name="breakDurationMinutes"
                 value={form.breakDurationMinutes}
                 onChange={handleChange}
-                min={0}
-                max={30}
+                min={5}
+                max={60}
                 required
               />
+            </S.Field>
+            <S.Field>
+              <S.Label>Break after which period?</S.Label>
+              <S.Input
+                type="number"
+                name="breakAfterPeriod"
+                value={form.breakAfterPeriod}
+                onChange={handleChange}
+                min={1}
+                max={10}
+                required
+              />
+              <span
+                style={{
+                  fontSize: "12px",
+                  opacity: 0.6,
+                  marginTop: "4px",
+                  display: "block",
+                }}
+              >
+                One break per day, after this period number
+              </span>
             </S.Field>
           </S.Grid>
         </S.Section>
 
+        {/* ── Friday Short Day ── */}
+        <S.Section>
+          <S.SectionTitle>
+            Friday Schedule{" "}
+            <span
+              style={{ fontWeight: 400, opacity: 0.6, fontSize: "0.85rem" }}
+            >
+              (optional — leave empty if Friday hours are the same)
+            </span>
+          </S.SectionTitle>
+          <S.Grid>
+            <S.Field>
+              <S.Label>Friday end time</S.Label>
+              <S.Input
+                type="time"
+                name="fridayEndTime"
+                value={form.fridayEndTime}
+                onChange={handleChange}
+              />
+              <span
+                style={{
+                  fontSize: "12px",
+                  opacity: 0.6,
+                  marginTop: "4px",
+                  display: "block",
+                }}
+              >
+                All grades dismiss earlier on Friday unless overridden per grade
+              </span>
+            </S.Field>
+          </S.Grid>
+        </S.Section>
+
+        {/* ── Period Preview ── */}
         {periods.length > 0 && (
           <S.PeriodPreview>
-            <S.SectionTitle>
-              Period Preview{" "}
-              <span style={{ fontWeight: 400, opacity: 0.6 }}>
-                ({periods.length} periods fit)
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "12px",
+                flexWrap: "wrap",
+              }}
+            >
+              <S.SectionTitle style={{ margin: 0 }}>
+                Period Preview
+              </S.SectionTitle>
+              <select
+                value={previewGrade}
+                onChange={(e) =>
+                  setPreviewGrade(
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                style={{
+                  padding: "4px 8px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  fontSize: "13px",
+                }}
+              >
+                <option value="">School default</option>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((g) => (
+                  <option key={g} value={g}>
+                    Grade {g}
+                    {gradeOverrides.find((o) => o.grade === g) ? " ✦" : ""}
+                  </option>
+                ))}
+              </select>
+              <span style={{ fontSize: "13px", opacity: 0.6 }}>
+                {periods.length} period{periods.length !== 1 ? "s" : ""}
+                {breakTime ? ` · Break: ${breakTime}` : ""}
               </span>
-            </S.SectionTitle>
-            <S.BadgeContainer>
-              {periods.map((p, i) => (
-                <S.PeriodBadge key={i}>
-                  <strong>{p.label}</strong> {p.start} – {p.end}
-                </S.PeriodBadge>
-              ))}
-            </S.BadgeContainer>
+            </div>
+
+            {/* Regular day */}
+            <div style={{ marginBottom: fridayPeriods.length ? "16px" : 0 }}>
+              <span
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  opacity: 0.5,
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                  display: "block",
+                  marginBottom: "6px",
+                }}
+              >
+                Mon – Thu{fridayPeriods.length === 0 ? " + Fri" : ""}
+              </span>
+              <S.BadgeContainer>
+                {periods.map((p, i) => (
+                  <>
+                    <S.PeriodBadge key={i}>
+                      <strong>{p.label}</strong> {p.start} – {p.end}
+                    </S.PeriodBadge>
+                    {p.isBreakAfter && breakTime && (
+                      <S.PeriodBadge
+                        key={`break-${i}`}
+                        style={{
+                          background: "#fef9c3",
+                          color: "#854d0e",
+                          border: "1px dashed #fbbf24",
+                        }}
+                      >
+                        🍽 Break {breakTime}
+                      </S.PeriodBadge>
+                    )}
+                  </>
+                ))}
+              </S.BadgeContainer>
+            </div>
+
+            {/* Friday day (only if different) */}
+            {fridayPeriods.length > 0 && (
+              <div>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    opacity: 0.5,
+                    letterSpacing: "0.05em",
+                    textTransform: "uppercase",
+                    display: "block",
+                    marginBottom: "6px",
+                  }}
+                >
+                  Friday · ends {fridayEnd} · {fridayPeriods.length} period
+                  {fridayPeriods.length !== 1 ? "s" : ""}
+                </span>
+                <S.BadgeContainer>
+                  {fridayPeriods.map((p, i) => (
+                    <>
+                      <S.PeriodBadge
+                        key={i}
+                        style={{ background: "#ede9fe", color: "#5b21b6" }}
+                      >
+                        <strong>{p.label}</strong> {p.start} – {p.end}
+                      </S.PeriodBadge>
+                      {p.isBreakAfter && (
+                        <S.PeriodBadge
+                          key={`break-fri-${i}`}
+                          style={{
+                            background: "#fef9c3",
+                            color: "#854d0e",
+                            border: "1px dashed #fbbf24",
+                          }}
+                        >
+                          🍽 Break {p.end} –{" "}
+                          {(() => {
+                            const [h, m] = p.end.split(":").map(Number);
+                            const total =
+                              h * 60 + m + form.breakDurationMinutes;
+                            return `${Math.floor(total / 60)
+                              .toString()
+                              .padStart(
+                                2,
+                                "0",
+                              )}:${(total % 60).toString().padStart(2, "0")}`;
+                          })()}
+                        </S.PeriodBadge>
+                      )}
+                    </>
+                  ))}
+                </S.BadgeContainer>
+              </div>
+            )}
           </S.PeriodPreview>
         )}
 
-        {periods.length === 0 && (
+        {periods.length === 0 && form.schoolStartTime && form.schoolEndTime && (
           <S.EmptyMessage>
             No full periods fit in the selected hours.
           </S.EmptyMessage>
@@ -283,6 +596,7 @@ export default function SchoolConfigPage() {
         </S.SaveButton>
       </S.Form>
 
+      {/* ── Conflicts ── */}
       {showConflicts && conflicts.length > 0 && (
         <S.ConflictPanel>
           <S.ConflictHeader>
@@ -325,10 +639,153 @@ export default function SchoolConfigPage() {
         </S.ConflictPanel>
       )}
 
+      {/* ── Grade-specific End Times ── */}
+      <S.Section style={{ marginTop: "2rem" }}>
+        <S.SectionTitle>Grade-specific Dismissal Times</S.SectionTitle>
+        <p style={{ fontSize: "13px", opacity: 0.6, marginBottom: "1rem" }}>
+          Override the school's default end time for specific grades. Useful
+          when lower grades (e.g. Grade 1–3) finish earlier than senior grades.
+          Friday times here take priority over the global Friday end time above.
+        </p>
+
+        {/* Add override form */}
+        <div
+          style={{
+            display: "flex",
+            gap: "12px",
+            alignItems: "flex-end",
+            marginBottom: "1.5rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <S.Field>
+            <S.Label>Grade</S.Label>
+            <S.Input
+              type="number"
+              min={1}
+              max={10}
+              value={newOverride.grade}
+              onChange={(e) =>
+                setNewOverride((p) => ({
+                  ...p,
+                  grade: Number(e.target.value),
+                }))
+              }
+              style={{ width: "70px" }}
+            />
+          </S.Field>
+
+          <S.Field>
+            <S.Label>End time (Mon–Thu)</S.Label>
+            <S.Input
+              type="time"
+              value={newOverride.endTime}
+              onChange={(e) =>
+                setNewOverride((p) => ({ ...p, endTime: e.target.value }))
+              }
+            />
+          </S.Field>
+
+          <S.Field>
+            <S.Label>End time (Friday)</S.Label>
+            <S.Input
+              type="time"
+              value={newOverride.fridayEndTime}
+              onChange={(e) =>
+                setNewOverride((p) => ({
+                  ...p,
+                  fridayEndTime: e.target.value,
+                }))
+              }
+            />
+          </S.Field>
+
+          <S.SaveButton
+            type="button"
+            disabled={addingOverride}
+            onClick={handleAddOverride}
+            style={{ width: "auto", padding: "8px 20px" }}
+          >
+            {addingOverride ? "Adding..." : "+ Add Override"}
+          </S.SaveButton>
+        </div>
+
+        {gradeOverrides.length === 0 ? (
+          <S.EmptyMessage>
+            No grade overrides yet. All grades follow the school default times.
+          </S.EmptyMessage>
+        ) : (
+          <S.ConflictTable>
+            <thead>
+              <tr>
+                <th>Grade</th>
+                <th>End time (Mon–Thu)</th>
+                <th>End time (Friday)</th>
+                <th>Periods (regular)</th>
+                <th>Periods (Friday)</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {[...gradeOverrides]
+                .sort((a, b) => a.grade - b.grade)
+                .map((o) => {
+                  const regPeriods = computePeriods(
+                    o.endTime || form.schoolEndTime,
+                  );
+                  const friPeriods =
+                    o.fridayEndTime || form.fridayEndTime
+                      ? computePeriods(
+                          o.fridayEndTime ||
+                            form.fridayEndTime ||
+                            o.endTime ||
+                            form.schoolEndTime,
+                        )
+                      : null;
+                  return (
+                    <tr key={o.grade}>
+                      <td>Grade {o.grade}</td>
+                      <td>
+                        {o.endTime ?? (
+                          <span style={{ opacity: 0.4 }}>same as school</span>
+                        )}
+                      </td>
+                      <td>
+                        {o.fridayEndTime ?? (
+                          <span style={{ opacity: 0.4 }}>
+                            {form.fridayEndTime
+                              ? `global (${form.fridayEndTime})`
+                              : "same as regular"}
+                          </span>
+                        )}
+                      </td>
+                      <td>{regPeriods.length} periods</td>
+                      <td>
+                        {friPeriods !== null ? (
+                          `${friPeriods.length} periods`
+                        ) : (
+                          <span style={{ opacity: 0.4 }}>same as regular</span>
+                        )}
+                      </td>
+                      <td>
+                        <S.DeleteButton
+                          onClick={() => handleDeleteOverride(o.grade)}
+                        >
+                          Delete
+                        </S.DeleteButton>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </S.ConflictTable>
+        )}
+      </S.Section>
+
+      {/* ── Classes & Sections ── */}
       <S.Section style={{ marginTop: "2rem" }}>
         <S.SectionTitle>Classes &amp; Sections</S.SectionTitle>
 
-        {/* Add Section Form */}
         <div
           style={{
             display: "flex",
@@ -406,7 +863,6 @@ export default function SchoolConfigPage() {
           </S.SaveButton>
         </div>
 
-        {/* Classes Table */}
         {classes.length === 0 ? (
           <S.EmptyMessage>No classes yet. Add one above.</S.EmptyMessage>
         ) : (
