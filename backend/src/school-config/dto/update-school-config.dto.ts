@@ -1,4 +1,3 @@
-// school-config/dto/update-school-config.dto.ts
 import {
   IsString,
   IsInt,
@@ -14,14 +13,14 @@ export class UpdateSchoolConfigDto {
   @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, {
     message: 'schoolStartTime must be in HH:MM format',
   })
-  schoolStartTime?: string; // "08:00"
+  schoolStartTime?: string;
 
   @IsString()
   @IsOptional()
   @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, {
     message: 'schoolEndTime must be in HH:MM format',
   })
-  schoolEndTime?: string; // "15:00"
+  schoolEndTime?: string;
 
   @IsInt()
   @IsOptional()
@@ -34,4 +33,17 @@ export class UpdateSchoolConfigDto {
   @Min(0)
   @Max(30)
   breakDurationMinutes?: number;
+
+  @IsInt()
+  @IsOptional()
+  @Min(1)
+  @Max(10)
+  breakAfterPeriod?: number;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, {
+    message: 'fridayEndTime must be in HH:MM format',
+  })
+  fridayEndTime?: string | null;
 }

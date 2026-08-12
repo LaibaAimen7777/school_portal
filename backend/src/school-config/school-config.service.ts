@@ -36,6 +36,9 @@ export class SchoolConfigService {
     const config = await this.getConfig();
     const updated = await this.configRepo.save({ ...config, ...dto });
 
+    console.log('config before', config);
+    console.log('Update times', updated);
+
     // Run audit and return conflicts alongside the updated config
     const conflicts = await this.auditSchedulesAgainstNewTiming(updated);
     return { config: updated, conflicts };

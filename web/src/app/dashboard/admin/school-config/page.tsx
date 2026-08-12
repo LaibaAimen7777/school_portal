@@ -94,13 +94,17 @@ export default function SchoolConfigPage() {
     try {
       const res = await api.get("/school-config");
       setConfig(res.data);
+      const formatTime = (time: string | null | undefined) => {
+        if (!time) return "";
+        return time.substring(0, 5);
+      };
       setForm({
-        schoolStartTime: res.data.schoolStartTime,
-        schoolEndTime: res.data.schoolEndTime,
+        schoolStartTime: formatTime(res.data.schoolStartTime),
+        schoolEndTime: formatTime(res.data.schoolEndTime),
         periodDurationMinutes: res.data.periodDurationMinutes,
         breakDurationMinutes: res.data.breakDurationMinutes,
         breakAfterPeriod: res.data.breakAfterPeriod ?? 4,
-        fridayEndTime: res.data.fridayEndTime ?? "",
+        fridayEndTime: formatTime(res.data.fridayEndTime) ?? "",
       });
     } catch {
       showError("Failed to load school config");

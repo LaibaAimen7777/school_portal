@@ -27,6 +27,7 @@ export class SchoolConfigController {
 
   @Patch()
   updateTiming(@Body() dto: UpdateSchoolConfigDto) {
+    console.log('dto', dto);
     return this.schoolConfigService.updateTiming(dto);
   }
 }

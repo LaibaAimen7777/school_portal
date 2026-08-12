@@ -17,6 +17,7 @@ import {
   FaCalendarWeek,
   FaTimes,
   FaDoorOpen,
+  FaCoffee,
 } from "react-icons/fa";
 
 interface Schedule {
@@ -46,13 +47,79 @@ interface SchoolConfig {
   schoolEndTime: string;
   periodDurationMinutes: number;
   breakDurationMinutes: number;
+  breakAfterPeriod: number;
+  fridayEndTime: string | null;
 }
+
+interface GradeOverride {
+  id: number;
+  grade: number;
+  endTime: string | null;
+  fridayEndTime: string | null;
+}
+
+// A slot entry is either a teaching period or the break block
+type SlotEntry =
+  | { type: "period"; startTime: string; endTime: string }
+  | { type: "break"; startTime: string; endTime: string };
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
 
 const formatDay = (day: string) => day.charAt(0) + day.slice(1).toLowerCase();
-
 const formatTime = (time: string) => time.substring(0, 5);
+
+const toMins = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+};
+const toTime = (mins: number) =>
+  `${Math.floor(mins / 60)
+    .toString()
+    .padStart(2, "0")}:${(mins % 60).toString().padStart(2, "0")}`;
+
+/**
+ * Generates period + break entries for a given end time.
+ * Break appears exactly once — after breakAfterPeriod periods — not every period.
+ */
+function generateSlotEntries(
+  config: SchoolConfig,
+  endTimeOverride?: string,
+): SlotEntry[] {
+  const startMins = toMins(config.schoolStartTime);
+  const endMins = toMins(endTimeOverride ?? config.schoolEndTime);
+  const entries: SlotEntry[] = [];
+  let cursor = startMins;
+  let periodNum = 1;
+
+  while (cursor + config.periodDurationMinutes <= endMins) {
+    const slotEnd = cursor + config.periodDurationMinutes;
+
+    entries.push({
+      type: "period",
+      startTime: toTime(cursor),
+      endTime: toTime(slotEnd),
+    });
+
+    if (periodNum === config.breakAfterPeriod) {
+      const breakEnd = slotEnd + config.breakDurationMinutes;
+      // Only render the break row if it actually fits before school ends
+      if (breakEnd <= endMins) {
+        entries.push({
+          type: "break",
+          startTime: toTime(slotEnd),
+          endTime: toTime(breakEnd),
+        });
+      }
+      cursor = breakEnd;
+    } else {
+      cursor = slotEnd;
+    }
+
+    periodNum++;
+  }
+
+  return entries;
+}
 
 const SUBJECT_COLORS = [
   "#3b82f6",
@@ -69,28 +136,6 @@ function getSubjectColor(subjectId: number) {
   return SUBJECT_COLORS[subjectId % SUBJECT_COLORS.length];
 }
 
-function generateTimeSlots(config: SchoolConfig): string[] {
-  const [sh, sm] = config.schoolStartTime.split(":").map(Number);
-  const [eh, em] = config.schoolEndTime.split(":").map(Number);
-  const startMins = sh * 60 + sm;
-  const endMins = eh * 60 + em;
-  const slots: string[] = [];
-  const PERIOD_MINS = config.periodDurationMinutes;
-  const BREAK_MINS = config.breakDurationMinutes;
-  let cursor = startMins;
-  while (cursor < endMins) {
-    const slotEnd = cursor + PERIOD_MINS;
-    if (slotEnd > endMins) break;
-    const h = Math.floor(cursor / 60)
-      .toString()
-      .padStart(2, "0");
-    const m = (cursor % 60).toString().padStart(2, "0");
-    slots.push(`${h}:${m}`);
-    cursor += PERIOD_MINS + BREAK_MINS;
-  }
-  return slots;
-}
-
 export default function ScheduleDisplayPage() {
   const router = useRouter();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -98,6 +143,7 @@ export default function ScheduleDisplayPage() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [config, setConfig] = useState<SchoolConfig | null>(null);
+  const [gradeOverrides, setGradeOverrides] = useState<GradeOverride[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "week">("grid");
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -120,12 +166,13 @@ export default function ScheduleDisplayPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [schedulesRes, teachersRes, classesRes, configRes] =
+      const [schedulesRes, teachersRes, classesRes, configRes, overridesRes] =
         await Promise.allSettled([
           api.get("/schedule"),
           api.get("/teachers"),
           api.get("/school-class"),
           api.get("/school-config"),
+          api.get("/school-config/grade-overrides"),
         ]);
 
       if (schedulesRes.status === "fulfilled") {
@@ -136,7 +183,9 @@ export default function ScheduleDisplayPage() {
         setTeachers(teachersRes.value.data);
       if (classesRes.status === "fulfilled") setClasses(classesRes.value.data);
       if (configRes.status === "fulfilled") setConfig(configRes.value.data);
-    } catch (err) {
+      if (overridesRes.status === "fulfilled")
+        setGradeOverrides(overridesRes.value.data);
+    } catch {
       showError("Failed to fetch schedule data");
     } finally {
       setLoading(false);
@@ -169,17 +218,12 @@ export default function ScheduleDisplayPage() {
 
   const handleConfirmDelete = async () => {
     if (selectedScheduleId === null) return;
-
     const id = selectedScheduleId;
-
     setIsDeleteModalOpen(false);
     setDeletingId(id);
-
     try {
       await api.delete(`/schedule/${id}`);
-
       setSchedules((prev) => prev.filter((s) => s.id !== id));
-
       showSuccess("Schedule slot deleted successfully");
     } catch {
       showError("Failed to delete schedule slot");
@@ -195,12 +239,64 @@ export default function ScheduleDisplayPage() {
     setSelectedTeacher("");
   };
 
-  const timeSlots = config ? generateTimeSlots(config) : [];
+  /**
+   * For the grid we use the widest possible slot list (school default or
+   * global Friday end time) so all grades' data has a row to land in.
+   * Grade-specific early dismissals just mean those later rows will be empty
+   * for those grades — which is correct.
+   */
+  const getGridEntries = (day: string): SlotEntry[] => {
+    if (!config) return [];
+    const isFriday = day === "FRIDAY";
+    const endOverride = isFriday
+      ? (config.fridayEndTime ?? undefined)
+      : undefined;
+    return generateSlotEntries(config, endOverride);
+  };
+
+  /**
+   * Returns a small label for days where some grades leave earlier,
+   * shown as a note in the column header.
+   */
+  const getFridayNote = (): string | null => {
+    if (!config?.fridayEndTime && gradeOverrides.length === 0) return null;
+    const notes: string[] = [];
+    if (config?.fridayEndTime)
+      notes.push(`school ends ${config.fridayEndTime}`);
+    const gradeNotes = gradeOverrides
+      .filter((o) => o.fridayEndTime)
+      .map((o) => `Gr${o.grade} ends ${o.fridayEndTime}`);
+    notes.push(...gradeNotes);
+    return notes.join(" · ");
+  };
 
   const findSchedulesInSlot = (day: string, slotStart: string) =>
     filteredSchedules.filter(
       (s) => s.dayOfWeek === day && formatTime(s.startTime) === slotStart,
     );
+
+  /**
+   * For a given day+slot, checks if a filtered grade has an override that
+   * means they're already dismissed by this slot start time.
+   */
+  const isGradeDismissed = (
+    grade: number,
+    day: string,
+    slotStart: string,
+  ): boolean => {
+    if (!config) return false;
+    const isFriday = day === "FRIDAY";
+    const override = gradeOverrides.find((o) => o.grade === grade);
+
+    const endTime = isFriday
+      ? (override?.fridayEndTime ??
+        config.fridayEndTime ??
+        override?.endTime ??
+        config.schoolEndTime)
+      : (override?.endTime ?? config.schoolEndTime);
+
+    return toMins(slotStart) >= toMins(endTime);
+  };
 
   const schedulesByDay = DAYS.reduce(
     (acc, day) => {
@@ -211,6 +307,13 @@ export default function ScheduleDisplayPage() {
     },
     {} as Record<string, Schedule[]>,
   );
+
+  // When a single class is filtered, resolve its grade for dismissal hints
+  const filteredGrade = selectedClass
+    ? (classes.find((c) => c.id === parseInt(selectedClass))?.grade ?? null)
+    : null;
+
+  const fridayNote = getFridayNote();
 
   if (loading) return <LoadingOverlay />;
 
@@ -237,7 +340,6 @@ export default function ScheduleDisplayPage() {
             <span className="label">Total Slots</span>
           </div>
         </S.StatCard>
-
         <S.StatCard>
           <div className="stat-icon">
             <FaGraduationCap />
@@ -249,7 +351,6 @@ export default function ScheduleDisplayPage() {
             <span className="label">Classes Covered</span>
           </div>
         </S.StatCard>
-
         <S.StatCard>
           <div className="stat-icon">
             <FaUserTie />
@@ -352,71 +453,255 @@ export default function ScheduleDisplayPage() {
               up in School Config.
             </S.WarningText>
           )}
-          <S.ScheduleGrid>
-            <div />
-            {DAYS.map((day) => (
-              <S.GridHeader key={day}>{formatDay(day)}</S.GridHeader>
-            ))}
 
-            {timeSlots.map((slotStart) => (
-              <React.Fragment key={slotStart}>
-                <S.TimeLabel>{slotStart}</S.TimeLabel>
-                {DAYS.map((day) => {
-                  const slots = findSchedulesInSlot(day, slotStart);
+          {config && (
+            <S.ScheduleGrid>
+              {/* ── column headers ── */}
+              <div />
+              {DAYS.map((day) => (
+                <S.GridHeader key={day}>
+                  {formatDay(day)}
+                  {day === "FRIDAY" && fridayNote && (
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: "10px",
+                        fontWeight: 400,
+                        opacity: 0.65,
+                        marginTop: "2px",
+                      }}
+                    >
+                      {fridayNote}
+                    </span>
+                  )}
+                </S.GridHeader>
+              ))}
+
+              {/* ── rows: use Monday's slots as the master grid (all days share
+                  the same start time and period duration; Friday may have fewer
+                  rows because getGridEntries uses fridayEndTime) ── */}
+              {getGridEntries("MONDAY").map((entry, rowIdx) => {
+                if (entry.type === "break") {
                   return (
-                    <S.Cell key={day + slotStart}>
-                      {slots.length > 0 ? (
-                        slots.map((slot) => {
-                          const color = getSubjectColor(slot.subject.id);
-                          return (
-                            <S.SlotCard key={slot.id} $color={color}>
-                              <div className="subject">{slot.subject.name}</div>
-                              <div className="class">
-                                Gr {slot.schoolClass.grade}-
-                                {slot.schoolClass.section}
-                              </div>
-                              <div className="teacher">
-                                <FaUserTie />{" "}
-                                {slot.teacher.fullName.split(" ").slice(-1)[0]}
-                              </div>
-                              <div className="room">
-                                <FaDoorOpen /> {slot.room.name}
-                              </div>
-                              <S.DeleteButton
-                                onClick={() => handleDeleteClick(slot.id)}
-                                disabled={deletingId === slot.id}
-                              >
-                                ✕
-                              </S.DeleteButton>
-                            </S.SlotCard>
-                          );
-                        })
-                      ) : (
-                        <S.AddSlotButton
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/admin/schedule/create?classId=${selectedClass}&day=${day}&time=${slotStart}`,
-                            )
-                          }
-                        >
-                          +
-                        </S.AddSlotButton>
-                      )}
-                    </S.Cell>
+                    <React.Fragment key={`break-${rowIdx}`}>
+                      {/* time label */}
+                      <S.TimeLabel
+                        style={{
+                          opacity: 0.55,
+                          fontSize: "11px",
+                          alignSelf: "center",
+                        }}
+                      >
+                        {entry.startTime}
+                      </S.TimeLabel>
+
+                      {/* break banner spanning all 5 day columns */}
+                      <div
+                        style={{
+                          gridColumn: "2 / -1",
+                          background:
+                            "linear-gradient(90deg, #fef9c3, #fefce8)",
+                          borderTop: "1px dashed #fbbf24",
+                          borderBottom: "1px dashed #fbbf24",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "6px",
+                          padding: "6px 12px",
+                          color: "#92400e",
+                          fontSize: "12px",
+                          fontWeight: 500,
+                          letterSpacing: "0.02em",
+                        }}
+                      >
+                        <FaCoffee style={{ opacity: 0.7 }} />
+                        Break &nbsp;·&nbsp; {entry.startTime} – {entry.endTime}
+                        &nbsp;·&nbsp; {config.breakDurationMinutes} min
+                      </div>
+                    </React.Fragment>
                   );
-                })}
-              </React.Fragment>
-            ))}
-          </S.ScheduleGrid>
+                }
+
+                // Regular period row
+                return (
+                  <React.Fragment key={`period-${entry.startTime}`}>
+                    <S.TimeLabel>{entry.startTime}</S.TimeLabel>
+
+                    {DAYS.map((day) => {
+                      // Check if this day has fewer slots (e.g. Friday short day)
+                      const dayEntries = getGridEntries(day);
+                      const dayHasThisSlot = dayEntries.some(
+                        (e) =>
+                          e.type === "period" &&
+                          e.startTime === entry.startTime,
+                      );
+
+                      // Check if filtered grade is already dismissed at this slot
+                      const gradeDismissedHere =
+                        filteredGrade !== null &&
+                        isGradeDismissed(filteredGrade, day, entry.startTime);
+
+                      if (!dayHasThisSlot || gradeDismissedHere) {
+                        return (
+                          <S.Cell
+                            key={day}
+                            style={{ background: "#f8f8f8", opacity: 0.4 }}
+                          >
+                            {gradeDismissedHere && (
+                              <span style={{ fontSize: "10px", color: "#999" }}>
+                                dismissed
+                              </span>
+                            )}
+                          </S.Cell>
+                        );
+                      }
+
+                      const slots = findSchedulesInSlot(day, entry.startTime);
+                      return (
+                        <S.Cell key={day}>
+                          {slots.length > 0 ? (
+                            slots.map((slot) => {
+                              const color = getSubjectColor(slot.subject.id);
+                              return (
+                                <S.SlotCard key={slot.id} $color={color}>
+                                  <div className="subject">
+                                    {slot.subject.name}
+                                  </div>
+                                  <div className="class">
+                                    Gr {slot.schoolClass.grade}-
+                                    {slot.schoolClass.section}
+                                  </div>
+                                  <div className="teacher">
+                                    <FaUserTie />{" "}
+                                    {
+                                      slot.teacher.fullName
+                                        .split(" ")
+                                        .slice(-1)[0]
+                                    }
+                                  </div>
+                                  <div className="room">
+                                    <FaDoorOpen /> {slot.room.name}
+                                  </div>
+                                  <S.DeleteButton
+                                    onClick={() => handleDeleteClick(slot.id)}
+                                    disabled={deletingId === slot.id}
+                                  >
+                                    ✕
+                                  </S.DeleteButton>
+                                </S.SlotCard>
+                              );
+                            })
+                          ) : (
+                            <S.AddSlotButton
+                              onClick={() =>
+                                router.push(
+                                  `/dashboard/admin/schedule/create?classId=${selectedClass}&day=${day}&time=${entry.startTime}`,
+                                )
+                              }
+                            >
+                              +
+                            </S.AddSlotButton>
+                          )}
+                        </S.Cell>
+                      );
+                    })}
+                  </React.Fragment>
+                );
+              })}
+            </S.ScheduleGrid>
+          )}
         </S.GridView>
       ) : (
+        /* ── week view ─────────────────────────────────────────────────────── */
         <S.WeekView>
-          {DAYS.map((day) => (
-            <S.DayColumn key={day}>
-              <S.DayTitle>{formatDay(day)}</S.DayTitle>
-              <S.DayContent>
-                {schedulesByDay[day].length > 0 ? (
-                  schedulesByDay[day].map((schedule) => {
+          {DAYS.map((day) => {
+            const daySchedules = schedulesByDay[day];
+            const breakEntry = config
+              ? generateSlotEntries(
+                  config,
+                  day === "FRIDAY"
+                    ? (config.fridayEndTime ?? undefined)
+                    : undefined,
+                ).find((e) => e.type === "break")
+              : null;
+
+            // Merge schedules and break into a single sorted list for rendering
+            type WeekItem =
+              | { kind: "schedule"; data: Schedule }
+              | { kind: "break"; startTime: string; endTime: string };
+
+            const items: WeekItem[] = daySchedules.map((s) => ({
+              kind: "schedule",
+              data: s,
+            }));
+
+            if (breakEntry) {
+              items.push({
+                kind: "break",
+                startTime: breakEntry.startTime,
+                endTime: breakEntry.endTime,
+              });
+            }
+
+            items.sort((a, b) => {
+              const aTime =
+                a.kind === "schedule" ? a.data.startTime : a.startTime;
+              const bTime =
+                b.kind === "schedule" ? b.data.startTime : b.startTime;
+              return aTime.localeCompare(bTime);
+            });
+
+            return (
+              <S.DayColumn key={day}>
+                <S.DayTitle>
+                  {formatDay(day)}
+                  {day === "FRIDAY" && config?.fridayEndTime && (
+                    <span
+                      style={{
+                        display: "block",
+                        fontSize: "11px",
+                        fontWeight: 400,
+                        opacity: 0.6,
+                      }}
+                    >
+                      ends {config.fridayEndTime}
+                    </span>
+                  )}
+                </S.DayTitle>
+
+                <S.DayContent>
+                  {items.length === 0 && (
+                    <div className="empty-day">No classes scheduled</div>
+                  )}
+
+                  {items.map((item, idx) => {
+                    if (item.kind === "break") {
+                      return (
+                        <div
+                          key={`break-${idx}`}
+                          style={{
+                            background: "#fef9c3",
+                            border: "1px dashed #fbbf24",
+                            borderRadius: "6px",
+                            padding: "6px 10px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            color: "#92400e",
+                            fontSize: "12px",
+                            fontWeight: 500,
+                            margin: "2px 0",
+                          }}
+                        >
+                          <FaCoffee style={{ opacity: 0.7, flexShrink: 0 }} />
+                          <span>
+                            Break · {item.startTime} – {item.endTime}
+                          </span>
+                        </div>
+                      );
+                    }
+
+                    const schedule = item.data;
                     const color = getSubjectColor(schedule.subject.id);
                     return (
                       <S.WeekSlotCard key={schedule.id} $text={color}>
@@ -444,15 +729,14 @@ export default function ScheduleDisplayPage() {
                         </S.WeekDeleteButton>
                       </S.WeekSlotCard>
                     );
-                  })
-                ) : (
-                  <div className="empty-day">No classes scheduled</div>
-                )}
-              </S.DayContent>
-            </S.DayColumn>
-          ))}
+                  })}
+                </S.DayContent>
+              </S.DayColumn>
+            );
+          })}
         </S.WeekView>
       )}
+
       {isDeleteModalOpen && (
         <S.ModalOverlay onClick={() => setIsDeleteModalOpen(false)}>
           <S.DeleteModal onClick={(e) => e.stopPropagation()}>
@@ -461,25 +745,20 @@ export default function ScheduleDisplayPage() {
                 <h3>Delete Schedule</h3>
                 <p>This action cannot be undone.</p>
               </div>
-
               <S.ModalCloseButton onClick={() => setIsDeleteModalOpen(false)}>
                 <FaTimes />
               </S.ModalCloseButton>
             </S.ModalHeader>
-
             <S.ModalContent>
               <div className="warning-icon">
                 <FaExclamationTriangle />
               </div>
-
               <p>Are you sure you want to delete this schedule slot?</p>
             </S.ModalContent>
-
             <S.ModalActions>
               <S.CancelButton onClick={() => setIsDeleteModalOpen(false)}>
                 Cancel
               </S.CancelButton>
-
               <S.ConfirmDeleteButton onClick={handleConfirmDelete}>
                 Delete Schedule
               </S.ConfirmDeleteButton>
