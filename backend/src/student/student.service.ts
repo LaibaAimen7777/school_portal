@@ -261,6 +261,36 @@ export class StudentService {
     });
   }
 
+async bulkPromote(dto: BulkPromoteDto) {
+  const results = { promoted: 0, graduated: 0, errors: string[] = [] };
+
+  for (const { fromClassId, toClassId } of dto.promotions) {
+    const students = await this.studentRepo.find({
+      where: { schoolClass: { id: fromClassId } },
+    });
+
+    if (toClassId === null) {
+      // mark as graduated — adjust to your own alumni/archive logic
+      await this.studentRepo.update(
+        { schoolClass: { id: fromClassId } },
+        { isGraduated: true, schoolClass: null },
+      );
+      results.graduated += students.length;
+    } else {
+      const targetClass = await this.classRepo.findOne({ where: { id: toClassId } });
+      if (!targetClass) { results.errors.push(`Class ${toClassId} not found`); continue; }
+
+      await this.studentRepo.update(
+        { schoolClass: { id: fromClassId } },
+        { schoolClass: targetClass },
+      );
+      results.promoted += students.length;
+    }
+  }
+
+  return results;
+}
+
   // async getResults(studentId: number) {
   //   const marks = await this.marksRepo.find({
   //     where: {

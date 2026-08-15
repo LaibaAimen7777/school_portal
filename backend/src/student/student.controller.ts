@@ -15,6 +15,7 @@ import { Roles } from 'src/auth/roles.decorator';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { StudentService } from './student.service';
 import { UserRole } from 'src/users/entities/user.entity';
+import { BulkPromoteDto } from './dto/bulk-promote.dto';
 
 @Controller('student')
 export class StudentController {
@@ -27,12 +28,12 @@ export class StudentController {
     return this.studentService.create(dto);
   }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(UserRole.ADMIN)
-  // @Patch(':id/reset-password')
-  // resetPassword(@Param('id') id: number) {
-  //   return this.studentService.resetPassword(Number(id));
-  // }
+  // student.controller.ts
+  @Post('bulk-promote')
+  @Roles('ADMIN')
+  bulkPromote(@Body() dto: BulkPromoteDto) {
+    return this.studentService.bulkPromote(dto);
+  }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
