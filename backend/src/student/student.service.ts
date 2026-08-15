@@ -282,7 +282,7 @@ export class StudentService {
         // mark as graduated — adjust to your own alumni/archive logic
         await this.studentRepository.update(
           { schoolClass: { id: fromClassId } },
-          { isGraduated: true, schoolClass: null },
+          { isGraduated: true, graduatedAt: new Date(), schoolClass: null },
         );
         results.graduated += students.length;
       } else {
@@ -304,49 +304,4 @@ export class StudentService {
 
     return results;
   }
-
-  // async getResults(studentId: number) {
-  //   const marks = await this.marksRepo.find({
-  //     where: {
-  //       student: { id: studentId },
-  //     },
-  //     relations: ['exam', 'exam.subject', 'exam.schoolClass'],
-  //   });
-
-  //   return marks.map((m) => ({
-  //     subject: m.exam.subject.name,
-  //     examType: m.exam.examType,
-  //     score: m.score,
-  //     date: m.exam.date,
-  //   }));
-  // }
-
-  // async getMyProfile(userId: number) {
-  //   const student = await this.studentRepository.findOne({
-  //     where: {
-  //       user: { id: userId },
-  //     },
-  //     relations: ['schoolClass', 'parent'],
-  //   });
-
-  //   if (!student) {
-  //     throw new NotFoundException('Student not found');
-  //   }
-
-  //   return {
-  //     id: student.id,
-  //     firstName: student.firstName,
-  //     lastName: student.lastName,
-  //     rollNumber: student.rollNumber,
-  //     grade: student.schoolClass.grade,
-  //     section: student.schoolClass.section,
-  //     joiningYear: student.joiningYear,
-
-  //     parent: {
-  //       fatherName: student.parent?.fatherName,
-  //       motherName: student.parent?.motherName,
-  //       phone: student.parent?.phone,
-  //     },
-  //   };
-  // }
 }

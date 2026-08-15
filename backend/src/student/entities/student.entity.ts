@@ -50,4 +50,10 @@ export class Student {
   })
   @JoinColumn({ name: 'parentId' })
   parent!: Parent;
+
+  @Column({ default: false })
+  isGraduated!: boolean;
+
+  @Column({ type: 'date', nullable: true })
+  graduatedAt!: Date | null;
 }
