@@ -37,7 +37,7 @@ export class Student {
   joiningYear!: number;
 
   @ManyToOne(() => SchoolClass, (schoolClass) => schoolClass.students, {
-    nullable: false,
+    nullable: true,
     onDelete: 'CASCADE',
     eager: true, // optional: load class automatically
   })

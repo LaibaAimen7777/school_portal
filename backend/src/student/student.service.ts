@@ -12,6 +12,7 @@ import { User, UserRole } from 'src/users/entities/user.entity';
 import { CreateStudentDto } from './dto/create-student.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { BulkPromoteDto } from './dto/bulk-promote.dto';
 // import { Mark } from 'src/marks/entities/marks.entity';
 
 function generatePassword() {
@@ -261,35 +262,48 @@ export class StudentService {
     });
   }
 
-async bulkPromote(dto: BulkPromoteDto) {
-  const results = { promoted: 0, graduated: 0, errors: string[] = [] };
+  async bulkPromote(dto: BulkPromoteDto) {
+    const results: {
+      promoted: number;
+      graduated: number;
+      errors: string[];
+    } = {
+      promoted: 0,
+      graduated: 0,
+      errors: [],
+    };
 
-  for (const { fromClassId, toClassId } of dto.promotions) {
-    const students = await this.studentRepo.find({
-      where: { schoolClass: { id: fromClassId } },
-    });
+    for (const { fromClassId, toClassId } of dto.promotions) {
+      const students = await this.studentRepository.find({
+        where: { schoolClass: { id: fromClassId } },
+      });
 
-    if (toClassId === null) {
-      // mark as graduated — adjust to your own alumni/archive logic
-      await this.studentRepo.update(
-        { schoolClass: { id: fromClassId } },
-        { isGraduated: true, schoolClass: null },
-      );
-      results.graduated += students.length;
-    } else {
-      const targetClass = await this.classRepo.findOne({ where: { id: toClassId } });
-      if (!targetClass) { results.errors.push(`Class ${toClassId} not found`); continue; }
+      if (toClassId === null) {
+        // mark as graduated — adjust to your own alumni/archive logic
+        await this.studentRepository.update(
+          { schoolClass: { id: fromClassId } },
+          { isGraduated: true, schoolClass: null },
+        );
+        results.graduated += students.length;
+      } else {
+        const targetClass = await this.classRepository.findOne({
+          where: { id: toClassId },
+        });
+        if (!targetClass) {
+          results.errors.push(`Class ${toClassId} not found`);
+          continue;
+        }
 
-      await this.studentRepo.update(
-        { schoolClass: { id: fromClassId } },
-        { schoolClass: targetClass },
-      );
-      results.promoted += students.length;
+        await this.studentRepository.update(
+          { schoolClass: { id: fromClassId } },
+          { schoolClass: targetClass },
+        );
+        results.promoted += students.length;
+      }
     }
-  }
 
-  return results;
-}
+    return results;
+  }
 
   // async getResults(studentId: number) {
   //   const marks = await this.marksRepo.find({
