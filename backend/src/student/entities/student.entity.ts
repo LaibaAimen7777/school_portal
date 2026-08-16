@@ -3,10 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToOne,
   JoinColumn,
   Unique,
-  RelationId,
 } from 'typeorm';
 import { SchoolClass } from 'src/school-class/entities/school-class.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -28,7 +26,7 @@ export class Student {
   dateOfBirth!: Date;
 
   @Column()
-  gender!: string; // or enum later
+  gender!: string;
 
   @Column()
   rollNumber!: number;
@@ -36,24 +34,29 @@ export class Student {
   @Column()
   joiningYear!: number;
 
+  // ── graduation ───────────────────────────────────────────────────────────
+  @Column({ default: false })
+  isGraduated!: boolean;
+
+  @Column({ type: 'date', nullable: true })
+  graduatedAt!: Date | null;
+
+  // ── relations ────────────────────────────────────────────────────────────
+
+  // SET NULL so deleting a class doesn't wipe student records
   @ManyToOne(() => SchoolClass, (schoolClass) => schoolClass.students, {
     nullable: true,
-    onDelete: 'CASCADE',
-    eager: true, // optional: load class automatically
+    onDelete: 'SET NULL',
+    eager: true,
   })
   @JoinColumn({ name: 'schoolClassId' })
   schoolClass!: SchoolClass;
 
   @ManyToOne(() => Parent, (parent) => parent.students, {
     eager: true,
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
+    nullable: true,
   })
   @JoinColumn({ name: 'parentId' })
   parent!: Parent;
-
-  @Column({ default: false })
-  isGraduated!: boolean;
-
-  @Column({ type: 'date', nullable: true })
-  graduatedAt!: Date | null;
 }
