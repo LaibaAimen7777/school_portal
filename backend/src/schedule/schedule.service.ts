@@ -405,7 +405,7 @@ export class ScheduleService {
       this.scheduleRepo.find({
         relations: ['schoolClass', 'subject', 'teacher', 'room'],
       }),
-      this.gradeOverrideRepo.find(), // NEW: load all grade overrides
+      this.gradeOverrideRepo.find(),
     ]);
 
     const config = await this.schoolConfigRepo.findOne({ where: { id: 1 } });
