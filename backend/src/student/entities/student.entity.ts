@@ -50,7 +50,7 @@ export class Student {
     eager: true,
   })
   @JoinColumn({ name: 'schoolClassId' })
-  schoolClass!: SchoolClass;
+  schoolClass!: SchoolClass | null;
 
   @ManyToOne(() => Parent, (parent) => parent.students, {
     eager: true,
@@ -58,5 +58,5 @@ export class Student {
     nullable: true,
   })
   @JoinColumn({ name: 'parentId' })
-  parent!: Parent;
+  parent!: Parent | null;
 }

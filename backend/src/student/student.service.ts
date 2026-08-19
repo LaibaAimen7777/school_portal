@@ -228,6 +228,12 @@ export class StudentService {
 
       const oldClass = student.schoolClass;
 
+      if (!oldClass) {
+        throw new BadRequestException(
+          'Student is not currently assigned to a class',
+        );
+      }
+
       const newClass = await manager.findOne(SchoolClass, {
         where: { id: newClassId },
       });
