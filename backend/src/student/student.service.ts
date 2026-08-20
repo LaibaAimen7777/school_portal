@@ -13,7 +13,6 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { BulkPromoteDto } from './dto/bulk-promote.dto';
-// import { Mark } from 'src/marks/entities/marks.entity';
 
 function generatePassword() {
   return crypto.randomBytes(8).toString('hex');
@@ -28,9 +27,6 @@ export class StudentService {
     @InjectRepository(SchoolClass)
     private classRepository: Repository<SchoolClass>,
 
-    // @InjectRepository(User)
-    // private userRepository: Repository<User>,
-
     private dataSource: DataSource,
   ) {}
 
@@ -38,66 +34,32 @@ export class StudentService {
     const query = this.studentRepository
       .createQueryBuilder('student')
       .leftJoinAndSelect('student.schoolClass', 'schoolClass')
-      .leftJoinAndSelect('student.parent', 'parent');
+      .leftJoinAndSelect('student.parent', 'parent')
+      .where('student.isGraduated = false'); // exclude graduated students from active list
 
     if (grade) query.andWhere('schoolClass.grade = :grade', { grade });
     if (section) query.andWhere('schoolClass.section = :section', { section });
-    console.log('query in ss', query);
 
     return query.getMany();
   }
 
   async create(dto: CreateStudentDto) {
     return this.dataSource.transaction(async (manager) => {
-      // 1️⃣ Find the class
       const schoolClass = await manager.findOne(SchoolClass, {
         where: { id: dto.classId },
       });
 
-      if (!schoolClass) {
-        throw new NotFoundException('Class not found');
-      }
+      if (!schoolClass) throw new NotFoundException('Class not found');
 
       if (schoolClass.currentStrength >= schoolClass.maxStrength) {
         throw new BadRequestException('Class is full');
       }
 
-      console.log('school class:', schoolClass);
-
-      // 2️⃣ Generate roll number
       const lastStudent = await manager.findOne(Student, {
         where: { schoolClass: { id: schoolClass.id } },
         order: { rollNumber: 'DESC' },
       });
       const rollNumber = lastStudent ? lastStudent.rollNumber + 1 : 1;
-
-      // let savedUser: User | null = null;
-      // let username: string | null = null;
-      // let plainPassword: string | null = null;
-      // let canLogin = false;
-
-      // if (schoolClass.grade >= 9) {
-      //   // 3️⃣ Prepare username/password
-      //   const yearShort = dto.joiningYear.toString().slice(2);
-      //   username = `${yearShort}${schoolClass.grade}${schoolClass.section}${rollNumber
-      //     .toString()
-      //     .padStart(2, '0')}`;
-
-      //   plainPassword = generatePassword();
-      //   const hashedPassword = await bcrypt.hash(plainPassword, 10);
-      //   canLogin = true;
-
-      //   const user = manager.create(User, {
-      //     username,
-      //     password: hashedPassword,
-      //     role: UserRole.STUDENT,
-      //     canLogin: 1,
-      //     mustChangePassword: 1,
-      //     isActive: 1,
-      //   });
-
-      //   savedUser = await manager.save(user);
-      // }
 
       let parent = await manager.findOne(Parent, {
         where: { phone: dto.phone },
@@ -107,7 +69,6 @@ export class StudentService {
       let parentPlainPassword: string | null = null;
 
       if (!parent) {
-        // Create parent user
         const parentUsername = dto.phone;
         parentPlainPassword = generatePassword();
         const parentHashedPassword = await bcrypt.hash(parentPlainPassword, 10);
@@ -123,7 +84,6 @@ export class StudentService {
 
         const savedParentUser = await manager.save(parentUser);
 
-        // Create parent
         parent = manager.create(Parent, {
           fatherName: dto.fatherName,
           motherName: dto.motherName,
@@ -135,7 +95,6 @@ export class StudentService {
 
         parent = await manager.save(parent);
       } else {
-        // Parent exists but may not have user
         if (!parent.user) {
           const parentUsername = parent.phone;
           parentPlainPassword = generatePassword();
@@ -154,12 +113,11 @@ export class StudentService {
           });
 
           const savedParentUser = await manager.save(parentUser);
-
           parent.user = savedParentUser;
           await manager.save(parent);
         }
       }
-      // 6️⃣ Create student using classId directly
+
       const student = manager.create(Student, {
         firstName: dto.firstName,
         lastName: dto.lastName,
@@ -173,49 +131,19 @@ export class StudentService {
 
       const savedStudent = await manager.save(student);
 
-      // 7️⃣ Update class current strength
       schoolClass.currentStrength += 1;
       await manager.save(schoolClass);
 
-      // 8️⃣ Return created info
       return {
         studentId: savedStudent.id,
         grade: schoolClass.grade,
         section: schoolClass.section,
         rollNumber,
-
         parentUsername: parent?.user?.username || null,
         parentPassword: parentPlainPassword,
       };
     });
   }
-  // async resetPassword(studentId: number) {
-  //   return this.dataSource.transaction(async (manager) => {
-  //     const student = await manager.findOne(Student, {
-  //       where: { id: studentId },
-  //       relations: ['user'],
-  //     });
-
-  //     if (!student) {
-  //       throw new NotFoundException('Student not found');
-  //     }
-
-  //     const newPassword = crypto.randomBytes(8).toString('hex');
-  //     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  //     if (student.user) {
-  //       student.user.password = hashedPassword;
-  //       student.user.must_change_password = true;
-  //     }
-
-  //     await manager.save(student.user);
-
-  //     return {
-  //       message: 'Password reset successfully',
-  //       temporaryPassword: newPassword,
-  //     };
-  //   });
-  // }
 
   async updateClass(studentId: number, newClassId: number) {
     return this.dataSource.transaction(async (manager) => {
@@ -244,11 +172,9 @@ export class StudentService {
         throw new BadRequestException('Class is full');
       }
 
-      // 🔁 Decrease old class strength
       oldClass.currentStrength -= 1;
       await manager.save(oldClass);
 
-      // 🔢 Generate new roll number
       const lastStudent = await manager.findOne(Student, {
         where: { schoolClass: { id: newClass.id } },
         order: { rollNumber: 'DESC' },
@@ -256,11 +182,9 @@ export class StudentService {
 
       const newRollNumber = lastStudent ? lastStudent.rollNumber + 1 : 1;
 
-      // ✅ Update student
       student.rollNumber = newRollNumber;
       student.schoolClass = newClass;
 
-      // 🔁 Increase new class strength
       newClass.currentStrength += 1;
       await manager.save(newClass);
 
@@ -273,38 +197,91 @@ export class StudentService {
       promoted: number;
       graduated: number;
       errors: string[];
-    } = {
-      promoted: 0,
-      graduated: 0,
-      errors: [],
-    };
+    } = { promoted: 0, graduated: 0, errors: [] };
 
     for (const { fromClassId, toClassId } of dto.promotions) {
-      const students = await this.studentRepository.find({
-        where: { schoolClass: { id: fromClassId } },
-      });
+      try {
+        await this.dataSource.transaction(async (manager) => {
+          // Load all active students in the source class
+          const students = await manager.find(Student, {
+            where: { schoolClass: { id: fromClassId }, isGraduated: false },
+            relations: ['schoolClass'],
+          });
 
-      if (toClassId === null) {
-        // mark as graduated — adjust to your own alumni/archive logic
-        await this.studentRepository.update(
-          { schoolClass: { id: fromClassId } },
-          { isGraduated: true, graduatedAt: new Date(), schoolClass: null },
-        );
-        results.graduated += students.length;
-      } else {
-        const targetClass = await this.classRepository.findOne({
-          where: { id: toClassId },
+          if (students.length === 0) return;
+
+          const sourceClass = await manager.findOne(SchoolClass, {
+            where: { id: fromClassId },
+          });
+
+          if (toClassId === null) {
+            // ── Graduate ────────────────────────────────────────────────────
+            for (const student of students) {
+              student.isGraduated = true;
+              student.graduatedAt = new Date();
+              student.schoolClass = null as any; // detach from class
+            }
+
+            await manager.save(students);
+
+            // Zero out the source class strength
+            if (sourceClass) {
+              sourceClass.currentStrength = Math.max(
+                0,
+                sourceClass.currentStrength - students.length,
+              );
+              await manager.save(sourceClass);
+            }
+
+            results.graduated += students.length;
+          } else {
+            // ── Promote ─────────────────────────────────────────────────────
+            const targetClass = await manager.findOne(SchoolClass, {
+              where: { id: toClassId },
+            });
+
+            if (!targetClass) {
+              results.errors.push(
+                `Target class ${toClassId} not found — skipping Grade source class ${fromClassId}`,
+              );
+              return;
+            }
+
+            // Get the current highest roll number in the target class so we
+            // don't collide with students already in it
+            const lastInTarget = await manager.findOne(Student, {
+              where: { schoolClass: { id: toClassId }, isGraduated: false },
+              order: { rollNumber: 'DESC' },
+            });
+
+            let nextRoll = lastInTarget ? lastInTarget.rollNumber + 1 : 1;
+
+            for (const student of students) {
+              student.schoolClass = targetClass;
+              student.rollNumber = nextRoll++;
+            }
+
+            await manager.save(students);
+
+            // Update strengths on both classes
+            if (sourceClass) {
+              sourceClass.currentStrength = Math.max(
+                0,
+                sourceClass.currentStrength - students.length,
+              );
+              await manager.save(sourceClass);
+            }
+
+            targetClass.currentStrength += students.length;
+            await manager.save(targetClass);
+
+            results.promoted += students.length;
+          }
         });
-        if (!targetClass) {
-          results.errors.push(`Class ${toClassId} not found`);
-          continue;
-        }
-
-        await this.studentRepository.update(
-          { schoolClass: { id: fromClassId } },
-          { schoolClass: targetClass },
+      } catch (err: any) {
+        results.errors.push(
+          `Failed to process class ${fromClassId}: ${err.message}`,
         );
-        results.promoted += students.length;
       }
     }
 
