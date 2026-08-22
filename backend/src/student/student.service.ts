@@ -193,108 +193,166 @@ export class StudentService {
   }
 
   async bulkPromote(dto: BulkPromoteDto) {
-    const results: {
-      promoted: number;
-      graduated: number;
-      errors: string[];
-    } = { promoted: 0, graduated: 0, errors: [] };
+    return this.dataSource.transaction(async (manager) => {
+      const promoted = 0;
+      const graduated = 0;
+      const errors: string[] = [];
 
-    console.log('promoted in backend', results);
+      // -------------------------------------------------------
+      // 1. Load all source students
+      // -------------------------------------------------------
 
-    for (const { fromClassId, toClassId } of dto.promotions) {
-      console.log('from class id', fromClassId);
-      console.log('to class id', toClassId);
-      try {
-        await this.dataSource.transaction(async (manager) => {
-          // Load all active students in the source class
-          const students = await manager.find(Student, {
-            where: { schoolClass: { id: fromClassId }, isGraduated: false },
-            relations: ['schoolClass'],
-          });
+      const sourceStudentMap = new Map<number, Student[]>();
 
-          console.log('students', students);
-
-          if (students.length === 0) return;
-
-          const sourceClass = await manager.findOne(SchoolClass, {
-            where: { id: fromClassId },
-          });
-
-          console.log('source class', sourceClass);
-
-          if (toClassId === null) {
-            // ── Graduate ────────────────────────────────────────────────────
-            for (const student of students) {
-              student.isGraduated = true;
-              student.graduatedAt = new Date();
-              student.schoolClass = null as any; // detach from class
-            }
-
-            await manager.save(students);
-
-            // Zero out the source class strength
-            if (sourceClass) {
-              sourceClass.currentStrength = Math.max(
-                0,
-                sourceClass.currentStrength - students.length,
-              );
-              await manager.save(sourceClass);
-            }
-
-            results.graduated += students.length;
-          } else {
-            // ── Promote ─────────────────────────────────────────────────────
-            const targetClass = await manager.findOne(SchoolClass, {
-              where: { id: toClassId },
-            });
-
-            console.log('target class', targetClass);
-
-            if (!targetClass) {
-              results.errors.push(
-                `Target class ${toClassId} not found — skipping Grade source class ${fromClassId}`,
-              );
-              return;
-            }
-
-            // Get the current highest roll number in the target class so we
-            // don't collide with students already in it
-            const lastInTarget = await manager.findOne(Student, {
-              where: { schoolClass: { id: toClassId }, isGraduated: false },
-              order: { rollNumber: 'DESC' },
-            });
-
-            let nextRoll = lastInTarget ? lastInTarget.rollNumber + 1 : 1;
-
-            for (const student of students) {
-              student.schoolClass = targetClass;
-              student.rollNumber = nextRoll++;
-            }
-
-            await manager.save(students);
-
-            // Update strengths on both classes
-            if (sourceClass) {
-              sourceClass.currentStrength = Math.max(
-                0,
-                sourceClass.currentStrength - students.length,
-              );
-              await manager.save(sourceClass);
-            }
-
-            targetClass.currentStrength += students.length;
-            await manager.save(targetClass);
-
-            results.promoted += students.length;
-          }
+      for (const promotion of dto.promotions) {
+        const students = await manager.find(Student, {
+          where: {
+            schoolClass: { id: promotion.fromClassId },
+            isGraduated: false,
+          },
+          relations: ['schoolClass'],
         });
-      } catch (err: any) {
-        results.errors.push(
-          `Failed to process class ${fromClassId}: ${err.message}`,
+
+        sourceStudentMap.set(promotion.fromClassId, students);
+      }
+
+      // -------------------------------------------------------
+      // 2. Calculate how many students are going into each
+      //    target class
+      // -------------------------------------------------------
+
+      const incomingCounts = new Map<number, number>();
+
+      for (const { fromClassId, toClassId } of dto.promotions) {
+        if (toClassId === null) continue;
+
+        const students = sourceStudentMap.get(fromClassId) ?? [];
+
+        incomingCounts.set(
+          toClassId,
+          (incomingCounts.get(toClassId) ?? 0) + students.length,
         );
       }
-    }
 
-    return results;
+      // -------------------------------------------------------
+      // 3. Validate target classes and capacity
+      // -------------------------------------------------------
+
+      for (const [targetClassId, incomingCount] of incomingCounts) {
+        const targetClass = await manager.findOne(SchoolClass, {
+          where: { id: targetClassId },
+        });
+
+        if (!targetClass) {
+          throw new BadRequestException(
+            `Target class ${targetClassId} not found`,
+          );
+        }
+
+        const finalStrength = targetClass.currentStrength + incomingCount;
+
+        if (finalStrength > targetClass.maxStrength) {
+          throw new BadRequestException(
+            `Grade ${targetClass.grade}-${targetClass.section} ` +
+              `does not have enough capacity. ` +
+              `Current: ${targetClass.currentStrength}, ` +
+              `Incoming: ${incomingCount}, ` +
+              `Maximum: ${targetClass.maxStrength}`,
+          );
+        }
+      }
+
+      // -------------------------------------------------------
+      // 4. Process all promotions
+      // -------------------------------------------------------
+
+      let totalPromoted = 0;
+      let totalGraduated = 0;
+
+      for (const { fromClassId, toClassId } of dto.promotions) {
+        const students = sourceStudentMap.get(fromClassId) ?? [];
+
+        if (students.length === 0) continue;
+
+        const sourceClass = await manager.findOne(SchoolClass, {
+          where: { id: fromClassId },
+        });
+
+        if (!sourceClass) {
+          throw new BadRequestException(
+            `Source class ${fromClassId} not found`,
+          );
+        }
+
+        // ---------------------------------------------------
+        // Graduation
+        // ---------------------------------------------------
+
+        if (toClassId === null) {
+          for (const student of students) {
+            student.isGraduated = true;
+            student.graduatedAt = new Date();
+            student.schoolClass = null;
+          }
+
+          await manager.save(Student, students);
+
+          sourceClass.currentStrength = 0;
+          await manager.save(SchoolClass, sourceClass);
+
+          totalGraduated += students.length;
+
+          continue;
+        }
+
+        // ---------------------------------------------------
+        // Promotion
+        // ---------------------------------------------------
+
+        const targetClass = await manager.findOne(SchoolClass, {
+          where: { id: toClassId },
+        });
+
+        if (!targetClass) {
+          throw new BadRequestException(`Target class ${toClassId} not found`);
+        }
+
+        const lastStudent = await manager.findOne(Student, {
+          where: {
+            schoolClass: { id: targetClass.id },
+            isGraduated: false,
+          },
+          order: {
+            rollNumber: 'DESC',
+          },
+        });
+
+        let nextRollNumber = lastStudent?.rollNumber
+          ? lastStudent.rollNumber + 1
+          : 1;
+
+        for (const student of students) {
+          student.schoolClass = targetClass;
+          student.rollNumber = nextRollNumber++;
+
+          await manager.save(Student, student);
+        }
+
+        sourceClass.currentStrength = 0;
+
+        targetClass.currentStrength += students.length;
+
+        await manager.save(SchoolClass, sourceClass);
+        await manager.save(SchoolClass, targetClass);
+
+        totalPromoted += students.length;
+      }
+
+      return {
+        promoted: totalPromoted,
+        graduated: totalGraduated,
+        errors,
+      };
+    });
   }
 }

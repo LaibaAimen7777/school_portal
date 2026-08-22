@@ -150,6 +150,8 @@ export default function AdminStudents() {
         console.log("next class", nextClass);
         // Fall back to any class in the next grade if same section doesn't exist
         const anyNextClass = classes.find((c) => c.grade === cls.grade + 1);
+        console.log("any next class", anyNextClass);
+
         defaultMap[cls.id] = nextClass?.id ?? anyNextClass?.id ?? null;
       }
     }
@@ -209,6 +211,8 @@ export default function AdminStudents() {
     classes
       .filter((c) => c.grade > fromGrade)
       .sort((a, b) => a.grade - b.grade || a.section.localeCompare(b.section));
+
+  console.log("promotion targets", promotionTargets);
 
   return (
     <Wrapper>
