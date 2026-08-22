@@ -66,7 +66,9 @@ export default function AdminStudents() {
 
   // Single student class change
   const [isClassModalOpen, setIsClassModalOpen] = useState(false);
-  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(
+    null,
+  );
   const [inputClassId, setInputClassId] = useState("");
 
   // Bulk promotion
@@ -74,7 +76,9 @@ export default function AdminStudents() {
   const [promoteStep, setPromoteStep] = useState<ModalStep>("setup");
   const [promotionMap, setPromotionMap] = useState<PromotionMap>({});
   const [promoteLoading, setPromoteLoading] = useState(false);
-  const [promoteResult, setPromoteResult] = useState<PromoteResult | null>(null);
+  const [promoteResult, setPromoteResult] = useState<PromoteResult | null>(
+    null,
+  );
 
   useEffect(() => {
     fetchStudents();
@@ -133,6 +137,7 @@ export default function AdminStudents() {
 
   const openPromoteModal = () => {
     const maxGrade = Math.max(...classes.map((c) => c.grade), 0);
+    console.log("max grade in open promote model", maxGrade);
     const defaultMap: PromotionMap = {};
 
     for (const cls of activeSourceClasses) {
@@ -142,6 +147,7 @@ export default function AdminStudents() {
         const nextClass = classes.find(
           (c) => c.grade === cls.grade + 1 && c.section === cls.section,
         );
+        console.log("next class", nextClass);
         // Fall back to any class in the next grade if same section doesn't exist
         const anyNextClass = classes.find((c) => c.grade === cls.grade + 1);
         defaultMap[cls.id] = nextClass?.id ?? anyNextClass?.id ?? null;
@@ -179,10 +185,13 @@ export default function AdminStudents() {
   const handleConfirmPromotion = async () => {
     setPromoteLoading(true);
     try {
+      console.log("active source class", activeSourceClasses);
       const promotions = activeSourceClasses.map((cls) => ({
         fromClassId: cls.id,
         toClassId: promotionMap[cls.id] ?? null,
       }));
+
+      console.log("promotions", promotions);
 
       const res = await api.post("/student/bulk-promote", { promotions });
       setPromoteResult(res.data);
@@ -234,7 +243,9 @@ export default function AdminStudents() {
         {students.map((student) => (
           <div className="card" key={student.id}>
             <div className="card-header">
-              <div className="card-icon"><FaUserGraduate /></div>
+              <div className="card-icon">
+                <FaUserGraduate />
+              </div>
               <span className="student-badge">ID #{student.id}</span>
             </div>
             <div className="card-body">
@@ -246,12 +257,16 @@ export default function AdminStudents() {
               <div className="info-row">
                 <FaSchool className="info-icon" />
                 <span className="label">Grade</span>
-                <span className="value">{student.schoolClass?.grade ?? "N/A"}th Grade</span>
+                <span className="value">
+                  {student.schoolClass?.grade ?? "N/A"}th Grade
+                </span>
               </div>
               <div className="info-row">
                 <FaUsers className="info-icon" />
                 <span className="label">Section</span>
-                <span className="value">Section {student.schoolClass?.section ?? "N/A"}</span>
+                <span className="value">
+                  Section {student.schoolClass?.section ?? "N/A"}
+                </span>
               </div>
               <div className="info-row">
                 <FaCalendarAlt className="info-icon" />
@@ -260,7 +275,10 @@ export default function AdminStudents() {
               </div>
             </div>
             <div className="actions">
-              <button className="change-btn" onClick={() => openClassModal(student.id)}>
+              <button
+                className="change-btn"
+                onClick={() => openClassModal(student.id)}
+              >
                 <FaExchangeAlt />
                 <span>Change Class</span>
               </button>
@@ -273,7 +291,9 @@ export default function AdminStudents() {
       <ModalOverlay $isOpen={isClassModalOpen}>
         <div className="modal-box">
           <h4>Assign New Class</h4>
-          <p className="modal-subtitle">Enter the target Class ID to reassign this student.</p>
+          <p className="modal-subtitle">
+            Enter the target Class ID to reassign this student.
+          </p>
           <input
             type="number"
             placeholder="e.g., 402"
@@ -281,8 +301,15 @@ export default function AdminStudents() {
             onChange={(e) => setInputClassId(e.target.value)}
           />
           <div className="modal-actions">
-            <button className="cancel-btn" onClick={() => setIsClassModalOpen(false)}>Cancel</button>
-            <button className="confirm-btn" onClick={handleClassChangeConfirm}>Update Class</button>
+            <button
+              className="cancel-btn"
+              onClick={() => setIsClassModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button className="confirm-btn" onClick={handleClassChangeConfirm}>
+              Update Class
+            </button>
           </div>
         </div>
       </ModalOverlay>
@@ -294,7 +321,6 @@ export default function AdminStudents() {
           style={{ maxWidth: "640px", width: "100%" }}
           onClick={(e) => e.stopPropagation()}
         >
-
           {/* STEP 1: setup */}
           {promoteStep === "setup" && (
             <>
@@ -303,19 +329,49 @@ export default function AdminStudents() {
                 Year-end Promotion
               </h4>
               <p className="modal-subtitle" style={{ marginBottom: "16px" }}>
-                Map each class to its destination. Same-section classes in the next
-                grade are pre-selected. Highest grade defaults to{" "}
+                Map each class to its destination. Same-section classes in the
+                next grade are pre-selected. Highest grade defaults to{" "}
                 <strong>graduate</strong>.
               </p>
 
               <div style={{ overflowY: "auto", maxHeight: "340px" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "14px",
+                  }}
+                >
                   <thead>
                     <tr style={{ borderBottom: "2px solid #e5e7eb" }}>
-                      <th style={{ textAlign: "left", padding: "8px 6px", color: "#6b7280" }}>Current class</th>
-                      <th style={{ textAlign: "center", padding: "8px 6px", color: "#6b7280" }}>Students</th>
+                      <th
+                        style={{
+                          textAlign: "left",
+                          padding: "8px 6px",
+                          color: "#6b7280",
+                        }}
+                      >
+                        Current class
+                      </th>
+                      <th
+                        style={{
+                          textAlign: "center",
+                          padding: "8px 6px",
+                          color: "#6b7280",
+                        }}
+                      >
+                        Students
+                      </th>
                       <th style={{ padding: "8px 6px" }} />
-                      <th style={{ textAlign: "left", padding: "8px 6px", color: "#6b7280" }}>Promote to</th>
+                      <th
+                        style={{
+                          textAlign: "left",
+                          padding: "8px 6px",
+                          color: "#6b7280",
+                        }}
+                      >
+                        Promote to
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -329,41 +385,72 @@ export default function AdminStudents() {
                           key={cls.id}
                           style={{
                             borderBottom: "1px solid #f3f4f6",
-                            background: isGraduating ? "#faf5ff" : "transparent",
+                            background: isGraduating
+                              ? "#faf5ff"
+                              : "transparent",
                           }}
                         >
                           <td style={{ padding: "10px 6px", fontWeight: 600 }}>
                             Grade {cls.grade}-{cls.section}
                           </td>
-                          <td style={{ padding: "10px 6px", textAlign: "center" }}>
-                            <span style={{
-                              background: "#e0e7ff", color: "#3730a3",
-                              borderRadius: "12px", padding: "2px 10px",
-                              fontSize: "13px", fontWeight: 600,
-                            }}>
+                          <td
+                            style={{ padding: "10px 6px", textAlign: "center" }}
+                          >
+                            <span
+                              style={{
+                                background: "#e0e7ff",
+                                color: "#3730a3",
+                                borderRadius: "12px",
+                                padding: "2px 10px",
+                                fontSize: "13px",
+                                fontWeight: 600,
+                              }}
+                            >
                               {count}
                             </span>
                           </td>
-                          <td style={{ padding: "10px 6px", textAlign: "center", color: "#9ca3af" }}>
+                          <td
+                            style={{
+                              padding: "10px 6px",
+                              textAlign: "center",
+                              color: "#9ca3af",
+                            }}
+                          >
                             <FaArrowRight />
                           </td>
                           <td style={{ padding: "10px 6px" }}>
                             <select
-                              value={currentTarget === null ? "graduate" : String(currentTarget)}
-                              onChange={(e) => handlePromotionMapChange(cls.id, e.target.value)}
+                              value={
+                                currentTarget === null
+                                  ? "graduate"
+                                  : String(currentTarget)
+                              }
+                              onChange={(e) =>
+                                handlePromotionMapChange(cls.id, e.target.value)
+                              }
                               style={{
-                                padding: "6px 10px", borderRadius: "6px", width: "100%",
-                                border: isGraduating ? "1px solid #a78bfa" : "1px solid #d1d5db",
+                                padding: "6px 10px",
+                                borderRadius: "6px",
+                                width: "100%",
+                                border: isGraduating
+                                  ? "1px solid #a78bfa"
+                                  : "1px solid #d1d5db",
                                 background: isGraduating ? "#f5f3ff" : "#fff",
                                 color: isGraduating ? "#6d28d9" : "#111",
                                 fontWeight: isGraduating ? 600 : 400,
                                 cursor: "pointer",
                               }}
                             >
-                              <option value="graduate">🎓 Graduate (remove from active)</option>
+                              <option value="graduate">
+                                🎓 Graduate (remove from active)
+                              </option>
                               {promotionTargets(cls.grade).map((target) => (
-                                <option key={target.id} value={String(target.id)}>
-                                  Grade {target.grade}-{target.section} ({target.currentStrength}/{target.maxStrength})
+                                <option
+                                  key={target.id}
+                                  value={String(target.id)}
+                                >
+                                  Grade {target.grade}-{target.section} (
+                                  {target.currentStrength}/{target.maxStrength})
                                 </option>
                               ))}
                             </select>
@@ -376,7 +463,12 @@ export default function AdminStudents() {
               </div>
 
               <div className="modal-actions" style={{ marginTop: "16px" }}>
-                <button className="cancel-btn" onClick={() => setIsPromoteModalOpen(false)}>Cancel</button>
+                <button
+                  className="cancel-btn"
+                  onClick={() => setIsPromoteModalOpen(false)}
+                >
+                  Cancel
+                </button>
                 <button
                   className="confirm-btn"
                   style={{ background: "#7c3aed" }}
@@ -400,34 +492,124 @@ export default function AdminStudents() {
                 This will reassign all listed students. This cannot be undone.
               </p>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", margin: "16px 0" }}>
-                <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
-                  <div style={{ fontSize: "28px", fontWeight: 700, color: "#1d4ed8" }}>{totalBeingPromoted}</div>
-                  <div style={{ fontSize: "13px", color: "#3b82f6", marginTop: "2px" }}>students being promoted</div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px",
+                  margin: "16px 0",
+                }}
+              >
+                <div
+                  style={{
+                    background: "#eff6ff",
+                    border: "1px solid #bfdbfe",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "#1d4ed8",
+                    }}
+                  >
+                    {totalBeingPromoted}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#3b82f6",
+                      marginTop: "2px",
+                    }}
+                  >
+                    students being promoted
+                  </div>
                 </div>
-                <div style={{ background: "#f5f3ff", border: "1px solid #ddd6fe", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
-                  <div style={{ fontSize: "28px", fontWeight: 700, color: "#6d28d9" }}>{totalGraduating}</div>
-                  <div style={{ fontSize: "13px", color: "#7c3aed", marginTop: "2px" }}>students graduating</div>
+                <div
+                  style={{
+                    background: "#f5f3ff",
+                    border: "1px solid #ddd6fe",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "#6d28d9",
+                    }}
+                  >
+                    {totalGraduating}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#7c3aed",
+                      marginTop: "2px",
+                    }}
+                  >
+                    students graduating
+                  </div>
                 </div>
               </div>
 
-              <div style={{ background: "#f9fafb", borderRadius: "8px", padding: "12px", overflowY: "auto", maxHeight: "220px", fontSize: "13px" }}>
+              <div
+                style={{
+                  background: "#f9fafb",
+                  borderRadius: "8px",
+                  padding: "12px",
+                  overflowY: "auto",
+                  maxHeight: "220px",
+                  fontSize: "13px",
+                }}
+              >
                 {activeSourceClasses.map((cls) => {
                   const target = promotionMap[cls.id];
-                  const targetClass = target !== null ? classes.find((c) => c.id === target) : null;
+                  const targetClass =
+                    target !== null
+                      ? classes.find((c) => c.id === target)
+                      : null;
                   const count = studentCountForClass(cls.id);
 
                   return (
-                    <div key={cls.id} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "5px 0", borderBottom: "1px solid #e5e7eb" }}>
-                      <span style={{ fontWeight: 600, minWidth: "90px" }}>Gr {cls.grade}-{cls.section}</span>
-                      <span style={{ color: "#9ca3af", fontSize: "11px" }}>({count} students)</span>
-                      <FaArrowRight style={{ color: "#d1d5db", flexShrink: 0 }} />
+                    <div
+                      key={cls.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "5px 0",
+                        borderBottom: "1px solid #e5e7eb",
+                      }}
+                    >
+                      <span style={{ fontWeight: 600, minWidth: "90px" }}>
+                        Gr {cls.grade}-{cls.section}
+                      </span>
+                      <span style={{ color: "#9ca3af", fontSize: "11px" }}>
+                        ({count} students)
+                      </span>
+                      <FaArrowRight
+                        style={{ color: "#d1d5db", flexShrink: 0 }}
+                      />
                       {targetClass ? (
                         <span style={{ color: "#1d4ed8", fontWeight: 500 }}>
                           Grade {targetClass.grade}-{targetClass.section}
                         </span>
                       ) : (
-                        <span style={{ color: "#7c3aed", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px" }}>
+                        <span
+                          style={{
+                            color: "#7c3aed",
+                            fontWeight: 600,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                          }}
+                        >
                           <FaGraduationCap /> Graduated
                         </span>
                       )}
@@ -437,7 +619,13 @@ export default function AdminStudents() {
               </div>
 
               <div className="modal-actions" style={{ marginTop: "16px" }}>
-                <button className="cancel-btn" onClick={() => setPromoteStep("setup")} disabled={promoteLoading}>← Back</button>
+                <button
+                  className="cancel-btn"
+                  onClick={() => setPromoteStep("setup")}
+                  disabled={promoteLoading}
+                >
+                  ← Back
+                </button>
                 <button
                   className="confirm-btn"
                   style={{ background: "#7c3aed" }}
@@ -454,33 +642,101 @@ export default function AdminStudents() {
           {promoteStep === "done" && promoteResult && (
             <>
               <div style={{ textAlign: "center", padding: "16px 0" }}>
-                <FaCheckCircle style={{ fontSize: "48px", color: "#10b981", marginBottom: "12px" }} />
+                <FaCheckCircle
+                  style={{
+                    fontSize: "48px",
+                    color: "#10b981",
+                    marginBottom: "12px",
+                  }}
+                />
                 <h4 style={{ marginBottom: "6px" }}>Promotion Complete</h4>
-                <p className="modal-subtitle">Academic year has been advanced.</p>
+                <p className="modal-subtitle">
+                  Academic year has been advanced.
+                </p>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", margin: "16px 0" }}>
-                <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
-                  <div style={{ fontSize: "28px", fontWeight: 700, color: "#15803d" }}>{promoteResult.promoted}</div>
-                  <div style={{ fontSize: "13px", color: "#16a34a" }}>promoted</div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px",
+                  margin: "16px 0",
+                }}
+              >
+                <div
+                  style={{
+                    background: "#f0fdf4",
+                    border: "1px solid #bbf7d0",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "#15803d",
+                    }}
+                  >
+                    {promoteResult.promoted}
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#16a34a" }}>
+                    promoted
+                  </div>
                 </div>
-                <div style={{ background: "#f5f3ff", border: "1px solid #ddd6fe", borderRadius: "8px", padding: "12px", textAlign: "center" }}>
-                  <div style={{ fontSize: "28px", fontWeight: 700, color: "#6d28d9" }}>{promoteResult.graduated}</div>
-                  <div style={{ fontSize: "13px", color: "#7c3aed" }}>graduated</div>
+                <div
+                  style={{
+                    background: "#f5f3ff",
+                    border: "1px solid #ddd6fe",
+                    borderRadius: "8px",
+                    padding: "12px",
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "#6d28d9",
+                    }}
+                  >
+                    {promoteResult.graduated}
+                  </div>
+                  <div style={{ fontSize: "13px", color: "#7c3aed" }}>
+                    graduated
+                  </div>
                 </div>
               </div>
 
               {promoteResult.errors.length > 0 && (
-                <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", padding: "10px 12px", marginBottom: "12px", fontSize: "13px", color: "#dc2626" }}>
+                <div
+                  style={{
+                    background: "#fef2f2",
+                    border: "1px solid #fecaca",
+                    borderRadius: "8px",
+                    padding: "10px 12px",
+                    marginBottom: "12px",
+                    fontSize: "13px",
+                    color: "#dc2626",
+                  }}
+                >
                   <strong>Some issues occurred:</strong>
                   <ul style={{ margin: "4px 0 0 16px" }}>
-                    {promoteResult.errors.map((e, i) => <li key={i}>{e}</li>)}
+                    {promoteResult.errors.map((e, i) => (
+                      <li key={i}>{e}</li>
+                    ))}
                   </ul>
                 </div>
               )}
 
               <div className="modal-actions">
-                <button className="confirm-btn" onClick={() => setIsPromoteModalOpen(false)}>Done</button>
+                <button
+                  className="confirm-btn"
+                  onClick={() => setIsPromoteModalOpen(false)}
+                >
+                  Done
+                </button>
               </div>
             </>
           )}

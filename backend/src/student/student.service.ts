@@ -199,7 +199,11 @@ export class StudentService {
       errors: string[];
     } = { promoted: 0, graduated: 0, errors: [] };
 
+    console.log('promoted in backend', results);
+
     for (const { fromClassId, toClassId } of dto.promotions) {
+      console.log('from class id', fromClassId);
+      console.log('to class id', toClassId);
       try {
         await this.dataSource.transaction(async (manager) => {
           // Load all active students in the source class
@@ -208,11 +212,15 @@ export class StudentService {
             relations: ['schoolClass'],
           });
 
+          console.log('students', students);
+
           if (students.length === 0) return;
 
           const sourceClass = await manager.findOne(SchoolClass, {
             where: { id: fromClassId },
           });
+
+          console.log('source class', sourceClass);
 
           if (toClassId === null) {
             // ── Graduate ────────────────────────────────────────────────────
@@ -239,6 +247,8 @@ export class StudentService {
             const targetClass = await manager.findOne(SchoolClass, {
               where: { id: toClassId },
             });
+
+            console.log('target class', targetClass);
 
             if (!targetClass) {
               results.errors.push(
